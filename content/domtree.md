@@ -8,7 +8,7 @@ title = "dom tree算法介绍"
 
 domtree构建算法
 
-1. domtree概念介绍
+# 1. domtree概念介绍
 
 >Dom(b): A node n in the CFG dominates b if n lies on every path from the entry node of the CFG to b.
 即Dom(b)是一个集合，根据定义 b in Dom(b)
@@ -24,7 +24,7 @@ IDom(b): For a node b, the set IDom(b) contains exactly one node, the immediate 
 > IDom(b) = {n}
 
 
-2. iteratve way 
+# 2. iteratve way 
 可以用前向数据流分析来计算domtree：
 对于CFG G = (N, E, n0), N是点集，E是边集，n0是entry
 
@@ -51,7 +51,7 @@ while (changed){
 ```
 这里用reverse post order可以保证n的所有前驱都被处理后，再处理n
 
-3. A Simple, Fast Dominance Algorithm
+# 3. A Simple, Fast Dominance Algorithm
 前面介绍了迭代方式计算domtree算法，简单容易理解，但是效率没那么高(bitvector实现)。 bitvector每次拷贝所有节点信息。那对于稀疏的图来说，效率就难说了，所以`A Simple, Fast Dominance Algorithm`用一种sparse方式去计算domtree。
 
 除了entry节点， Dom(b) = {b} ∪ IDom(b) ∪ IDom(IDom(b)) ∪ .... ∪ {entry}
@@ -113,13 +113,75 @@ function intersect(a, b) return dom_tree_node{
 
 
 > 其实原论文中用的是数组，但我们用树实现。
-> 原因是对于部分IR来说，basicblock*指针的值就可以被看为一个id。用链表+hashmap的组合更通用。
+> 原因是对于部分IR来说，basicblock*指针的值就可以被看为一个id。用指针+hashmap的组合更通用。
 
-4. Lengauer-Tarjan algorithm
-TODO
-5. semi-nca
-TODO
-6. Dominance Frontiers
+# 4. Lengauer-Tarjan algorithm
+
+LT算法基于
+1. DFS 
+2. spanning-tree
+
+
+基于DFS遍历顺序，LT算法提出了**semidominator**概念，简写为`sdom`(注意和strict dominator区分)。
+
+sdom(w) = semidom(w) = min {v | there is a path v = v0, v1 ,..., vk=w such that vi > w for 1 ≤ i ≤ k-1 }
+注：vi>w指的是DFS的order
+
+对于大部分节点来说sdom和idom相同。
+故我们需要
+1. sdom -> idom
+2. 计算sdom
+
+----
+
+## 计算sdom
+
+```c
+// step 1
+Create a DFS tree T
+for v in V
+    semi(v) = v
+
+for v in reverse_preorder(V-{entry})
+    for q in pred(v)
+        z = eval(v, q)
+        if semi(z) < semi(v)
+            semi(v) = semi(z)
+
+function eval(v, q){
+    if v==entry return v;
+    while (v < q) {
+        q = semi(q)
+    }
+    return q;
+}
+
+```
+
+剩下的sdom-》idom太复杂了，没看懂。。。。
+
+# 5. semi-nca
+1. 计算semi dominator
+2. 利用NCA算法计算idom
+
+idom(v) = NCA_D( parent_T(v), sdom(v))
+D是dom tree， T是spanning tree
+算法如下：
+
+```text
+
+1. T = create a DFS tree
+2. Calculate semidominator for all vertex
+3. D = create_dom_tree().set_root(entry)
+4.
+for v in preorder_T(V-{r}){
+    Ascend the all the path r -> parent_T(v) in D and find the deepest vertex with which number is smaller than or equal to sdom(v). set this vertext as the parent of v in D.
+}
+
+
+```
+
+# 6. Dominance Frontiers
 
 SSA-construction中插入phi节点时候会用到。
 
@@ -143,3 +205,8 @@ for b in nodes{
 }
 
 ```
+
+# reference
+
+- https://blog.csdn.net/dashuniuniu/article/details/103462147
+(为数不多的CSDN能用上的时候)

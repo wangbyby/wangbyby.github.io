@@ -1,6 +1,6 @@
 +++
 title = "使用zola设置github.io作为个人博客"
-slug = "hello"
+slug = "deploy"
 
 +++
 

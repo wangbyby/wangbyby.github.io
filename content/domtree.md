@@ -112,6 +112,8 @@ function intersect(a, b) return dom_tree_node{
 >Remember that nodes higher in the dominator tree have higher postorder numbers, which is why intersect moves the finger whose value is less than the other finger’s.
 
 
+> 其实原论文中用的是数组，但我们用树实现。
+> 原因是对于部分IR来说，basicblock*指针的值就可以被看为一个id。用链表+hashmap的组合更通用。
 
 4. Lengauer-Tarjan algorithm
 TODO

@@ -22,9 +22,7 @@ jobs:
         run: zola build
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: shalzz/zola-deploy-action@master
         env:
             PAGES_BRANCH: gh-pages
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
+            TOKEN: ${{ secrets.GITHUB_TOKEN }}

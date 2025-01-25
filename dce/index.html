@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dead code elimination介绍</title>
+</head>
+<body>
+    <h1>dead code elimination介绍</h1>
+    <p>发布日期: </p>
+    <hr>
+    <h1 id="si-dai-ma-xiao-chu">死代码消除</h1>
+<p>在ssa上比较好实现，根据use-def chain传播
+如果只是运算指令，且没有users，就是dead的指令。</p>
+<pre data-lang="c" style="background-color:#2b303b;color:#c0c5ce;" class="language-c "><code class="language-c" data-lang="c"><span>
+</span><span>worklist = {}
+</span><span style="color:#b48ead;">for</span><span> bb in func{
+</span><span>    </span><span style="color:#b48ead;">for</span><span> inst in bb {
+</span><span>        </span><span style="color:#b48ead;">if </span><span>(inst not in worklist)
+</span><span>            worklist.</span><span style="color:#bf616a;">push</span><span>(inst)
+</span><span>    }
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">while</span><span>(!worklist.</span><span style="color:#bf616a;">empty</span><span>()) {
+</span><span>    inst = worklist.</span><span style="color:#bf616a;">pop</span><span>()
+</span><span>    </span><span style="color:#b48ead;">if</span><span>( inst is pure &amp;&amp; inst.</span><span style="color:#bf616a;">num_users</span><span>()== </span><span style="color:#d08770;">0 </span><span>){
+</span><span>        </span><span style="color:#65737e;">// dead instruction
+</span><span>        </span><span style="color:#b48ead;">for</span><span>(op in inst.</span><span style="color:#bf616a;">operands</span><span>()){
+</span><span>            inst.</span><span style="color:#96b5b4;">remove</span><span>(op)
+</span><span>
+</span><span>            </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">class</span><span>(op) == instruction and </span><span style="color:#bf616a;">isDead</span><span>(op) {
+</span><span>                worklist.</span><span style="color:#bf616a;">insert</span><span>(op)
+</span><span>            }
+</span><span>        }
+</span><span>    }
+</span><span>}
+</span><span>
+</span></code></pre>
+
+</body>
+</html>

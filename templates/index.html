@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ config.title }}</title>
+</head>
+<body>
+    <h1>{{ config.title }}</h1>
+    <p>{{ config.description }}</p>
+
+    <h2>最新文章</h2>
+    <ul>
+        {% for page in section.pages %}
+            <li>
+                <a href="{{ page.permalink }}">{{ page.title }}</a>
+                <span>{{ page.date }}</span>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

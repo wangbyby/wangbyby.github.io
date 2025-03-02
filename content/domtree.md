@@ -178,8 +178,26 @@ for v in preorder_T(V-{r}){
     Ascend the all the path r -> parent_T(v) in D and find the deepest vertex with which number is smaller than or equal to sdom(v). set this vertext as the parent of v in D.
 }
 
-
 ```
+
+图例：
+ref https://blog.csdn.net/dashuniuniu/article/details/103462147?spm=1001.2014.3001.5501
+
+![CFG](image1.png)
+
+### step 1. Spanning tree
+
+>![alt text](image.png)
+![alt text](image-1.png)
+
+### step 2. sdom
+
+![alt text](image-2.png)
+
+### step 3. domtree
+![alt text](image-4.png)
+
+>![alt text](image-5.png)
 
 # 6. Dominance Frontiers
 

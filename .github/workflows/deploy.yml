@@ -20,7 +20,7 @@ jobs:
 
       - name: Build site
         run: |
-          git submodule add https://codeberg.org/salif/linkita.git themes/linkita
+          git submodule update --remote
           zola build
 
       - name: Deploy to GitHub Pages

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>使用zola设置github.io作为个人博客</title>
+</head>
+<body>
+    <h1>使用zola设置github.io作为个人博客</h1>
+    <p>发布日期: </p>
+    <hr>
+    <p>步骤如下：</p>
+<ol>
+<li>本地安装zola</li>
+<li>运行<code>zola init &lt;your blog dir&gt;</code>, like <code>zola init myblog</code></li>
+</ol>
+<p>目录如下：</p>
+<pre data-lang="txt" style="background-color:#2b303b;color:#c0c5ce;" class="language-txt "><code class="language-txt" data-lang="txt"><span>myblog/
+</span><span>├── config.toml          # 配置文件
+</span><span>├── content/             # 内容文件（Markdown）
+</span><span>├── sass/                # Sass 样式文件（可选）
+</span><span>├── static/              # 静态资源（图片、CSS、JS 等）
+</span><span>├── templates/           # 模板文件（HTML）
+</span><span>└── themes/              # 主题文件（可选）
+</span></code></pre>
+<ul>
+<li>创建的博客就放在content下面。</li>
+<li>图片放在static/images下面，在博客里用<code>![test](/images/a.png)</code>引用</li>
+<li>博客格式：<code>+++</code>一定要有</li>
+</ul>
+<pre data-lang="txt" style="background-color:#2b303b;color:#c0c5ce;" class="language-txt "><code class="language-txt" data-lang="txt"><span>+++
+</span><span>title = &quot;我的第一篇文章&quot;
+</span><span>+++
+</span><span>
+</span><span>## hello zola
+</span></code></pre>
+<ol start="3">
+<li><code>cd &lt;your blog dir&gt; &amp;&amp; git init</code>将这些目录加到版本控制进去。</li>
+<li>添加自定义模板<code>teplates/index.html</code>和<code>teplates/page.html</code></li>
+<li>创建github actions: <code>.github/workflows/deploy.yml</code>
+内容如下：</li>
+</ol>
+<pre data-lang="yml" style="background-color:#2b303b;color:#c0c5ce;" class="language-yml "><code class="language-yml" data-lang="yml"><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">Deploy Zola site to GitHub Pages
+</span><span>
+</span><span style="color:#d08770;">on</span><span>:
+</span><span>  </span><span style="color:#bf616a;">push</span><span>:
+</span><span>    </span><span style="color:#bf616a;">branches</span><span>:
+</span><span>      - </span><span style="color:#a3be8c;">master  </span><span style="color:#65737e;"># 触发部署的分支
+</span><span>
+</span><span style="color:#bf616a;">jobs</span><span>:
+</span><span>  </span><span style="color:#bf616a;">deploy</span><span>:
+</span><span>    </span><span style="color:#bf616a;">runs-on</span><span>: </span><span style="color:#a3be8c;">ubuntu-latest
+</span><span>    </span><span style="color:#bf616a;">steps</span><span>:
+</span><span>      - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">Checkout
+</span><span>        </span><span style="color:#bf616a;">uses</span><span>: </span><span style="color:#a3be8c;">actions/checkout@v3
+</span><span>
+</span><span>      - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">Install Zola
+</span><span>        </span><span style="color:#bf616a;">run</span><span>: </span><span style="color:#b48ead;">|
+</span><span style="color:#a3be8c;">          wget https://github.com/getzola/zola/releases/download/v0.19.2/zola-v0.19.2-x86_64-unknown-linux-gnu.tar.gz
+</span><span style="color:#a3be8c;">          tar -xzf zola-v0.19.2-x86_64-unknown-linux-gnu.tar.gz
+</span><span style="color:#a3be8c;">          sudo mv zola /usr/local/bin
+</span><span style="color:#a3be8c;">
+</span><span>      - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">Build site
+</span><span>        </span><span style="color:#bf616a;">run</span><span>: </span><span style="color:#a3be8c;">zola build
+</span><span>
+</span><span>      - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">Deploy to GitHub Pages
+</span><span>        </span><span style="color:#bf616a;">uses</span><span>: </span><span style="color:#a3be8c;">shalzz/zola-deploy-action@master
+</span><span>        </span><span style="color:#bf616a;">env</span><span>:
+</span><span>            </span><span style="color:#bf616a;">PAGES_BRANCH</span><span>: </span><span style="color:#a3be8c;">gh-pages
+</span><span>            </span><span style="color:#bf616a;">TOKEN</span><span>: </span><span style="color:#a3be8c;">${{ secrets.GITHUB_TOKEN }}
+</span></code></pre>
+<p>这里注意分支。</p>
+<ul>
+<li>master分支是我们源文件的分支</li>
+<li>gh-pages分支是制品分支</li>
+</ul>
+<blockquote>
+<p>参考：<a href="https://www.getzola.org/documentation/deployment/github-pages/#github-actions">zola github-actions</a></p>
+</blockquote>
+<ol start="6">
+<li>
+<p>推送到 <code>git@github.com:&lt;username&gt;/&lt;username&gt;.github.io.git</code></p>
+</li>
+<li>
+<p>设置github pages:
+<img src="/images/image-github-pages.png" alt="alt text" /></p>
+</li>
+<li>
+<p>如果上传图片，设置<code>config.toml</code>中<code>base_url = "https://&lt;username&gt;.github.io/"</code></p>
+</li>
+<li>
+<p>等待github actions完成，就OK了</p>
+</li>
+</ol>
+<hr />
+<p>之前用hexo，但图片上传太麻烦了:(
+zola图片上传也没有那么方便</p>
+
+</body>
+</html>

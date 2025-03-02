@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dom tree算法介绍</title>
+</head>
+<body>
+    <h1>dom tree算法介绍</h1>
+    <p>发布日期: </p>
+    <hr>
+    <p>domtree构建算法</p>
+<h1 id="1-domtreegai-nian-jie-shao">1. domtree概念介绍</h1>
+<blockquote>
+<p>Dom(b): A node n in the CFG dominates b if n lies on every path from the entry node of the CFG to b.
+即Dom(b)是一个集合，根据定义 b in Dom(b)</p>
+</blockquote>
+<blockquote>
+<p>immediate dominator: b's immediate dominator is the node n in Dom(b) which is cloest to b.</p>
+</blockquote>
+<p>IDom(b): For a node b, the set IDom(b) contains exactly one node, the immediate dominator of b. If n is b's immediate dominator, then every node in { Dom(b) - b } is also in Dom(n)
+即集合IDom(b)只有一个元素。</p>
+<blockquote>
+<p>例子：
+<img src="/images/domtree/dt_image.png" alt="aa" />
+Dom(b) = {entry, n, b}
+IDom(b) = {n}</p>
+</blockquote>
+<h1 id="2-iteratve-way">2. iteratve way</h1>
+<p>可以用前向数据流分析来计算domtree：
+对于CFG G = (N, E, n0), N是点集，E是边集，n0是entry</p>
+<pre data-lang="c" style="background-color:#2b303b;color:#c0c5ce;" class="language-c "><code class="language-c" data-lang="c"><span style="color:#b48ead;">for</span><span> n in nodes
+</span><span>    Dom[n] = {</span><span style="color:#d08770;">1</span><span>...N}
+</span><span style="color:#b48ead;">bool</span><span> changed = </span><span style="color:#d08770;">true
+</span><span style="color:#b48ead;">while </span><span>(changed){
+</span><span>    changed = </span><span style="color:#d08770;">false
+</span><span>    </span><span style="color:#b48ead;">for</span><span> n in </span><span style="color:#bf616a;">reverse_post_order</span><span>(){
+</span><span>        new_set = {}
+</span><span>        </span><span style="color:#b48ead;">for</span><span> p in </span><span style="color:#bf616a;">preds</span><span>(n){
+</span><span>            new_set = new_set ∩ </span><span style="color:#bf616a;">Dom</span><span>(p)
+</span><span>        }
+</span><span>        new_set = new_set ∪ {n}
+</span><span>    
+</span><span>        </span><span style="color:#b48ead;">if</span><span>(new_set != Dom[n]){
+</span><span>            Dom[n] = new_set
+</span><span>            changed = </span><span style="color:#d08770;">true
+</span><span>        }
+</span><span>    }
+</span><span>}
+</span><span>
+</span></code></pre>
+<p>这里用reverse post order可以保证n的所有前驱都被处理后，再处理n</p>
+<h1 id="3-a-simple-fast-dominance-algorithm">3. A Simple, Fast Dominance Algorithm</h1>
+<p>前面介绍了迭代方式计算domtree算法，简单容易理解，但是效率没那么高(bitvector实现)。 bitvector每次拷贝所有节点信息。那对于稀疏的图来说，效率就难说了，所以<code>A Simple, Fast Dominance Algorithm</code>用一种sparse方式去计算domtree。</p>
+<p>除了entry节点， Dom(b) = {b} ∪ IDom(b) ∪ IDom(IDom(b)) ∪ .... ∪ {entry}
+根据这个特性，我们构建一个dom tree</p>
+<pre data-lang="c" style="background-color:#2b303b;color:#c0c5ce;" class="language-c "><code class="language-c" data-lang="c"><span style="color:#b48ead;">struct </span><span>dom_tree_node{
+</span><span>    </span><span style="color:#b48ead;">int</span><span> order;
+</span><span>    cfg_node* ref;
+</span><span>    </span><span style="color:#b48ead;">struct </span><span>dom_tree_node *idom;
+</span><span>    vector&lt;</span><span style="color:#b48ead;">struct </span><span>dom_tree_node* &gt; children;
+</span><span>};
+</span><span>
+</span></code></pre>
+<blockquote>
+<p><img src="/images/domtree/dt_image-2.png" alt="alt text" /></p>
+</blockquote>
+<p>算法实现：</p>
+<pre data-lang="c" style="background-color:#2b303b;color:#c0c5ce;" class="language-c "><code class="language-c" data-lang="c"><span>
+</span><span style="color:#b48ead;">for </span><span>(number, node) in </span><span style="color:#bf616a;">post_order</span><span>(){
+</span><span>    </span><span style="color:#65737e;">// mapping CFG node to dom tree node
+</span><span>    mapping[node] = create </span><span style="color:#bf616a;">dom_tree_node</span><span>(node, number) 
+</span><span>}
+</span><span>mapping[entry]-&gt;idom = mapping[entry];
+</span><span>changed = </span><span style="color:#d08770;">true
+</span><span style="color:#b48ead;">while </span><span>(changed){
+</span><span>    changed = </span><span style="color:#d08770;">false
+</span><span>    </span><span style="color:#b48ead;">for</span><span> b in </span><span style="color:#bf616a;">reverse_post_order</span><span>(expect entry){
+</span><span>        new_idom = </span><span style="color:#bf616a;">first </span><span>(processed) predecessor of b
+</span><span>        </span><span style="color:#b48ead;">for</span><span> p in </span><span style="color:#bf616a;">other_processors</span><span>(b) {
+</span><span>            </span><span style="color:#b48ead;">if</span><span> mapping[p]-&gt;idom != </span><span style="color:#d08770;">NULL </span><span>{
+</span><span>                new_idom = </span><span style="color:#bf616a;">intersect</span><span>(mapping[p], new_idom)
+</span><span>            }
+</span><span>        }
+</span><span>        </span><span style="color:#b48ead;">if</span><span> mapping[b]-&gt;idom != new_idom {
+</span><span>            mapping[b]-&gt;idom = new_idom
+</span><span>            changed = </span><span style="color:#d08770;">true
+</span><span>        }
+</span><span>    }
+</span><span>}
+</span><span>
+</span><span style="color:#65737e;">// order is the postorder numbers
+</span><span>function </span><span style="color:#8fa1b3;">intersect</span><span>(</span><span style="color:#bf616a;">a</span><span>, </span><span style="color:#bf616a;">b</span><span>) </span><span style="color:#b48ead;">return</span><span> dom_tree_node{
+</span><span>    f1 = a;
+</span><span>    f2 = b;
+</span><span>    </span><span style="color:#b48ead;">while</span><span>(f1 != f2){
+</span><span>        </span><span style="color:#b48ead;">while </span><span>(f1-&gt;order &lt; f2-&gt;order ) {
+</span><span>            f1 = f1-&gt;idom;
+</span><span>        }
+</span><span>        </span><span style="color:#b48ead;">while </span><span>(f2-&gt;order &lt; f1-&gt;order) {
+</span><span>            f2 = f2-&gt;idom;
+</span><span>        }
+</span><span>    }
+</span><span>    </span><span style="color:#b48ead;">return</span><span> f1;
+</span><span>}
+</span><span>
+</span></code></pre>
+<blockquote>
+<p>Remember that nodes higher in the dominator tree have higher postorder numbers, which is why intersect moves the finger whose value is less than the other finger’s.</p>
+</blockquote>
+<blockquote>
+<p>其实原论文中用的是数组，但我们用树实现。
+原因是对于部分IR来说，basicblock*指针的值就可以被看为一个id。用指针+hashmap的组合更通用。</p>
+</blockquote>
+<h1 id="4-lengauer-tarjan-algorithm">4. Lengauer-Tarjan algorithm</h1>
+<p>LT算法基于</p>
+<ol>
+<li>DFS</li>
+<li>spanning-tree</li>
+</ol>
+<p>基于DFS遍历顺序，LT算法提出了<strong>semidominator</strong>概念，简写为<code>sdom</code>(注意和strict dominator区分)。</p>
+<p>sdom(w) = semidom(w) = min {v | there is a path v = v0, v1 ,..., vk=w such that vi &gt; w for 1 ≤ i ≤ k-1 }
+注：vi&gt;w指的是DFS的order</p>
+<p>对于大部分节点来说sdom和idom相同。
+故我们需要</p>
+<ol>
+<li>sdom -&gt; idom</li>
+<li>计算sdom</li>
+</ol>
+<hr />
+<h2 id="ji-suan-sdom">计算sdom</h2>
+<pre data-lang="c" style="background-color:#2b303b;color:#c0c5ce;" class="language-c "><code class="language-c" data-lang="c"><span style="color:#65737e;">// step 1
+</span><span>Create a DFS tree T
+</span><span>for v in V
+</span><span>    </span><span style="color:#8fa1b3;">semi</span><span>(</span><span style="color:#bf616a;">v</span><span>) = v
+</span><span>
+</span><span style="color:#b48ead;">for</span><span> v in </span><span style="color:#bf616a;">reverse_preorder</span><span>(V-{entry})
+</span><span>    </span><span style="color:#b48ead;">for</span><span> q in </span><span style="color:#bf616a;">pred</span><span>(v)
+</span><span>        z = </span><span style="color:#bf616a;">eval</span><span>(v, q)
+</span><span>        </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">semi</span><span>(z) &lt; </span><span style="color:#bf616a;">semi</span><span>(v)
+</span><span>            </span><span style="color:#bf616a;">semi</span><span>(v) = </span><span style="color:#bf616a;">semi</span><span>(z)
+</span><span>
+</span><span>function </span><span style="color:#8fa1b3;">eval</span><span>(</span><span style="color:#bf616a;">v</span><span>, </span><span style="color:#bf616a;">q</span><span>){
+</span><span>    </span><span style="color:#b48ead;">if</span><span> v==entry </span><span style="color:#b48ead;">return</span><span> v;
+</span><span>    </span><span style="color:#b48ead;">while </span><span>(v &lt; q) {
+</span><span>        q = </span><span style="color:#bf616a;">semi</span><span>(q)
+</span><span>    }
+</span><span>    </span><span style="color:#b48ead;">return</span><span> q;
+</span><span>}
+</span><span>
+</span></code></pre>
+<p>剩下的sdom-》idom太复杂了，没看懂。。。。</p>
+<h1 id="5-semi-nca">5. semi-nca</h1>
+<ol>
+<li>计算semi dominator</li>
+<li>利用NCA算法计算idom</li>
+</ol>
+<p>idom(v) = NCA_D( parent_T(v), sdom(v))
+D是dom tree， T是spanning tree
+算法如下：</p>
+<pre data-lang="text" style="background-color:#2b303b;color:#c0c5ce;" class="language-text "><code class="language-text" data-lang="text"><span>
+</span><span>1. T = create a DFS tree
+</span><span>2. Calculate semidominator for all vertex
+</span><span>3. D = create_dom_tree().set_root(entry)
+</span><span>4.
+</span><span>for v in preorder_T(V-{r}){
+</span><span>    Ascend the all the path r -&gt; parent_T(v) in D and find the deepest vertex with which number is smaller than or equal to sdom(v). set this vertext as the parent of v in D.
+</span><span>}
+</span><span>
+</span></code></pre>
+<p>图例：<a href="https://blog.csdn.net/dashuniuniu/article/details/103462147?spm=1001.2014.3001.5501">参考</a></p>
+<p><img src="/images/domtree/dt_cfg.png" alt="CFG" /></p>
+<h3 id="step-1-spanning-tree">step 1. Spanning tree</h3>
+<blockquote>
+<p><img src="/images/domtree/dt_cfg_dfs.png" alt="alt text" />
+<img src="/images/domtree/dt_dfs.png" alt="alt text" /></p>
+</blockquote>
+<h3 id="step-2-sdom">step 2. sdom</h3>
+<p><img src="/images/domtree/dt_sdom.png" alt="alt text" /></p>
+<h3 id="step-3-domtree">step 3. domtree</h3>
+<p><img src="/images/domtree/dt_domtree.png" alt="alt text" /></p>
+<blockquote>
+<p><img src="/images/domtree/dt_all.png" alt="alt text" /></p>
+</blockquote>
+<h1 id="6-dominance-frontiers">6. Dominance Frontiers</h1>
+<p>SSA-construction中插入phi节点时候会用到。</p>
+<blockquote>
+<p>define the Dominance Frontiers of a node b as: for a node y, that b dominates a predessor of y but does not strictly dominate y.</p>
+</blockquote>
+<p>例子：</p>
+<blockquote>
+<p><img src="/images/domtree/dt_image-3.png" alt="alt text" />
+DF(b) = {y}</p>
+</blockquote>
+<pre data-lang="txt" style="background-color:#2b303b;color:#c0c5ce;" class="language-txt "><code class="language-txt" data-lang="txt"><span>for b in nodes{
+</span><span>    if b.preds().len &gt;= 2 {
+</span><span>        for p in b.preds(){
+</span><span>            runner = mapping[p]
+</span><span>            while runner != mapping[b]-&gt;idom {
+</span><span>                add b to runner&#39;s dominance frontier set
+</span><span>                runner = runner-&gt;idom
+</span><span>            }
+</span><span>        }
+</span><span>    }
+</span><span>}
+</span><span>
+</span></code></pre>
+<h1 id="reference">reference</h1>
+<ul>
+<li>https://blog.csdn.net/dashuniuniu/article/details/103462147
+(为数不多的CSDN能用上的时候)</li>
+</ul>
+
+</body>
+</html>

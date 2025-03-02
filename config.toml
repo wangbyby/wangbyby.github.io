@@ -1,6 +1,6 @@
 # The URL the site will be built for
 base_url = "https://wangbyby.github.io/"
-
+theme = "linkita"
 # Whether to automatically compile all Sass files in the sass directory
 compile_sass = false
 

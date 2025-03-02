@@ -19,7 +19,9 @@ jobs:
           sudo mv zola /usr/local/bin
 
       - name: Build site
-        run: zola build
+        run: |
+          git submodule add https://codeberg.org/salif/linkita.git themes/linkita
+          zola build
 
       - name: Deploy to GitHub Pages
         uses: shalzz/zola-deploy-action@master

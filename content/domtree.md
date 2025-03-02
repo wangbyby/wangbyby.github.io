@@ -180,24 +180,23 @@ for v in preorder_T(V-{r}){
 
 ```
 
-图例：
-ref https://blog.csdn.net/dashuniuniu/article/details/103462147?spm=1001.2014.3001.5501
+图例：[参考](https://blog.csdn.net/dashuniuniu/article/details/103462147?spm=1001.2014.3001.5501)
 
-![CFG](image1.png)
+![CFG](/images/domtree/dt_cfg.png)
 
 ### step 1. Spanning tree
 
->![alt text](image.png)
-![alt text](image-1.png)
+>![alt text](/images/domtree/dt_cfg_dfs.png)
+![alt text](/images/domtree/dt_dfs.png)
 
 ### step 2. sdom
 
-![alt text](image-2.png)
+![alt text](/images/domtree/dt_sdom.png)
 
 ### step 3. domtree
-![alt text](image-4.png)
+![alt text](/images/domtree/dt_domtree.png)
 
->![alt text](image-5.png)
+>![alt text](/images/domtree/dt_all.png)
 
 # 6. Dominance Frontiers
 

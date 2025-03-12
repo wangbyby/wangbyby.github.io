@@ -1,4 +1,8 @@
 
++++
+title = "llvm Value Use User内存布局"
++++
+
 >- 起源：工作里用c搓了个ir库，ssa形式，但在实现方面遇到了问题（replaceAllUsesWith) 。所以看看工业级的llvm怎么处理的
 >- 参考llvm18版本源码
 
@@ -112,6 +116,20 @@ while (UseList) {
 ----
 
 - branch指令:
+>
+>这里还需要提到BasicBlock如何获取前驱和后缀
+>- 前驱：
+>	变量UseList可以得到Inst，然后搜集inst.parent即可
+>- 后继：
+>	遍历最后一条指令的Use，搜集类型是BasicBlock的变量即可
+>注：这里的前驱和后缀都是CFG里面的概念
+>然后我们还看到，Function中有遍历Block的方法，其实遍历的是Block的存储结构。
+>即BasicBlock有两种遍历方式
+>1. CFG遍历，通过前驱/后缀。包括了RPO，DFS等遍历方式。
+>2. 存储结构遍历，通过ilist的next/prev
+
+
+
 ![[static/images/llvm-branch.png]]
 
 - phi指令：

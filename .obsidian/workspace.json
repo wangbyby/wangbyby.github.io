@@ -1,0 +1,247 @@
+{
+  "main": {
+    "id": "a6a499088df316b6",
+    "type": "split",
+    "children": [
+      {
+        "id": "12a2690a9f4062b4",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "faf2e4f285b7615f",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "content/llvm Value Use User内存布局.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "llvm Value Use User内存布局"
+            }
+          },
+          {
+            "id": "7a1cefed48e816f4",
+            "type": "leaf",
+            "state": {
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "新标签页"
+            }
+          },
+          {
+            "id": "80584186ae6f84b3",
+            "type": "leaf",
+            "state": {
+              "type": "image",
+              "state": {
+                "file": "static/images/llvm-switch.png"
+              },
+              "icon": "lucide-image",
+              "title": "llvm-switch"
+            }
+          },
+          {
+            "id": "52ff9b52b6d5e2f7",
+            "type": "leaf",
+            "state": {
+              "type": "image",
+              "state": {
+                "file": "static/images/llvm-phi.png"
+              },
+              "icon": "lucide-image",
+              "title": "llvm-phi"
+            }
+          },
+          {
+            "id": "bb075b24531663fc",
+            "type": "leaf",
+            "state": {
+              "type": "image",
+              "state": {
+                "file": "static/images/llvm-branch.png"
+              },
+              "icon": "lucide-image",
+              "title": "llvm-branch"
+            }
+          },
+          {
+            "id": "8126f84ddf356092",
+            "type": "leaf",
+            "state": {
+              "type": "image",
+              "state": {
+                "file": "static/images/llvm-use-list-impl.png"
+              },
+              "icon": "lucide-image",
+              "title": "llvm-use-list-impl"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "c5a596e4ed0dabbd",
+    "type": "split",
+    "children": [
+      {
+        "id": "11f46807efb144eb",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "632473388c3fb1e8",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "文件列表"
+            }
+          },
+          {
+            "id": "991bc51534ae987d",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "搜索"
+            }
+          },
+          {
+            "id": "fe9d878308083cce",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "书签"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "33d6930d5be49c92",
+    "type": "split",
+    "children": [
+      {
+        "id": "c28a198106e40697",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "3a371c61d5cef903",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "content/llvm Value Use User内存布局.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "llvm Value Use User内存布局 的反向链接列表"
+            }
+          },
+          {
+            "id": "7bcb7b248ca70c08",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "content/llvm Value Use User内存布局.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "llvm Value Use User内存布局 的出链列表"
+            }
+          },
+          {
+            "id": "89d83a0d2df96f2a",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "标签"
+            }
+          },
+          {
+            "id": "bd0c2bead0fdf27b",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "content/llvm Value Use User内存布局.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "llvm Value Use User内存布局 的大纲"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": false,
+      "canvas:新建白板": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "templates:插入模板": false,
+      "command-palette:打开命令面板": false
+    }
+  },
+  "active": "faf2e4f285b7615f",
+  "lastOpenFiles": [
+    "static/images/llvm_value_use_layout.excalidraw",
+    "content/llvm Value Use User内存布局.md",
+    "static/images/llvm-switch.png",
+    "static/images/llvm-phi.png",
+    "static/images/llvm-branch.png",
+    "static/images/value_use_layout.excalidraw",
+    "static/images/llvm-use-list-impl.png",
+    "static/images/llvm-ir-use.jpeg",
+    "static/images/b60afe1c4150d5e7b1b71c3ebbf3a428305a103d_2_690x290.png",
+    "static/images/3e1c4416af8a2d18537664396f222e86b1d756d4_2_690x386.jpeg",
+    "static/images/a63ece927e2f339e157f22cf886cd3d6bcbc8a40_2_690x474.png",
+    "content/dce.md",
+    "static/images/use_graph.png",
+    "content/deploy.md",
+    "content/domtree.md"
+  ]
+}

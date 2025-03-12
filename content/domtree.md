@@ -19,7 +19,7 @@ IDom(b): For a node b, the set IDom(b) contains exactly one node, the immediate 
 即集合IDom(b)只有一个元素。
 
 > 例子：
-> ![aa](/images/domtree/dt_image.png)
+> ![aa](/static/images/domtree/dt_image.png)
 > Dom(b) = {entry, n, b}
 > IDom(b) = {n}
 
@@ -66,7 +66,7 @@ struct dom_tree_node{
 
 ```
 
->![alt text](/images/domtree/dt_image-2.png)
+>![alt text](/static/images/domtree/dt_image-2.png)
 
 算法实现：
 ```c
@@ -129,13 +129,11 @@ sdom(w) = semidom(w) = min {v | there is a path v = v0, v1 ,..., vk=w such that 
 
 对于大部分节点来说sdom和idom相同。
 故我们需要
-1. sdom -> idom
-2. 计算sdom
+1. 计算sdom
+2. sdom -> idom
 
-----
 
-## 计算sdom
-
+计算sdom：
 ```c
 // step 1
 Create a DFS tree T
@@ -158,7 +156,7 @@ function eval(v, q){
 
 ```
 
-剩下的sdom-》idom太复杂了，没看懂。。。。
+剩下的sdom-> idom太复杂了，没看懂。。。。
 
 # 5. semi-nca
 1. 计算semi dominator
@@ -182,21 +180,21 @@ for v in preorder_T(V-{r}){
 
 图例：[参考](https://blog.csdn.net/dashuniuniu/article/details/103462147?spm=1001.2014.3001.5501)
 
-![CFG](/images/domtree/dt_cfg.png)
+![CFG](/static/images/domtree/dt_cfg.png)
 
 ### step 1. Spanning tree
 
->![alt text](/images/domtree/dt_cfg_dfs.png)
-![alt text](/images/domtree/dt_dfs.png)
+>初始CFG: ![alt text](/static/images/domtree/dt_cfg_dfs.png)
+Spanning Tree：![spanning tree](/static/images/domtree/dt_dfs.png)
 
-### step 2. sdom
+### step 2. 计算sdom
 
-![alt text](/images/domtree/dt_sdom.png)
+![alt text](/static/images/domtree/dt_sdom.png)
 
-### step 3. domtree
-![alt text](/images/domtree/dt_domtree.png)
+### step 3. 计算domtree
+![alt text](/static/images/domtree/dt_domtree.png)
 
->![alt text](/images/domtree/dt_all.png)
+>![alt text](/static/images/domtree/dt_all.png)
 
 # 6. Dominance Frontiers
 
@@ -205,7 +203,7 @@ SSA-construction中插入phi节点时候会用到。
 > define the Dominance Frontiers of a node b as: for a node y, that b dominates a predessor of y but does not strictly dominate y.
 
 例子：
->![alt text](/images/domtree/dt_image-3.png)
+>![alt text](/static/images/domtree/dt_image-3.png)
 > DF(b) = {y}
 
 ```txt

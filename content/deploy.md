@@ -72,7 +72,7 @@ jobs:
 
 6. 推送到 `git@github.com:<username>/<username>.github.io.git`
 7. 设置github pages:
-![alt text](/images/image-github-pages.png)
+![alt text](/static/images/image-github-pages.png)
 
 8. 如果上传图片，设置`config.toml`中`base_url = "https://<username>.github.io/"`
 9. 等待github actions完成，就OK了

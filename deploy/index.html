@@ -1,0 +1,288 @@
+<!doctype html>
+<html class="not-ready overflow-y-scroll lg:text-base" lang="en">
+
+<head prefix="og: https://ogp.me/ns# article: https://ogp.me/ns/article#">
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta name="generator" content="Zola" />
+  <title>使用zola设置github.io作为个人博客</title>
+  <meta property="og:title" content="使用zola设置github.io作为个人博客" />
+  <meta property="og:url" content="https://wangbyby.github.io/deploy/" />
+  <link rel="canonical" href="https://wangbyby.github.io/deploy/" />
+  <meta property="og:type" content="article" />
+
+  <meta name="theme-color" data-light="#e4e4e7" data-dark="#27272a" content="#e4e4e7" />
+  <link rel="preload stylesheet" as="style" href="https://wangbyby.github.io/main.min.css?h=77d92547a754e29fb150" />
+  <style>
+    :root {
+      --bg: #f4f4f5;
+      --header: #e4e4e7;
+      color-scheme: light;
+    }
+    :root.dark {
+      --bg: #18181b;
+      --header: #27272a;
+      color-scheme: dark;
+    }/**/
+  </style>
+  <link rel="icon" type="image/x-icon" sizes="16x16" href="https://wangbyby.github.io/favicon.ico" />
+  <link rel="apple-touch-icon" type="image/png" href="https://wangbyby.github.io/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href="https://wangbyby.github.io/android-icon.png" />
+  <script src="https://wangbyby.github.io/js/linkita.min.js?h=2cfe69bc508021cbd3c5"></script>
+  <script src="https://wangbyby.github.io/js/linkita-search.min.js?h=698547b4b081d012c661"></script>
+
+  <!-- Head inject -->
+  
+</head>
+
+<body class="text-black duration-200 ease-out bg-[var(--bg)] dark:text-white">
+  
+<header class="bg-[var(--header)] fixed top-0 z-40 mx-auto min-h-[3.25rem] w-full">
+  <div class="mx-auto w-full max-w-4xl p-2.5 lg:flex lg:justify-between">
+    <div class="flex justify-between">
+      <div class="flex items-center min-h-8">
+        <button type="button" title="Go to home page" accesskey="!"
+          onclick="window.location.href='https://wangbyby.github.io/';"
+          class="btn-home h-6 w-6 shrink-0 cursor-pointer text-[0] bg-center bg-no-repeat bg-cover dark:invert"
+          style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\' viewBox=\'0 0 24 24\' \
+            fill=\'none\' stroke=\'currentColor\' stroke-width=\'2.5\' stroke-linecap=\'round\' stroke-linejoin=\'round\' class=\'feather feather-home\'><path \
+            d=\'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\'></path><polyline points=\'9 22 9 12 15 12 15 22\'></polyline></svg>');"
+        ></button>
+        <button type="button" title="Switch color scheme" accesskey="$"
+          onclick="window.linkita.toggleDarkMode();" ondblclick="window.linkita.resetDarkMode();"
+          class="btn-dark ml-4 h-6 w-6 shrink-0 cursor-pointer text-[0] bg-center bg-no-repeat bg-cover dark:invert [background-image:var(--url-dark)] dark:[background-image:var(--url-light)]"
+          style="--url-light: url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\' viewBox=\'0 0 24 24\' \
+            fill=\'none\' stroke=\'currentColor\' stroke-width=\'2.5\' stroke-linecap=\'round\' stroke-linejoin=\'round\' class=\'feather feather-sun\' \
+            ><circle cx=\'12\' cy=\'12\' r=\'5\'></circle><line x1=\'12\' y1=\'1\' x2=\'12\' y2=\'3\'></line><line x1=\'12\' y1=\'21\' x2=\'12\' y2=\'23\' \
+            ></line><line x1=\'4.22\' y1=\'4.22\' x2=\'5.64\' y2=\'5.64\'></line><line x1=\'18.36\' y1=\'18.36\' x2=\'19.78\' y2=\'19.78\'></line><line \
+            x1=\'1\' y1=\'12\' x2=\'3\' y2=\'12\'></line><line x1=\'21\' y1=\'12\' x2=\'23\' y2=\'12\'></line><line x1=\'4.22\' y1=\'19.78\' x2=\'5.64\' \
+            y2=\'18.36\'></line><line x1=\'18.36\' y1=\'5.64\' x2=\'19.78\' y2=\'4.22\'></line></svg>'); --url-dark: url('data:image/svg+xml;utf8,<svg \
+            xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2.5\' \
+            stroke-linecap=\'round\' stroke-linejoin=\'round\' class=\'feather feather-moon\'><path d=\'M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z\'></path></svg>');"
+        ></button>
+        <button type="button" title="Search" accesskey="/"
+          onclick="window.linkita.toggleSearch();"
+          class="btn-search ml-4 h-6 w-6 shrink-0 cursor-pointer text-[0] bg-center bg-no-repeat bg-cover dark:invert"
+          style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\' viewBox=\'0 0 24 24\' \
+            fill=\'none\' stroke=\'currentColor\' stroke-width=\'2.5\' stroke-linecap=\'round\' stroke-linejoin=\'round\' class=\'feather feather-search\' \
+            ><circle cx=\'11\' cy=\'11\' r=\'8\'></circle><line x1=\'21\' y1=\'21\' x2=\'16.65\' y2=\'16.65\'></line></svg>');"
+        ></button>
+        <script>window.linkita.initSearchButton({
+          scripts: ["https://wangbyby.github.io/elasticlunr.min.js", "https://wangbyby.github.io/search_index.en.js"]
+        });</script>
+      </div>
+      
+    </div>
+    
+  </div>
+</header>
+
+  <!-- Body Start inject -->
+  
+  <main class="prose prose-neutral relative mx-auto min-h-[calc(100%-4rem)]
+    max-w-3xl break-words px-4 pb-12 pt-28 lg:pt-32 dark:prose-invert prose-pre:rounded-lg prose-img:rounded-lg">
+      <div id="linkita-search-wrapper" class="hidden">
+  <ul id="linkita-search-results"></ul>
+</div>
+
+<article>
+  <!-- Page Start inject -->
+  
+
+  <header class="mb-16">
+    <h1 class="!my-0 pb-2.5">使用zola设置github.io作为个人博客</h1>
+    <div class="text-sm antialiased opacity-80"><span class="mx-1">&middot;</span><time
+    datetime="PT0H3M0S">3 min</time>
+</div>
+
+  </header>
+
+  <!-- TOC -->
+  
+<div class="block-bg mb-12 rounded-lg p-2 text-lg">
+  <details>
+    <summary class="select-none py-0.5 lg:py-1 pl-4" accesskey="=">
+      <span class="cursor-pointer">Table of Contents</span>
+    </summary>
+    <div class="px-2">
+      <ul>
+        <li>
+          <a class="no-underline hover:underline" href="https://wangbyby.github.io/deploy/#bu-shu-jing-tai-wang-zhi-dao-fu-wu-qi">部署静态网址到服务器</a>
+        </li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+
+  <!-- Content -->
+  <section><p>步骤如下：</p>
+<ol>
+<li>本地安装zola</li>
+<li>运行<code>zola init &lt;your blog dir&gt;</code>, like <code>zola init myblog</code></li>
+</ol>
+<p>目录如下：</p>
+<pre data-lang="txt" style="background-color:#2b303b;color:#c0c5ce;" class="language-txt "><code class="language-txt" data-lang="txt"><span>myblog/
+</span><span>├── config.toml          # 配置文件
+</span><span>├── content/             # 内容文件（Markdown）
+</span><span>├── sass/                # Sass 样式文件（可选）
+</span><span>├── static/              # 静态资源（图片、CSS、JS 等）
+</span><span>├── templates/           # 模板文件（HTML）
+</span><span>└── themes/              # 主题文件（可选）
+</span></code></pre>
+<ul>
+<li>创建的博客就放在content下面。</li>
+<li>图片放在static/images下面，在博客里用<code>![test](/images/a.png)</code>引用</li>
+<li>博客格式：<code>+++</code>一定要有</li>
+</ul>
+<pre data-lang="txt" style="background-color:#2b303b;color:#c0c5ce;" class="language-txt "><code class="language-txt" data-lang="txt"><span>+++
+</span><span>title = &quot;我的第一篇文章&quot;
+</span><span>+++
+</span><span>
+</span><span>## hello zola
+</span></code></pre>
+<ol start="3">
+<li><code>cd &lt;your blog dir&gt; &amp;&amp; git init</code>将这些目录加到版本控制进去。</li>
+<li>添加自定义模板<code>teplates/index.html</code>和<code>teplates/page.html</code></li>
+<li>创建github actions: <code>.github/workflows/deploy.yml</code>
+内容如下：</li>
+</ol>
+<pre data-lang="yml" style="background-color:#2b303b;color:#c0c5ce;" class="language-yml "><code class="language-yml" data-lang="yml"><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">Deploy Zola site to GitHub Pages
+</span><span>
+</span><span style="color:#d08770;">on</span><span>:
+</span><span>  </span><span style="color:#bf616a;">push</span><span>:
+</span><span>    </span><span style="color:#bf616a;">branches</span><span>:
+</span><span>      - </span><span style="color:#a3be8c;">master  </span><span style="color:#65737e;"># 触发部署的分支
+</span><span>
+</span><span style="color:#bf616a;">jobs</span><span>:
+</span><span>  </span><span style="color:#bf616a;">deploy</span><span>:
+</span><span>    </span><span style="color:#bf616a;">runs-on</span><span>: </span><span style="color:#a3be8c;">ubuntu-latest
+</span><span>    </span><span style="color:#bf616a;">steps</span><span>:
+</span><span>      - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">Checkout
+</span><span>        </span><span style="color:#bf616a;">uses</span><span>: </span><span style="color:#a3be8c;">actions/checkout@v3
+</span><span>
+</span><span>      - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">Install Zola
+</span><span>        </span><span style="color:#bf616a;">run</span><span>: </span><span style="color:#b48ead;">|
+</span><span style="color:#a3be8c;">          wget https://github.com/getzola/zola/releases/download/v0.19.2/zola-v0.19.2-x86_64-unknown-linux-gnu.tar.gz
+</span><span style="color:#a3be8c;">          tar -xzf zola-v0.19.2-x86_64-unknown-linux-gnu.tar.gz
+</span><span style="color:#a3be8c;">          sudo mv zola /usr/local/bin
+</span><span style="color:#a3be8c;">
+</span><span>      - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">Build site
+</span><span>        </span><span style="color:#bf616a;">run</span><span>: </span><span style="color:#a3be8c;">zola build
+</span><span>
+</span><span>      - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">Deploy to GitHub Pages
+</span><span>        </span><span style="color:#bf616a;">uses</span><span>: </span><span style="color:#a3be8c;">shalzz/zola-deploy-action@master
+</span><span>        </span><span style="color:#bf616a;">env</span><span>:
+</span><span>            </span><span style="color:#bf616a;">PAGES_BRANCH</span><span>: </span><span style="color:#a3be8c;">gh-pages
+</span><span>            </span><span style="color:#bf616a;">TOKEN</span><span>: </span><span style="color:#a3be8c;">${{ secrets.GITHUB_TOKEN }}
+</span></code></pre>
+<p>这里注意分支。</p>
+<ul>
+<li>master分支是我们源文件的分支</li>
+<li>gh-pages分支是制品分支</li>
+</ul>
+<blockquote>
+<p>参考：<a href="https://www.getzola.org/documentation/deployment/github-pages/#github-actions">zola github-actions</a></p>
+</blockquote>
+<ol start="6">
+<li>
+<p>推送到 <code>git@github.com:&lt;username&gt;/&lt;username&gt;.github.io.git</code></p>
+</li>
+<li>
+<p>设置github pages:
+<img src="/static/images/image-github-pages.png" alt="alt text" /></p>
+</li>
+<li>
+<p>如果上传图片，设置<code>config.toml</code>中<code>base_url = "https://&lt;username&gt;.github.io/"</code></p>
+</li>
+<li>
+<p>等待github actions完成，就OK了</p>
+</li>
+</ol>
+<hr />
+<h1 id="bu-shu-jing-tai-wang-zhi-dao-fu-wu-qi">部署静态网址到服务器</h1>
+<p>需要</p>
+<ol>
+<li>一个云服务器，带ip地址/域名的</li>
+</ol>
+<p>步骤如下</p>
+<ol>
+<li>在云服务器安装zola（pre-build比较好）</li>
+<li><strong>在服务器安装nginx</strong></li>
+<li>拉取博客代码到服务器：<code>git clone example_blog@git</code></li>
+<li>运行命令<code>cd example_blog &amp;&amp; zola build -u ""</code>. 构建好的文件在<code>example_blog/public</code>下</li>
+<li><code>cp public /var/www/static-site -r</code></li>
+<li>给nginx权限并确保自己有权限<code>sudo chown -R $USER:$USER /var/www/static-site &amp;&amp; sudo chown -R www-data:www-data /var/www/static-site &amp;&amp; sudo chmod -R 755 /var/www/static-site</code></li>
+<li>修改nginx的配置文件（ai生成的）
+- 新建配置文件<code>/etc/nginx/sites-available/static-site.conf</code>
+- 添加内容</li>
+</ol>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>```conf
+</span><span>server {
+</span><span>  listen 80;
+</span><span>  server_name example.com;  # 替换为你的域名或服务器 IP（如 192.168.1.100）
+</span><span>
+</span><span>  root /var/www/static-site;  # 静态文件根目录
+</span><span>  index index.html index.htm;  # 默认索引文件
+</span><span>
+</span><span>  location / {
+</span><span>      try_files $uri $uri/ =404;  # 按顺序查找文件或目录，否则返回 404
+</span><span>  }
+</span><span>
+</span><span>  # 可选：启用 Gzip 压缩
+</span><span>  gzip on;
+</span><span>  gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+</span><span>}
+</span><span>```
+</span><span>
+</span><span>- 设置符号链接`sudo ln -s /etc/nginx/sites-available/static-site.conf /etc/nginx/sites-enabled/`
+</span></code></pre>
+<ol start="8">
+<li>重启nginx  <code>sudo nginx -t &amp;&amp; sudo systemctl reload nginx</code></li>
+</ol>
+<blockquote>
+<p>坑</p>
+<ol>
+<li>本来打算用nginx做为动态转发，服务器后台跑个zola serve，结果发现zola build出来的都有端口<code>ip:1111/xxx</code>. 此路不通</li>
+<li>然后就用静态网页。最开始有403，权限问题。然后发现博客的url链接是<code>ip/ip/xxx</code>, 用<code>zola build -u ""</code>可以处理掉。然后就OK啦</li>
+</ol>
+</blockquote>
+<hr />
+<p>之前用hexo，但图片上传太麻烦了:( zola图片上传也没有那么方便。
+ai真好用，特别是这种琐碎的安装部署。</p>
+</section>
+  <hr />
+  <!-- Post Taxonomies -->
+  
+
+  <!-- Post Nav -->
+  
+
+  <!-- Page End inject -->
+  
+</article>
+
+  </main>
+  <footer class="mx-auto flex lg:mt-5 max-w-3xl flex-wrap items-center px-8 py-3 text-sm opacity-60">
+  <div class="mr-auto basis-full lg:basis-1/2">
+  © <time datetime="2025">2025</time>
+  </div>
+  <div class="flex basis-full lg:basis-1/2 lg:justify-end">
+    <span class="mr-6 lg:ml-6">
+      Powered by <a
+      class="link" href="https://www.getzola.org/" target="_blank">Zola</a>
+    </span>
+    <a class="link" href="https://www.getzola.org/themes/linkita/" target="_blank">&#9998; Linkita</a>
+  </div>
+  <!-- Footer inject -->
+  
+</footer>
+
+  
+
+  <!-- Body End inject -->
+  
+</body>
+
+</html>

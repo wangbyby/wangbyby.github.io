@@ -1,0 +1,665 @@
+<!doctype html>
+<html class="not-ready overflow-y-scroll lg:text-base" lang="en">
+
+<head prefix="og: https://ogp.me/ns# article: https://ogp.me/ns/article#">
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta name="generator" content="Zola" />
+  <title>SSA构建和销毁</title>
+  <meta property="og:title" content="SSA构建和销毁" />
+  <meta property="og:url" content="https://wangbyby.github.io/ssa-construction-and-destruction/" />
+  <link rel="canonical" href="https://wangbyby.github.io/ssa-construction-and-destruction/" />
+  <meta property="og:type" content="article" />
+
+  <meta name="theme-color" data-light="#e4e4e7" data-dark="#27272a" content="#e4e4e7" />
+  <link rel="preload stylesheet" as="style" href="https://wangbyby.github.io/main.min.css?h=77d92547a754e29fb150" />
+  <style>
+    :root {
+      --bg: #f4f4f5;
+      --header: #e4e4e7;
+      color-scheme: light;
+    }
+    :root.dark {
+      --bg: #18181b;
+      --header: #27272a;
+      color-scheme: dark;
+    }/**/
+  </style>
+  <link rel="icon" type="image/x-icon" sizes="16x16" href="https://wangbyby.github.io/favicon.ico" />
+  <link rel="apple-touch-icon" type="image/png" href="https://wangbyby.github.io/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href="https://wangbyby.github.io/android-icon.png" />
+  <script src="https://wangbyby.github.io/js/linkita.min.js?h=2cfe69bc508021cbd3c5"></script>
+  <script src="https://wangbyby.github.io/js/linkita-search.min.js?h=698547b4b081d012c661"></script>
+
+  <!-- Head inject -->
+  
+</head>
+
+<body class="text-black duration-200 ease-out bg-[var(--bg)] dark:text-white">
+  
+<header class="bg-[var(--header)] fixed top-0 z-40 mx-auto min-h-[3.25rem] w-full">
+  <div class="mx-auto w-full max-w-4xl p-2.5 lg:flex lg:justify-between">
+    <div class="flex justify-between">
+      <div class="flex items-center min-h-8">
+        <button type="button" title="Go to home page" accesskey="!"
+          onclick="window.location.href='https://wangbyby.github.io/';"
+          class="btn-home h-6 w-6 shrink-0 cursor-pointer text-[0] bg-center bg-no-repeat bg-cover dark:invert"
+          style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\' viewBox=\'0 0 24 24\' \
+            fill=\'none\' stroke=\'currentColor\' stroke-width=\'2.5\' stroke-linecap=\'round\' stroke-linejoin=\'round\' class=\'feather feather-home\'><path \
+            d=\'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\'></path><polyline points=\'9 22 9 12 15 12 15 22\'></polyline></svg>');"
+        ></button>
+        <button type="button" title="Switch color scheme" accesskey="$"
+          onclick="window.linkita.toggleDarkMode();" ondblclick="window.linkita.resetDarkMode();"
+          class="btn-dark ml-4 h-6 w-6 shrink-0 cursor-pointer text-[0] bg-center bg-no-repeat bg-cover dark:invert [background-image:var(--url-dark)] dark:[background-image:var(--url-light)]"
+          style="--url-light: url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\' viewBox=\'0 0 24 24\' \
+            fill=\'none\' stroke=\'currentColor\' stroke-width=\'2.5\' stroke-linecap=\'round\' stroke-linejoin=\'round\' class=\'feather feather-sun\' \
+            ><circle cx=\'12\' cy=\'12\' r=\'5\'></circle><line x1=\'12\' y1=\'1\' x2=\'12\' y2=\'3\'></line><line x1=\'12\' y1=\'21\' x2=\'12\' y2=\'23\' \
+            ></line><line x1=\'4.22\' y1=\'4.22\' x2=\'5.64\' y2=\'5.64\'></line><line x1=\'18.36\' y1=\'18.36\' x2=\'19.78\' y2=\'19.78\'></line><line \
+            x1=\'1\' y1=\'12\' x2=\'3\' y2=\'12\'></line><line x1=\'21\' y1=\'12\' x2=\'23\' y2=\'12\'></line><line x1=\'4.22\' y1=\'19.78\' x2=\'5.64\' \
+            y2=\'18.36\'></line><line x1=\'18.36\' y1=\'5.64\' x2=\'19.78\' y2=\'4.22\'></line></svg>'); --url-dark: url('data:image/svg+xml;utf8,<svg \
+            xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2.5\' \
+            stroke-linecap=\'round\' stroke-linejoin=\'round\' class=\'feather feather-moon\'><path d=\'M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z\'></path></svg>');"
+        ></button>
+        <button type="button" title="Search" accesskey="/"
+          onclick="window.linkita.toggleSearch();"
+          class="btn-search ml-4 h-6 w-6 shrink-0 cursor-pointer text-[0] bg-center bg-no-repeat bg-cover dark:invert"
+          style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\' viewBox=\'0 0 24 24\' \
+            fill=\'none\' stroke=\'currentColor\' stroke-width=\'2.5\' stroke-linecap=\'round\' stroke-linejoin=\'round\' class=\'feather feather-search\' \
+            ><circle cx=\'11\' cy=\'11\' r=\'8\'></circle><line x1=\'21\' y1=\'21\' x2=\'16.65\' y2=\'16.65\'></line></svg>');"
+        ></button>
+        <script>window.linkita.initSearchButton({
+          scripts: ["https://wangbyby.github.io/elasticlunr.min.js", "https://wangbyby.github.io/search_index.en.js"]
+        });</script>
+      </div>
+      
+    </div>
+    
+  </div>
+</header>
+
+  <!-- Body Start inject -->
+  
+  <main class="prose prose-neutral relative mx-auto min-h-[calc(100%-4rem)]
+    max-w-3xl break-words px-4 pb-12 pt-28 lg:pt-32 dark:prose-invert prose-pre:rounded-lg prose-img:rounded-lg">
+      <div id="linkita-search-wrapper" class="hidden">
+  <ul id="linkita-search-results"></ul>
+</div>
+
+<article>
+  <!-- Page Start inject -->
+  
+
+  <header class="mb-16">
+    <h1 class="!my-0 pb-2.5">SSA构建和销毁</h1>
+    <div class="text-sm antialiased opacity-80"><span class="mx-1">&middot;</span><time
+    datetime="PT0H6M0S">6 min</time>
+</div>
+
+  </header>
+
+  <!-- TOC -->
+  
+<div class="block-bg mb-12 rounded-lg p-2 text-lg">
+  <details>
+    <summary class="select-none py-0.5 lg:py-1 pl-4" accesskey="=">
+      <span class="cursor-pointer">Table of Contents</span>
+    </summary>
+    <div class="px-2">
+      <ul>
+        <li>
+          <a class="no-underline hover:underline" href="https://wangbyby.github.io/ssa-construction-and-destruction/#1-ssagou-jian-suan-fa">1. SSA构建算法</a>
+        </li>
+        <li>
+          <a class="no-underline hover:underline" href="https://wangbyby.github.io/ssa-construction-and-destruction/#ssa-destruction">SSA destruction</a>
+        </li>
+        <li>
+          <a class="no-underline hover:underline" href="https://wangbyby.github.io/ssa-construction-and-destruction/#begin-bmatrix-a-b-c-end">$$\begin{bmatrix}a \b \c\end</a>
+        </li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+
+  <!-- Content -->
+  <section><blockquote>
+<p>ssa 构建和删除</p>
+</blockquote>
+<h1 id="1-ssagou-jian-suan-fa">1. SSA构建算法</h1>
+<blockquote>
+<p>依赖：</p>
+<ol>
+<li>dom tree</li>
+<li>DF</li>
+<li>llvm ir基础知识</li>
+</ol>
+</blockquote>
+<p>对以下c代码</p>
+<pre data-lang="c" style="background-color:#2b303b;color:#c0c5ce;" class="language-c "><code class="language-c" data-lang="c"><span style="color:#b48ead;">int </span><span style="color:#8fa1b3;">foo</span><span>(</span><span style="color:#b48ead;">int </span><span style="color:#bf616a;">a</span><span>){
+</span><span>	</span><span style="color:#b48ead;">int</span><span> b = a;
+</span><span>	</span><span style="color:#b48ead;">return</span><span> b;
+</span><span>}
+</span></code></pre>
+<p>clang会生成类似这种IR</p>
+<pre data-lang="c" style="background-color:#2b303b;color:#c0c5ce;" class="language-c "><code class="language-c" data-lang="c"><span>define i32 @</span><span style="color:#bf616a;">foo</span><span>(i32 %a){
+</span><span>	%pa = alloc i32
+</span><span>	%pb = alloc i32
+</span><span>	store %a, %pa
+</span><span>	store %a, %pb
+</span><span>	%b1 = load %pb
+</span><span>	ret i32 %b1
+</span><span>}
+</span></code></pre>
+<p>我们能看到llvm采用了alloc+load+store指令来实现c中局部变量的存放。
+这里参数处理<code>i32 %a; store %a, %pa</code>实际上是个比较复杂的话题，按下不表。
+这段IR的有很多冗余的load/store, 有没有什么办法消除掉呢？
+SROA（mem2reg）！
+预期的IR</p>
+<pre data-lang="c" style="background-color:#2b303b;color:#c0c5ce;" class="language-c "><code class="language-c" data-lang="c"><span>define i32 @</span><span style="color:#bf616a;">foo</span><span>(i32 %a){
+</span><span>	ret i32 %a
+</span><span>}
+</span></code></pre>
+<p>如果控制流比较复杂呢？</p>
+<pre data-lang="c" style="background-color:#2b303b;color:#c0c5ce;" class="language-c "><code class="language-c" data-lang="c"><span style="color:#b48ead;">int</span><span> b = a;
+</span><span style="color:#b48ead;">if</span><span>(a &gt; </span><span style="color:#d08770;">10</span><span>){
+</span><span>	b = b + a;
+</span><span>}</span><span style="color:#b48ead;">else</span><span>{
+</span><span>	b = b * a;
+</span><span>}
+</span><span style="color:#b48ead;">return</span><span> b;
+</span><span>=&gt; 
+</span><span>ir
+</span><span>bb0:
+</span><span>  %pb = alloc i32
+</span><span>  store %a, %pb
+</span><span>  %c = CMP_GT %a, </span><span style="color:#d08770;">10
+</span><span>  br %c, %bb1, %bb2
+</span><span>
+</span><span>bb1:
+</span><span>  %b0 = load %pb
+</span><span>  %b1 = add %b0, %a
+</span><span>  store %b1, %pb
+</span><span>  br %bb4
+</span><span>
+</span><span>bb3:
+</span><span>  %b2 = load %pb
+</span><span>  %b3 = mul %b2, %a
+</span><span>  store %b3, %pb
+</span><span>  br %bb4
+</span><span>bb4:
+</span><span>  %b4 = load %pb
+</span><span>  ret %b4
+</span></code></pre>
+<p>这里我们发现，如果想要正确删除掉这些load/store，我们需要引入<code>phinode</code>,而且必须拿到控制流信息。phinode是个逻辑节点，在实际的CPU上没对应的指令/寄存器表示。所以我们在生成实际的汇编前需要再删除掉phi。</p>
+<p>接下来看如何实现SSA构建：</p>
+<p>原理分为两步, insertPHI, Rename， 伪代码如下：</p>
+<pre data-lang="c" style="background-color:#2b303b;color:#c0c5ce;" class="language-c "><code class="language-c" data-lang="c"><span>
+</span><span>procedure </span><span style="color:#8fa1b3;">InsertPHI</span><span>(</span><span style="color:#bf616a;">variable_list</span><span>)
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">for</span><span> each variable v in variable_list
+</span><span>        WorkList ← ∅
+</span><span>        EverOnWorkList ← ∅
+</span><span>        AlreadyHasPhiFunc ← ∅
+</span><span>        </span><span style="color:#b48ead;">for</span><span> each node n containing an assignment to v
+</span><span>            WorkList ← WorkList ∪ {n}
+</span><span>        end
+</span><span>
+</span><span>        EverOnWorkList ← WorkList
+</span><span>        </span><span style="color:#b48ead;">while</span><span> WorkList ≠ ∅
+</span><span>            Remove some node n from </span><span style="color:#8fa1b3;">WorkList
+</span><span>            </span><span style="color:#b48ead;">for</span><span> each d ∈ </span><span style="color:#bf616a;">DF</span><span>(n)
+</span><span>                </span><span style="color:#b48ead;">if</span><span> d ∉ AlreadyHasPhiFunc
+</span><span>                    Insert a φ-function </span><span style="color:#b48ead;">for</span><span> v at d
+</span><span>                    AlreadyHasPhiFunc ← AlreadyHasPhiFunc ∪ {d}
+</span><span>                    </span><span style="color:#b48ead;">if</span><span> d ∉ EverOnWorkList
+</span><span>                        WorkList ← WorkList ∪ {d}
+</span><span>                        EverOnWorkList ← EverOnWorkList ∪ {d}
+</span><span>                    end
+</span><span>                </span><span style="color:#8fa1b3;">end
+</span><span>            end
+</span><span>        end
+</span><span>    </span><span style="color:#8fa1b3;">end
+</span><span>end </span><span style="color:#8fa1b3;">procedure
+</span><span>
+</span><span>  
+</span><span>
+</span><span>procedure </span><span style="color:#8fa1b3;">GenName</span><span>(variable </span><span style="color:#bf616a;">v</span><span>)
+</span><span>    vn = new </span><span style="color:#bf616a;">Value</span><span>(v)
+</span><span>    Push vn onto Stacks[v]
+</span><span>    </span><span style="color:#b48ead;">return</span><span> v
+</span><span>end </span><span style="color:#8fa1b3;">procedure
+</span><span>
+</span><span>  
+</span><span>
+</span><span>procedure </span><span style="color:#8fa1b3;">Rename</span><span>(block </span><span style="color:#bf616a;">b</span><span>)
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">if</span><span> b previously visited </span><span style="color:#b48ead;">return
+</span><span>    </span><span style="color:#b48ead;">for</span><span> each φ-function p in b
+</span><span>        v = </span><span style="color:#bf616a;">LHS</span><span>(p)
+</span><span>        vn = </span><span style="color:#bf616a;">GenName</span><span>(v) and replace v with vn
+</span><span>    end
+</span><span>
+</span><span>    for each statement s in </span><span style="color:#8fa1b3;">b </span><span>(in </span><span style="color:#bf616a;">order</span><span>)
+</span><span>        </span><span style="color:#b48ead;">for</span><span> each variable v ∈ </span><span style="color:#bf616a;">RHS</span><span>(s)
+</span><span>            replace v by </span><span style="color:#8fa1b3;">Top</span><span>(</span><span style="color:#bf616a;">Stacks</span><span>[v])
+</span><span>        end
+</span><span>
+</span><span>        </span><span style="color:#b48ead;">for</span><span> each variable v ∈ </span><span style="color:#bf616a;">LHS</span><span>(s)
+</span><span>            vn = </span><span style="color:#bf616a;">GenName</span><span>(v) and replace v with vn
+</span><span>        end
+</span><span>
+</span><span>        for each s ∈ </span><span style="color:#bf616a;">succ</span><span>(b) (in CFG)
+</span><span>            j ← position in s’s φ-function corresponding to block b
+</span><span>            </span><span style="color:#b48ead;">for</span><span> each φ-function p in s
+</span><span>                replace the jth operand of </span><span style="color:#8fa1b3;">RHS</span><span>(</span><span style="color:#bf616a;">p</span><span>) by </span><span style="color:#bf616a;">Top</span><span>(Stacks[v])
+</span><span>            end
+</span><span>        </span><span style="color:#8fa1b3;">end
+</span><span>    end
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">for</span><span> each s ∈ </span><span style="color:#bf616a;">child</span><span>(b) (in DT)
+</span><span>        </span><span style="color:#bf616a;">Rename</span><span>(s)
+</span><span>    </span><span style="color:#8fa1b3;">end
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">for</span><span> each φ-function or statement t in b
+</span><span>        </span><span style="color:#b48ead;">for</span><span> each vi ∈ </span><span style="color:#bf616a;">LHS</span><span>(t)
+</span><span>            </span><span style="color:#bf616a;">Pop</span><span>(Stacks[v])
+</span><span>        </span><span style="color:#8fa1b3;">end
+</span><span>    end
+</span><span>end </span><span style="color:#8fa1b3;">procedure
+</span><span>
+</span><span>SSAConstruction:
+</span><span>    </span><span style="color:#bf616a;">InsertPHI</span><span>(list)
+</span><span>    </span><span style="color:#8fa1b3;">Rename</span><span>(</span><span style="color:#bf616a;">entry</span><span>)
+</span><span>end
+</span></code></pre>
+<p>我们看到这种伪代码的形式和LLVMIR区别很大。因为IR格式不一样，接下来看llvm ir下如何实现mem2reg</p>
+<pre data-lang="c" style="background-color:#2b303b;color:#c0c5ce;" class="language-c "><code class="language-c" data-lang="c"><span style="color:#bf616a;">mem2reg</span><span>(Function f){
+</span><span>	list = []
+</span><span>	</span><span style="color:#b48ead;">for</span><span> inst in f.</span><span style="color:#bf616a;">entry</span><span>(){
+</span><span>		</span><span style="color:#b48ead;">if</span><span> inst is alloc and </span><span style="color:#bf616a;">isPromotable</span><span>(inst){
+</span><span>			</span><span style="color:#65737e;">// 有些alloc不能被删除，like volatile
+</span><span>			list.</span><span style="color:#bf616a;">push</span><span>(inst)
+</span><span>		}
+</span><span>	}
+</span><span>	</span><span style="color:#b48ead;">if</span><span> list.</span><span style="color:#bf616a;">empty</span><span>() </span><span style="color:#b48ead;">return
+</span><span>
+</span><span>	Phi2Alloc = </span><span style="color:#bf616a;">InsertPHI</span><span>(list)
+</span><span>
+</span><span>	</span><span style="color:#65737e;">// init map: alloc -&gt; stack&lt;value&gt;
+</span><span>	</span><span style="color:#65737e;">// with first value undef
+</span><span>	incomings_map = {} 
+</span><span>	</span><span style="color:#b48ead;">for</span><span> alloc in list {
+</span><span>		incomings_map[alloc] = [undef]
+</span><span>	}
+</span><span>
+</span><span>	</span><span style="color:#bf616a;">Rename</span><span>(f.</span><span style="color:#bf616a;">entry</span><span>(), incomings_map, Phi2Alloc)
+</span><span>}
+</span><span>
+</span><span style="color:#bf616a;">InsertPHI</span><span>(list){
+</span><span>	Phi2Alloc = {}
+</span><span>	</span><span style="color:#b48ead;">for</span><span> alloc in list{
+</span><span>		WorkList = []
+</span><span>		</span><span style="color:#b48ead;">for</span><span> user in alloc.</span><span style="color:#bf616a;">use_list</span><span>(){
+</span><span>			</span><span style="color:#b48ead;">if</span><span> user is store {
+</span><span>				WorkList.</span><span style="color:#bf616a;">push</span><span>(user.</span><span style="color:#bf616a;">parent</span><span>())
+</span><span>			}
+</span><span>		}
+</span><span>		EverOnWorkList = WorkList.</span><span style="color:#bf616a;">clone</span><span>()
+</span><span>		AlreadyHasPhi = []
+</span><span>
+</span><span>		</span><span style="color:#b48ead;">while </span><span>!WorkList.</span><span style="color:#bf616a;">empty</span><span>() {
+</span><span>			n = WorkList.</span><span style="color:#bf616a;">pop</span><span>()
+</span><span>
+</span><span>			</span><span style="color:#b48ead;">for</span><span> d in </span><span style="color:#bf616a;">DF</span><span>(n) {
+</span><span>				</span><span style="color:#b48ead;">if</span><span> d not in AlreadyHasPhi {
+</span><span>					phi = </span><span style="color:#bf616a;">create_phi</span><span>()
+</span><span>					phi.</span><span style="color:#bf616a;">set_all_incomings</span><span>(undef)
+</span><span>					d.</span><span style="color:#bf616a;">insert_front</span><span>(phi)
+</span><span>					Phi2Alloc[phi] = alloc
+</span><span>
+</span><span>					AlreadyHasPhi.</span><span style="color:#bf616a;">add</span><span>(d)
+</span><span>					</span><span style="color:#b48ead;">if</span><span> d not in EverOnWorkList {
+</span><span>						WorkList.</span><span style="color:#bf616a;">push</span><span>(d)
+</span><span>						EverOnWorkList.</span><span style="color:#bf616a;">push</span><span>(d)
+</span><span>					}
+</span><span>				}
+</span><span>			}
+</span><span>		}
+</span><span>	}
+</span><span>	</span><span style="color:#b48ead;">return</span><span> Phi2Alloc
+</span><span>}
+</span><span>
+</span><span style="color:#bf616a;">PhiRename</span><span>(bb, incomings_map, Phi2Alloc){
+</span><span>	</span><span style="color:#b48ead;">if</span><span> bb visited, </span><span style="color:#b48ead;">return
+</span><span>	</span><span style="color:#b48ead;">for</span><span> inst in bb {
+</span><span>		</span><span style="color:#b48ead;">if</span><span> inst is phi {
+</span><span>			</span><span style="color:#b48ead;">if</span><span> inst not in Phi2Alloc
+</span><span>				</span><span style="color:#b48ead;">continue
+</span><span>			alloc = Phi2Alloc[inst]
+</span><span>			incomings_map[alloc].</span><span style="color:#bf616a;">push</span><span>(phi) </span><span style="color:#65737e;">// update top
+</span><span>		
+</span><span>			</span><span style="color:#b48ead;">continue
+</span><span>		}
+</span><span>		</span><span style="color:#b48ead;">if</span><span> inst is load {
+</span><span>			</span><span style="color:#65737e;">// %inst = load %address
+</span><span>			ad = inst.</span><span style="color:#bf616a;">get_address</span><span>();
+</span><span>			</span><span style="color:#b48ead;">if</span><span>(ad is alloc) {
+</span><span>				top = incomings_map[ad].</span><span style="color:#bf616a;">top</span><span>();
+</span><span>				inst.</span><span style="color:#bf616a;">replaceAllUsesWith</span><span>(top)
+</span><span>			}
+</span><span>			</span><span style="color:#b48ead;">continue</span><span>;
+</span><span>		}
+</span><span>		</span><span style="color:#b48ead;">if</span><span> inst is store {
+</span><span>			ad = inst.</span><span style="color:#bf616a;">get_address</span><span>()
+</span><span>			</span><span style="color:#65737e;">// store %x, %address
+</span><span>			</span><span style="color:#b48ead;">if</span><span> ad is alloc {
+</span><span>				</span><span style="color:#65737e;">// update top
+</span><span>				incomings_map[ad].</span><span style="color:#bf616a;">push</span><span>(inst.</span><span style="color:#bf616a;">getValue</span><span>());
+</span><span>			}
+</span><span>		}
+</span><span>	}
+</span><span>	</span><span style="color:#b48ead;">for</span><span> succ in b.</span><span style="color:#bf616a;">getSuccessors</span><span>() { </span><span style="color:#65737e;">// cfg
+</span><span>		</span><span style="color:#b48ead;">for</span><span> phi in succ.</span><span style="color:#bf616a;">getPhiNodes</span><span>() {
+</span><span>			alloc = Phi2Alloc[phi]
+</span><span>			top = incomings_map[alloc].</span><span style="color:#bf616a;">top</span><span>()
+</span><span>			phi.</span><span style="color:#bf616a;">update_by_block</span><span>(b, top) </span><span style="color:#65737e;">// update for incoming
+</span><span>		}
+</span><span>	}
+</span><span>
+</span><span>	</span><span style="color:#b48ead;">for</span><span> child in </span><span style="color:#bf616a;">DomTree</span><span>(b).</span><span style="color:#bf616a;">children</span><span>() {
+</span><span>		</span><span style="color:#65737e;">// may cause stack over flow...
+</span><span>		</span><span style="color:#bf616a;">Rename</span><span>(child, incomings_map, Phi2Alloc)
+</span><span>	}
+</span><span>
+</span><span>	</span><span style="color:#65737e;">// do pop stack
+</span><span>	</span><span style="color:#b48ead;">for</span><span> inst in b {
+</span><span>		</span><span style="color:#b48ead;">if</span><span> inst is phi {
+</span><span>			alloc = Phi2Alloc[phi]
+</span><span>			incomings_map[alloc].</span><span style="color:#bf616a;">pop</span><span>()
+</span><span>			</span><span style="color:#b48ead;">continue
+</span><span>		}
+</span><span>
+</span><span>		</span><span style="color:#b48ead;">if</span><span> inst is store {
+</span><span>			ad = inst.</span><span style="color:#bf616a;">getAddress</span><span>()
+</span><span>			incomings_map[ad].</span><span style="color:#bf616a;">pop</span><span>()
+</span><span>		}
+</span><span>	}
+</span><span>}
+</span><span>
+</span></code></pre>
+<p>当然，以上代码不是llvm mem2reg实际实现代码。</p>
+<p>llvm实现做了一些优化，domtree遍历优化，特殊情况处理等。</p>
+<hr />
+<h1 id="ssa-destruction">SSA destruction</h1>
+<p>如何销毁SSA形式，删除phinode。</p>
+<blockquote>
+<p>llvm的phi-elimination是在mir阶段发生。</p>
+</blockquote>
+<p>一般来说，SSA destruction是将phinode替换为copy指令。</p>
+<ol>
+<li>暴力做法，对于<code>p = phi (%a1, %bb1), (%a2, %bb2) ....</code>，在bb1,bb2... 尾部插入 <code>p = copy %a...</code> 然后删除掉phi节点。很不幸，改算法是错误的。
+考虑到lost copy和swap problem：</li>
+</ol>
+<p>![[static/images/Pasted image 20250314140205.png]]![[static/images/Pasted image 20250314140226.png]]</p>
+<blockquote>
+<p>ref <a href="https://inria.hal.science/inria-00349925v1/document">*Revisiting Out-of-SSA Translation for Correctness, Code Quality, and Efficiency</a></p>
+</blockquote>
+<p>我们的暴力算法会生成</p>
+<pre data-lang="c" style="background-color:#2b303b;color:#c0c5ce;" class="language-c "><code class="language-c" data-lang="c"><span>
+</span><span>swap problem:
+</span><span>b0:
+</span><span>	a1 = ...
+</span><span>	b1 = ...
+</span><span>	a2 = copy a1
+</span><span>	b2 = copy b1
+</span><span>	jump </span><span style="color:#8fa1b3;">b1
+</span><span>b1:
+</span><span>	a2 = copy b2 &lt;--- 没有swap
+</span><span>	b2 = copy a2
+</span><span>
+</span><span>	</span><span style="color:#b48ead;">if</span><span> p jump b1
+</span><span>	jump </span><span style="color:#8fa1b3;">b2
+</span><span>b2:
+</span><span>	...
+</span><span>
+</span><span>lost-copy-problem
+</span><span>
+</span><span>b0:
+</span><span>	x1 = ...
+</span><span>	x2 = copy x1
+</span><span>	jump </span><span style="color:#8fa1b3;">b1
+</span><span>b1:
+</span><span>	x3 = x2 + </span><span style="color:#d08770;">1
+</span><span>	x2 = copy x3
+</span><span>	</span><span style="color:#b48ead;">if</span><span> p jump b1
+</span><span>	jump </span><span style="color:#8fa1b3;">b2
+</span><span>b2:
+</span><span>	... = x2  &lt;---- 这里错误
+</span><span>
+</span></code></pre>
+<ol start="2">
+<li>split critical edges算法</li>
+</ol>
+<blockquote>
+<p>图中红边就是critical edge:
+![[static/images/Pasted image 20250314141430.png]]</p>
+</blockquote>
+<p>![[static/images/Pasted image 20250314141816.png]]</p>
+<p>![[static/images/Pasted image 20250314142302.png]]
+swap problem结果看起来不太对哦。
+看起来是插入copy出了问题, 再看一眼<code>a2=phi(a1, b2);b2=phi(b1,a2)</code>
+![[static/images/Pasted image 20250314142521.png]]
+是个环。。。</p>
+<p>我们发现swap problem中</p>
+<ul>
+<li>a2和b2的生命周期重叠了</li>
+<li>并且插入copy方式也需要改进</li>
+</ul>
+<ol start="3">
+<li>isolating phi + parallel copy</li>
+</ol>
+<blockquote>
+<p>先介绍几个概念</p>
+<ul>
+<li>CSSA(Conventional SSA) form is defined as SSA form for which each phi-web is interference-free.</li>
+<li>TSSA(Transformed SSA) form is non-conventional SSA, may have phi-web is not interference-free.</li>
+</ul>
+</blockquote>
+<p>swap problem和lost-copy problem中 都是TSSA，而不是CSSA。
+如何将TSSA转换为CSSA？并且在CSSA中插入copy是否还需要注意类似swapproblem的情况？</p>
+<p>所以我们接下来的算法：</p>
+<ol>
+<li>Insert parallel copies for all φ-functions （TSSA =&gt; CSSA）</li>
+<li>eliminate phis in CSSA</li>
+<li>Sequentialize parallel copies, possibly with one more variable and some additional copies</li>
+<li>some optimization</li>
+</ol>
+<blockquote>
+<p>CSSA形式
+![[static/images/lost-copy.png]]![[static/images/swap.png]]
+这代码逻辑看起来是没问题了，就是代码质量堪忧。。。</p>
+</blockquote>
+<p>消除phi节点后：</p>
+<p>![[static/images/lost-copy-phi-elim.png]]
+![[static/images/swap-phi-elim.png]]
+上一小节提到的swap中copy的问题仍然存在，所以接下来要介绍，parallel copies的概念。
+我们将这些插入的copy指令视为parallel copies，然后采用算法求解copy插入顺序</p>
+<blockquote>
+<p>![[static/images/Pasted image 20250314150937.png]]
+ref <a href="https://inria.hal.science/inria-00349925v1/document">Revisiting Out-of-SSA Translation for Correctness, Code Quality, and Efficiency</a>
+不幸的是，这个算法有点小问题。
+实际上是个图遍历算法：<a href="http://web.cs.ucla.edu/~palsberg/paper/cc09.pdf">cc09.pdf</a></p>
+</blockquote>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#b48ead;">class </span><span style="color:#ebcb8b;">Copy</span><span style="color:#eff1f5;">:
+</span><span>    </span><span style="color:#b48ead;">def </span><span style="color:#96b5b4;">__init__</span><span>(</span><span style="color:#bf616a;">self</span><span>, </span><span style="color:#bf616a;">src</span><span>, </span><span style="color:#bf616a;">dst</span><span>):
+</span><span>        </span><span style="color:#bf616a;">self</span><span>.src = src
+</span><span>        </span><span style="color:#bf616a;">self</span><span>.dst = dst
+</span><span>    </span><span style="color:#b48ead;">def </span><span style="color:#96b5b4;">__repr__</span><span>(</span><span style="color:#bf616a;">self</span><span>):
+</span><span>        </span><span style="color:#b48ead;">return </span><span>&quot;</span><span style="color:#d08770;">%s</span><span style="color:#a3be8c;"> &lt;- </span><span style="color:#d08770;">%s</span><span>&quot; % (</span><span style="color:#bf616a;">self</span><span>.dst, </span><span style="color:#bf616a;">self</span><span>.src)
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">seq_copy</span><span>(</span><span style="color:#bf616a;">seq</span><span>):
+</span><span>    ready = []
+</span><span>    todo = []
+</span><span>    pred = {}
+</span><span>    loc = {}
+</span><span>    n = &quot;</span><span style="color:#a3be8c;">tmp</span><span>&quot;
+</span><span>  
+</span><span>    pred[n] = </span><span style="color:#d08770;">None
+</span><span>    </span><span style="color:#b48ead;">for </span><span>i </span><span style="color:#b48ead;">in </span><span>seq:
+</span><span>        a = i.src
+</span><span>        b = i.dst
+</span><span>        loc[b] = </span><span style="color:#d08770;">None
+</span><span>        pred[a] = </span><span style="color:#d08770;">None
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">for </span><span>i </span><span style="color:#b48ead;">in </span><span>seq:
+</span><span>        a = i.src
+</span><span>        b = i.dst
+</span><span>        loc[a] = a
+</span><span>        pred[b] = a
+</span><span>        todo.</span><span style="color:#bf616a;">append</span><span>(b)
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">for </span><span>i </span><span style="color:#b48ead;">in </span><span>seq:
+</span><span>        a = i.src
+</span><span>        b = i.dst
+</span><span>        </span><span style="color:#b48ead;">if </span><span>loc[b] is </span><span style="color:#d08770;">None</span><span>:
+</span><span>            ready.</span><span style="color:#bf616a;">append</span><span>(b)
+</span><span>    </span><span style="color:#b48ead;">while </span><span style="color:#96b5b4;">len</span><span>(todo) != </span><span style="color:#d08770;">0</span><span>:
+</span><span>        </span><span style="color:#b48ead;">while </span><span style="color:#96b5b4;">len</span><span>(ready) != </span><span style="color:#d08770;">0</span><span>:
+</span><span>            b = ready.</span><span style="color:#bf616a;">pop</span><span>()
+</span><span>            a = pred[b]
+</span><span>            c = loc[a]
+</span><span>            </span><span style="color:#96b5b4;">print</span><span>(&quot;</span><span style="color:#a3be8c;">emit copy </span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;"> &lt;- </span><span style="color:#d08770;">{}</span><span>&quot;.</span><span style="color:#bf616a;">format</span><span>(b, c))
+</span><span>            loc[a] = b
+</span><span>            </span><span style="color:#b48ead;">if </span><span>a ==c and pred[a] is not </span><span style="color:#d08770;">None</span><span>:
+</span><span>                ready.</span><span style="color:#bf616a;">append</span><span>(a)
+</span><span>        b = todo.</span><span style="color:#bf616a;">pop</span><span>(</span><span style="color:#d08770;">0</span><span>)
+</span><span>        l = loc[pred[b]]
+</span><span>
+</span><span>        </span><span style="color:#b48ead;">if </span><span>b == l: </span><span style="color:#65737e;"># &lt;&lt;&lt;&lt;&lt; 这里
+</span><span>            </span><span style="color:#96b5b4;">print</span><span>(&quot;</span><span style="color:#a3be8c;">emit copy </span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;">&lt;- </span><span style="color:#d08770;">{}</span><span>&quot;.</span><span style="color:#bf616a;">format</span><span>(n, b))
+</span><span>            loc[b] = n
+</span><span>            ready.</span><span style="color:#bf616a;">append</span><span>(b)
+</span><span>           
+</span><span>seq= [
+</span><span>    </span><span style="color:#bf616a;">Copy</span><span>(&quot;</span><span style="color:#a3be8c;">b</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">a</span><span>&quot;),
+</span><span>    </span><span style="color:#bf616a;">Copy</span><span>(&quot;</span><span style="color:#a3be8c;">a</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">b</span><span>&quot;),
+</span><span>]
+</span><span>
+</span><span style="color:#bf616a;">seq_copy</span><span>(seq)
+</span></code></pre>
+<blockquote>
+<p>运行脚本，啥也不输出。
+但是如果我们将 <code>b==l</code>改成<code>b!=l</code>, 就会输出
+emit copy tmp&lt;- a
+emit copy a &lt;- b
+emit copy b &lt;- tmp</p>
+</blockquote>
+<p>至此，我们完成了phi-elimination的一半，合法化问题解决了。但是性能问题没解决。
+优化：TODO</p>
+<hr />
+<p>我们重新关注下parallel copies 。</p>
+<pre data-lang="c" style="background-color:#2b303b;color:#c0c5ce;" class="language-c "><code class="language-c" data-lang="c"><span>
+</span><span>对于
+</span><span>
+</span><span>
+</span><span>bb1:
+</span><span>	a1 = ...
+</span><span>	b1 = ...
+</span><span>	c1 = ...
+</span><span>	jump </span><span style="color:#8fa1b3;">bb
+</span><span>
+</span><span>bb2:
+</span><span>	a2 = ...
+</span><span>	b2 = ...
+</span><span>	c2 = ...
+</span><span>	jump </span><span style="color:#8fa1b3;">bb
+</span><span>
+</span><span>bb3:
+</span><span>	a3 = ...
+</span><span>	b3 = ...
+</span><span>	c3 = ...
+</span><span>	jump </span><span style="color:#8fa1b3;">bb
+</span><span>
+</span><span>bb:
+</span><span>	a = </span><span style="color:#bf616a;">phi</span><span>(a1, a2, a3)
+</span><span>	b = </span><span style="color:#bf616a;">phi</span><span>(b1, b2, b3)
+</span><span>	c = </span><span style="color:#bf616a;">phi</span><span>(c1, c2, c3)
+</span><span>
+</span></code></pre>
+<h1 id="begin-bmatrix-a-b-c-end">$$
+\begin{bmatrix}
+a \
+b \
+c
+\end</h1>
+<p>Φ
+\begin{bmatrix}
+a1 &amp; a2 &amp; a3\
+b1 &amp; b2 &amp; b3\
+c1 &amp; c2 &amp; c3
+\end{bmatrix}
+$$
+那么对于bb1来说，就有parallel copies: <code>a &lt;- a1;b&lt;-b1;c&lt;-c1</code>
+其对应的图<strong>Location Transfer Graph</strong>, G = (V, E), V = {a,b,c, a1, b1, c1}, E = { (<code>a &lt;- a1, b&lt;-b1, c&lt;-c1</code>) }</p>
+<p>再看下swap problem里面的</p>
+<pre data-lang="c" style="background-color:#2b303b;color:#c0c5ce;" class="language-c "><code class="language-c" data-lang="c"><span>a2 = </span><span style="color:#bf616a;">phi</span><span>(a1, b2)
+</span><span>b2 = </span><span style="color:#bf616a;">phi</span><span>(b1, a2)
+</span></code></pre>
+<ol>
+<li>前驱1的parallel copies</li>
+</ol>
+<pre data-lang="mermaid" style="background-color:#2b303b;color:#c0c5ce;" class="language-mermaid "><code class="language-mermaid" data-lang="mermaid"><span>flowchart TD
+</span><span>  a1 --&gt; a2
+</span><span>  b1 --&gt; b2
+</span></code></pre>
+<ol start="2">
+<li>前驱2的parallel copies</li>
+</ol>
+<pre data-lang="mermaid" style="background-color:#2b303b;color:#c0c5ce;" class="language-mermaid "><code class="language-mermaid" data-lang="mermaid"><span>flowchart TD
+</span><span>  a2 --&gt; b2
+</span><span>  b2 --&gt; a2
+</span></code></pre>
+<hr />
+<p>参考</p>
+<ul>
+<li>https://www.cs.utexas.edu/~pingali/CS380C/2010/papers/ssaCytron.pdf</li>
+<li>https://ics.uci.edu/~yeouln/course/ssa.pdf</li>
+<li><a href="https://inria.hal.science/inria-00349925v1/document">*Revisiting Out-of-SSA Translation for Correctness, Code Quality, and Efficiency</a></li>
+<li><a href="http://web.cs.ucla.edu/~palsberg/paper/cc09.pdf">cc09.pdf</a></li>
+</ul>
+</section>
+  <hr />
+  <!-- Post Taxonomies -->
+  
+
+  <!-- Post Nav -->
+  
+
+  <!-- Page End inject -->
+  
+</article>
+
+  </main>
+  <footer class="mx-auto flex lg:mt-5 max-w-3xl flex-wrap items-center px-8 py-3 text-sm opacity-60">
+  <div class="mr-auto basis-full lg:basis-1/2">
+  © <time datetime="2025">2025</time>
+  </div>
+  <div class="flex basis-full lg:basis-1/2 lg:justify-end">
+    <span class="mr-6 lg:ml-6">
+      Powered by <a
+      class="link" href="https://www.getzola.org/" target="_blank">Zola</a>
+    </span>
+    <a class="link" href="https://www.getzola.org/themes/linkita/" target="_blank">&#9998; Linkita</a>
+  </div>
+  <!-- Footer inject -->
+  
+</footer>
+
+  
+
+  <!-- Body End inject -->
+  
+</body>
+
+</html>

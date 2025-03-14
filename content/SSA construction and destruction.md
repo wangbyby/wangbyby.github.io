@@ -280,7 +280,8 @@ PhiRename(bb, incomings_map, Phi2Alloc){
 ```
 
 当然，以上代码不是llvm mem2reg实际实现代码。
-llvm实现做了很多优化，比如domtree遍历，一些特殊情况处理。
+
+llvm实现做了一些优化，domtree遍历优化，特殊情况处理等。
 
 
 
@@ -402,7 +403,6 @@ def seq_copy(seq):
     n = "tmp"
   
     pred[n] = None
-
     for i in seq:
         a = i.src
         b = i.dst
@@ -433,7 +433,7 @@ def seq_copy(seq):
         b = todo.pop(0)
         l = loc[pred[b]]
 
-        if b == l:
+        if b == l: # <<<<< 这里
             print("emit copy {}<- {}".format(n, b))
             loc[b] = n
             ready.append(b)
@@ -457,6 +457,77 @@ seq_copy(seq)
 
 
 
+----
+
+我们重新关注下parallel copies 。
+```c
+
+对于
+
+
+bb1:
+	a1 = ...
+	b1 = ...
+	c1 = ...
+	jump bb
+
+bb2:
+	a2 = ...
+	b2 = ...
+	c2 = ...
+	jump bb
+
+bb3:
+	a3 = ...
+	b3 = ...
+	c3 = ...
+	jump bb
+
+bb:
+	a = phi(a1, a2, a3)
+	b = phi(b1, b2, b3)
+	c = phi(c1, c2, c3)
+
+```
+
+
+$$
+\begin{bmatrix}
+a \\
+b \\
+c
+\end{bmatrix}
+= 
+Φ
+\begin{bmatrix}
+a1 & a2 & a3\\
+b1 & b2 & b3\\
+c1 & c2 & c3
+\end{bmatrix}
+$$
+那么对于bb1来说，就有parallel copies: `a <- a1;b<-b1;c<-c1`
+其对应的图**Location Transfer Graph**, G = (V, E), V = {a,b,c, a1, b1, c1}, E = { (`a <- a1, b<-b1, c<-c1`) }
+
+
+再看下swap problem里面的
+```c
+a2 = phi(a1, b2)
+b2 = phi(b1, a2)
+```
+
+
+1. 前驱1的parallel copies
+```mermaid
+flowchart TD
+  a1 --> a2
+  b1 --> b2
+```
+2. 前驱2的parallel copies
+```mermaid
+flowchart TD
+  a2 --> b2
+  b2 --> a2
+```
 
 ----
 

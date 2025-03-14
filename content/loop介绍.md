@@ -1,5 +1,5 @@
 +++
-title = "[WIP]loop 介绍“
+title = "[WIP]loop 介绍"
 +++
 
 循环，重要性不必多说。
@@ -9,10 +9,18 @@ llvm与循环相关的优化有很多：
 >- loop unroll and jam : 循环展开+ 合并
 >- loop unroll
 >- SCEV
->- 等
-其中循环迭代变量归纳是重中之重
+>- loop invariant code motion
+>- loop interchange
+>- loop rotation
+>- loop splitting
+>- loop fusion
+>- loop unswitching
+>- loop vectorization
+>....
 
-所以先看如何从非结构化的CFG中识别loop：
+
+- 从非结构化的CFG中识别loop：
+- 识别循环迭代变量
 
 1. Loop 定义
 
@@ -44,4 +52,4 @@ Then
 
 - [Compilers I Chapter 1: Introduction](https://www.doc.ic.ac.uk/~phjk/Compilers/Lectures/pdfs/Ch7-part2-DominatorsAndNaturalLoops.pdf)
 - [On loops, dominators, and dominance frontiers (acm.org)](https://dl.acm.org/doi/pdf/10.1145/570886.570887)
-[Microsoft PowerPoint - loopOptimization [Compatibility Mode] (utexas.edu)](https://www.cs.utexas.edu/~pingali/CS375/2010Sp/lectures/LoopOptimizations.pdf)
+- [Microsoft PowerPoint - loopOptimization [Compatibility Mode] (utexas.edu)](https://www.cs.utexas.edu/~pingali/CS375/2010Sp/lectures/LoopOptimizations.pdf)

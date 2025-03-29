@@ -1,6 +1,4 @@
 {
-  "attachmentFolderPath": "/static/images",
-  "newFileLocation": "current",
-  "newLinkFormat": "absolute",
-  "alwaysUpdateLinks": true
+  "tabSize": 2,
+  "attachmentFolderPath": "static"
 }

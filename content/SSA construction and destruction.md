@@ -1,6 +1,5 @@
 +++
 title = "SSA构建和销毁"
-date = 2025-03-18T09:19:42+00:00
 
 +++
 
@@ -492,23 +491,15 @@ bb:
 
 ```
 
+---
 
-$$
-\begin{bmatrix}
-a \\
-b \\
-c
-\end{bmatrix}
-= 
-Φ
-\begin{bmatrix}
-a1 & a2 & a3\\
-b1 & b2 & b3\\
-c1 & c2 & c3
-\end{bmatrix}
-$$
-那么对于bb1来说，就有parallel copies: `a <- a1;b<-b1;c<-c1`
-其对应的图**Location Transfer Graph**, G = (V, E), V = {a,b,c, a1, b1, c1}, E = { (`a <- a1, b<-b1, c<-c1`) }
+>注意`\\`可能会被识别为`\`, 用`\newline`更好
+
+$\begin{bmatrix} a \newline b \newline c \end{bmatrix}
+ = Φ \begin{bmatrix} a1 & a2 & a3 \newline b1 & b2 & b3 \newline c1 &c2 & c3 \end{bmatrix} $
+
+那么对于bb1来说，就有parallel copies: `a<-a1, b<-b1, c<-c1`。
+其对应的**Location Transfer Graph**为G = (V, E), V = {a,b,c, a1, b1, c1}, E = { (`a <- a1, b<-b1, c<-c1`) }
 
 
 再看下swap problem里面的

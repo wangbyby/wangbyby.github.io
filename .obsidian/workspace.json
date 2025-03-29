@@ -17,6 +17,7 @@
               "title": "新标签页"
             }
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
           },
           {
             "id": "80584186ae6f84b3",
@@ -72,11 +73,16 @@
           }
         ]
 >>>>>>> Stashed changes
+=======
+          }
+        ]
+>>>>>>> Stashed changes
       }
     ],
     "direction": "vertical"
   },
   "left": {
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
     "id": "c5a596e4ed0dabbd",
     "type": "split",
@@ -88,6 +94,8 @@
           {
             "id": "632473388c3fb1e8",
 =======
+=======
+>>>>>>> Stashed changes
     "id": "dab12d096ed45929",
     "type": "split",
     "children": [
@@ -97,6 +105,9 @@
         "children": [
           {
             "id": "af9d2fd1e1005a3b",
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
             "type": "leaf",
             "state": {
@@ -111,7 +122,11 @@
           },
           {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             "id": "991bc51534ae987d",
+=======
+            "id": "c020bc37a9a20c11",
+>>>>>>> Stashed changes
 =======
             "id": "c020bc37a9a20c11",
 >>>>>>> Stashed changes
@@ -128,17 +143,23 @@
               },
               "icon": "lucide-search",
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
               "title": "搜索"
             }
           },
           {
             "id": "fe9d878308083cce",
 =======
+=======
+>>>>>>> Stashed changes
               "title": "Search"
             }
           },
           {
             "id": "d270a8482dddcec5",
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
             "type": "leaf",
             "state": {
@@ -146,7 +167,11 @@
               "state": {},
               "icon": "lucide-bookmark",
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
               "title": "书签"
+=======
+              "title": "Bookmarks"
+>>>>>>> Stashed changes
 =======
               "title": "Bookmarks"
 >>>>>>> Stashed changes
@@ -156,6 +181,7 @@
       }
     ],
     "direction": "horizontal",
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
     "width": 300,
     "collapsed": true
@@ -171,6 +197,8 @@
           {
             "id": "3a371c61d5cef903",
 =======
+=======
+>>>>>>> Stashed changes
     "width": 300
   },
   "right": {
@@ -183,13 +211,20 @@
         "children": [
           {
             "id": "9f155e69f34b6780",
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
             "type": "leaf",
             "state": {
               "type": "backlink",
               "state": {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 "file": "content/llvm Value Use User内存布局.md",
+=======
+                "file": "content/dce.md",
+>>>>>>> Stashed changes
 =======
                 "file": "content/dce.md",
 >>>>>>> Stashed changes
@@ -203,24 +238,34 @@
               },
               "icon": "links-coming-in",
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
               "title": "llvm Value Use User内存布局 的反向链接列表"
             }
           },
           {
             "id": "7bcb7b248ca70c08",
 =======
+=======
+>>>>>>> Stashed changes
               "title": "Backlinks for dce"
             }
           },
           {
             "id": "842c920f14e3790b",
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
             "type": "leaf",
             "state": {
               "type": "outgoing-link",
               "state": {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 "file": "content/llvm Value Use User内存布局.md",
+=======
+                "file": "content/dce.md",
+>>>>>>> Stashed changes
 =======
                 "file": "content/dce.md",
 >>>>>>> Stashed changes
@@ -229,17 +274,23 @@
               },
               "icon": "links-going-out",
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
               "title": "llvm Value Use User内存布局 的出链列表"
             }
           },
           {
             "id": "89d83a0d2df96f2a",
 =======
+=======
+>>>>>>> Stashed changes
               "title": "Outgoing links from dce"
             }
           },
           {
             "id": "885ff99dd32520a3",
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
             "type": "leaf",
             "state": {
@@ -252,24 +303,34 @@
               },
               "icon": "lucide-tags",
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
               "title": "标签"
             }
           },
           {
             "id": "bd0c2bead0fdf27b",
 =======
+=======
+>>>>>>> Stashed changes
               "title": "Tags"
             }
           },
           {
             "id": "743f332eac3d73fd",
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
             "type": "leaf",
             "state": {
               "type": "outline",
               "state": {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 "file": "content/llvm Value Use User内存布局.md",
+=======
+                "file": "content/dce.md",
+>>>>>>> Stashed changes
 =======
                 "file": "content/dce.md",
 >>>>>>> Stashed changes
@@ -279,7 +340,11 @@
               },
               "icon": "lucide-list",
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
               "title": "llvm Value Use User内存布局 的大纲"
+=======
+              "title": "Outline of dce"
+>>>>>>> Stashed changes
 =======
               "title": "Outline of dce"
 >>>>>>> Stashed changes
@@ -299,6 +364,7 @@
       "canvas:新建白板": false,
       "daily-notes:打开/创建今天的日记": false,
       "templates:插入模板": false,
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
       "command-palette:打开命令面板": false
     }
@@ -326,6 +392,8 @@
     "static/images/llvm_value_use_layout.excalidraw",
     "static/images/value_use_layout.excalidraw"
 =======
+=======
+>>>>>>> Stashed changes
       "command-palette:打开命令面板": false,
       "obsidian-excalidraw-plugin:新建绘图文件": false
     }
@@ -341,6 +409,9 @@
     "content/dce.md",
     "static/images/image.png",
     "static/images/image-github-pages.png"
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
   ]
 }

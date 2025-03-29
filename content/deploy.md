@@ -1,6 +1,7 @@
 +++
 title = "使用zola设置github.io作为个人博客"
 slug = "deploy"
+date = 2021-05-01T09:19:42+00:00
 
 +++
 

@@ -1,6 +1,8 @@
 
 +++
 title = "llvm Value Use User内存布局"
+date = 2025-01-20T09:19:42+00:00
+
 +++
 
 >- 起源：工作里用c搓了个ir库，ssa形式，但在实现方面遇到了问题（replaceAllUsesWith) 。所以看看工业级的llvm怎么处理的

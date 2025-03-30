@@ -387,7 +387,7 @@ swap problem和lost-copy problem中 都是TSSA，而不是CSSA。
 >不幸的是，这个算法有点小问题。
 >实际上是个图遍历算法：[cc09.pdf](http://web.cs.ucla.edu/~palsberg/paper/cc09.pdf)
 
-
+我们用python写个demo：
 ```python
 class Copy:
     def __init__(self, src, dst):
@@ -454,6 +454,9 @@ seq_copy(seq)
 >emit copy b <- tmp
 
 至此，我们完成了phi-elimination的一半，合法化问题解决了。但是性能问题没解决。
+
+---
+
 优化：TODO
 
 
@@ -498,8 +501,8 @@ bb:
 $\begin{bmatrix} a \newline b \newline c \end{bmatrix}
  = Φ \begin{bmatrix} a1 & a2 & a3 \newline b1 & b2 & b3 \newline c1 &c2 & c3 \end{bmatrix} $
 
-那么对于bb1来说，就有parallel copies: `a<-a1, b<-b1, c<-c1`。
-其对应的**Location Transfer Graph**为G = (V, E), V = {a,b,c, a1, b1, c1}, E = { (`a <- a1, b<-b1, c<-c1`) }
+那么对于bb1来说，就有parallel copies: $a \gets a1, b \gets b1, c \gets c1$。
+其对应的**Location Transfer Graph**为$G = (V, E), V = \lbrace a,b,c, a1, b1, c1\rbrace, E = \lbrace a \gets a1, b \gets b1, c \gets c1 \rbrace$
 
 
 再看下swap problem里面的

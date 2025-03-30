@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+    <meta charset="UTF-8"><meta http-equiv="Content-Security-Policy"
+content="default-src 'self';font-src &#x27;self&#x27; data:;img-src &#x27;self&#x27; https:&#x2F;&#x2F;* data:;media-src &#x27;self&#x27;;style-src &#x27;self&#x27;;frame-src player.vimeo.com https:&#x2F;&#x2F;www.youtube-nocookie.com;connect-src 'self';script-src 'self' 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="base" content="https://wangbyby.github.io/">
+
+    
+    <title>bywww • dead code elimination介绍</title>
+
+    
+    
+    
+
+    
+    
+
+    
+    
+    
+        
+            <link rel="stylesheet" href="https://wangbyby.github.io/custom_subset.css?h=0b9535a28bc3d5bf2321">
+        
+    
+
+    
+        <link rel="stylesheet" href="https://wangbyby.github.io/main.css?h=98c8cfb580fe7a59eb13" />
+
+    <meta name="color-scheme" content="light dark" />
+        <meta name="description" content="" />
+        <meta property="og:description" content="" />
+
+    
+
+    <meta property="og:title" content="dead code elimination介绍" />
+    <meta property="og:type" content="article" />
+
+    
+<meta property="og:locale" content="en_GB" />
+
+    <meta property="og:url" content="https:&#x2F;&#x2F;wangbyby.github.io&#x2F;dce&#x2F;" /><meta property="og:site_name" content="bywww">
+        <noscript><link rel="stylesheet" href="https://wangbyby.github.io/no_js.css"/></noscript>
+        <script type="text/javascript" src="https://wangbyby.github.io/js/initializeTheme.min.js"></script>
+        <script defer src="https://wangbyby.github.io/js/themeSwitcher.min.js"></script><script defer src="https://wangbyby.github.io/search_index.en.js?h=495fa61fbcc607713e54"></script>
+        <script defer src="https://wangbyby.github.io/js/searchElasticlunr.min.js?h=3626c0ef99daa745b31e"></script>
+
+        </head>
+
+
+<body>
+    <header>
+    <nav class="navbar">
+        <div class="nav-title">
+            <a class="home-title" href="https://wangbyby.github.io">bywww</a>
+        </div>
+            <div class="nav-navs">
+                <ul>
+                        
+                            <li>
+                                <a class="nav-links no-hover-padding" href="https://wangbyby.github.io/blog/">blog
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a class="nav-links no-hover-padding" href="https://wangbyby.github.io/archive/">archive
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a class="nav-links no-hover-padding" href="https://wangbyby.github.io/tags/">tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a class="nav-links no-hover-padding" href="https://wangbyby.github.io/projects/">projects
+                                </a>
+                            </li>
+                        <li class="menu-icons-container">
+                        <ul class="menu-icons-group">
+                            <li class="js menu-icon">
+                                <div role="button" tabindex="0" id="search-button" class="search-icon interactive-icon" title="Click or press $SHORTCUT to open search" aria-label="Click or press $SHORTCUT to open search">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                                        <path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/>
+                                    </svg>
+                                </div>
+                            </li>
+
+                            
+                            
+
+                            <li class="theme-switcher-wrapper js"><div
+        title="Toggle dark&#x2F;light mode"
+        class="theme-switcher"
+        tabindex="0"
+        role="button"
+        aria-label="Toggle dark mode"
+        aria-pressed="false">
+    </div><div
+        title="Reset mode to default"
+        class="theme-resetter arrow"
+        tabindex="0"
+        role="button"
+        aria-hidden="true"
+        aria-label="Reset mode to default">
+    </div>
+
+</li>
+</ul>
+                    </li>
+                </ul>
+            </div>
+        
+    </nav>
+</header>
+
+    <div class="content">
+
+        
+        
+
+
+
+
+<main>
+    <article>
+        <h1 class="article-title">
+            dead code elimination介绍
+        </h1>
+
+        <ul class="meta"><li title="38 words">1 min read</li>
+        </ul>
+
+        <section class="body"><h1 id="si-dai-ma-xiao-chu">死代码消除</h1>
+<p>在ssa上比较好实现，根据use-def chain传播
+如果只是运算指令，且没有users，就是dead的指令。</p>
+<pre data-lang="c" class="language-c z-code"><code class="language-c" data-lang="c"><span class="z-source z-c">
+</span><span class="z-source z-c">worklist <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span><span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span><span class="z-source z-c"><span class="z-keyword z-control z-c">for</span> bb in func<span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">    <span class="z-keyword z-control z-c">for</span> inst in bb <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">        <span class="z-keyword z-control z-c">if</span> <span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span>inst not in worklist<span class="z-punctuation z-section z-group z-end z-c">)</span></span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">            worklist<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">push</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">inst</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">    <span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span><span class="z-source z-c">
+</span><span class="z-source z-c"><span class="z-keyword z-control z-c">while</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span><span class="z-keyword z-operator z-arithmetic z-c">!</span>worklist<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">empty</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-section z-group z-end z-c">)</span></span> <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">    inst <span class="z-keyword z-operator z-assignment z-c">=</span> worklist<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">pop</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">    <span class="z-keyword z-control z-c">if</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span> inst is pure <span class="z-keyword z-operator z-arithmetic z-c">&amp;&amp;</span> inst<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">num_users</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-keyword z-operator z-comparison z-c">==</span> <span class="z-constant z-numeric z-integer z-decimal z-c">0</span> <span class="z-punctuation z-section z-group z-end z-c">)</span></span><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">        <span class="z-comment z-line z-double-slash z-c"><span class="z-punctuation z-definition z-comment z-c">//</span> dead instruction
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">        <span class="z-keyword z-control z-c">for</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span>op in inst<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">operands</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-section z-group z-end z-c">)</span></span><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">            inst<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-support z-function z-C99 z-c">remove</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">op</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">            <span class="z-keyword z-control z-c">if</span> <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">class</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">op</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span> <span class="z-keyword z-operator z-comparison z-c">==</span> instruction and <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">isDead</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">op</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span> <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">                worklist<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">insert</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">op</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">            <span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">        <span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">    <span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span><span class="z-source z-c">
+</span></code></pre>
+
+        </section>
+
+        
+        
+        
+
+        
+            
+            
+            
+
+            
+        
+            
+            
+            
+
+            
+        
+            
+            
+            
+
+            
+        
+            
+            
+            
+
+            
+        
+        
+
+    </article>
+</main>
+
+
+<link rel="stylesheet" href="https://wangbyby.github.io/katex.min.css">
+    <script defer src="https://wangbyby.github.io/js/katex.min.js"></script><span id="copy-success" class="hidden">
+        Copied!
+    </span>
+    <span id="copy-init" class="hidden">
+        Copy code to clipboard
+    </span>
+    <script defer src="https://wangbyby.github.io/js/copyCodeToClipboard.min.js"></script>
+
+
+    </div>
+    <footer>
+    <section>
+        <nav class="socials nav-navs">
+        </nav>
+
+        
+        <nav class="nav-navs">
+        </nav>
+
+        <div class="credits">
+            <small>
+                
+
+                
+                Powered by
+                <a rel=""  href="https://www.getzola.org">Zola</a>
+                &amp;
+                <a rel=""  href="https://github.com/welpo/tabi">tabi</a>
+
+                </small>
+        </div>
+    </section>
+
+    <div id="searchModal" class="search-modal js" role="dialog" aria-labelledby="modalTitle">
+    <h1 id="modalTitle" class="visually-hidden">Search</h1>
+    <div id="modal-content">
+        <div id="searchBar">
+            <div class="search-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                    <path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/>
+                </svg>
+            </div>
+            <input id="searchInput" role="combobox" autocomplete="off" spellcheck="false" aria-expanded="false" aria-controls="results-container" placeholder="Search…"/>
+            <div id="clear-search" class="close-icon interactive-icon" tabindex="0" role="button" title="Clear search">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/>
+                </svg>
+            </div>
+        </div>
+        <div id="results-container">
+            <div id="results-info"><span id="zero_results"> No results</span>
+                <span id="one_results"> $NUMBER result</span>
+                <span id="many_results"> $NUMBER results</span><span id="two_results"> $NUMBER results</span>
+                <span id="few_results"> $NUMBER results</span>
+            </div>
+            <div id="results" role="listbox"></div>
+        </div>
+    </div>
+</div>
+</footer>
+
+</body>
+
+</html>

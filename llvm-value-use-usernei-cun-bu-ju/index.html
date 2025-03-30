@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+    <meta charset="UTF-8"><meta http-equiv="Content-Security-Policy"
+content="default-src 'self';font-src &#x27;self&#x27; data:;img-src &#x27;self&#x27; https:&#x2F;&#x2F;* data:;media-src &#x27;self&#x27;;style-src &#x27;self&#x27;;frame-src player.vimeo.com https:&#x2F;&#x2F;www.youtube-nocookie.com;connect-src 'self';script-src 'self' 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="base" content="https://wangbyby.github.io/">
+
+    
+    <title>bywww • llvm Value Use User内存布局</title>
+
+    
+    
+    
+
+    
+    
+
+    
+    
+    
+        
+            <link rel="stylesheet" href="https://wangbyby.github.io/custom_subset.css?h=0b9535a28bc3d5bf2321">
+        
+    
+
+    
+        <link rel="stylesheet" href="https://wangbyby.github.io/main.css?h=98c8cfb580fe7a59eb13" />
+
+    <meta name="color-scheme" content="light dark" />
+        <meta name="description" content="" />
+        <meta property="og:description" content="" />
+
+    
+
+    <meta property="og:title" content="llvm Value Use User内存布局" />
+    <meta property="og:type" content="article" />
+
+    
+<meta property="og:locale" content="en_GB" />
+
+    <meta property="og:url" content="https:&#x2F;&#x2F;wangbyby.github.io&#x2F;llvm-value-use-usernei-cun-bu-ju&#x2F;" /><meta property="og:site_name" content="bywww">
+        <noscript><link rel="stylesheet" href="https://wangbyby.github.io/no_js.css"/></noscript>
+        <script type="text/javascript" src="https://wangbyby.github.io/js/initializeTheme.min.js"></script>
+        <script defer src="https://wangbyby.github.io/js/themeSwitcher.min.js"></script><script defer src="https://wangbyby.github.io/search_index.en.js?h=495fa61fbcc607713e54"></script>
+        <script defer src="https://wangbyby.github.io/js/searchElasticlunr.min.js?h=3626c0ef99daa745b31e"></script>
+
+        </head>
+
+
+<body>
+    <header>
+    <nav class="navbar">
+        <div class="nav-title">
+            <a class="home-title" href="https://wangbyby.github.io">bywww</a>
+        </div>
+            <div class="nav-navs">
+                <ul>
+                        
+                            <li>
+                                <a class="nav-links no-hover-padding" href="https://wangbyby.github.io/blog/">blog
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a class="nav-links no-hover-padding" href="https://wangbyby.github.io/archive/">archive
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a class="nav-links no-hover-padding" href="https://wangbyby.github.io/tags/">tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a class="nav-links no-hover-padding" href="https://wangbyby.github.io/projects/">projects
+                                </a>
+                            </li>
+                        <li class="menu-icons-container">
+                        <ul class="menu-icons-group">
+                            <li class="js menu-icon">
+                                <div role="button" tabindex="0" id="search-button" class="search-icon interactive-icon" title="Click or press $SHORTCUT to open search" aria-label="Click or press $SHORTCUT to open search">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                                        <path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/>
+                                    </svg>
+                                </div>
+                            </li>
+
+                            
+                            
+
+                            <li class="theme-switcher-wrapper js"><div
+        title="Toggle dark&#x2F;light mode"
+        class="theme-switcher"
+        tabindex="0"
+        role="button"
+        aria-label="Toggle dark mode"
+        aria-pressed="false">
+    </div><div
+        title="Reset mode to default"
+        class="theme-resetter arrow"
+        tabindex="0"
+        role="button"
+        aria-hidden="true"
+        aria-label="Reset mode to default">
+    </div>
+
+</li>
+</ul>
+                    </li>
+                </ul>
+            </div>
+        
+    </nav>
+</header>
+
+    <div class="content">
+
+        
+        
+
+
+
+
+<main>
+    <article>
+        <h1 class="article-title">
+            llvm Value Use User内存布局
+        </h1>
+
+        <ul class="meta"><li title="410 words">3 min read</li>
+        </ul>
+
+        <section class="body"><blockquote>
+<ul>
+<li>起源：工作里用c搓了个ir库，ssa形式，但在实现方面遇到了问题（replaceAllUsesWith) 。所以看看工业级的llvm怎么处理的</li>
+<li>参考llvm18版本源码</li>
+</ul>
+</blockquote>
+<p>我的设计：</p>
+<pre data-lang="c" class="language-c z-code"><code class="language-c" data-lang="c"><span class="z-source z-c"><span class="z-meta z-enum z-c"><span class="z-storage z-type z-c">enum</span> <span class="z-meta z-enum z-c"><span class="z-entity z-name z-enum z-c">ClassID</span></span></span><span class="z-meta z-enum z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span></span></span><span class="z-meta z-enum z-c"><span class="z-meta z-block z-c">
+</span></span></span><span class="z-source z-c"><span class="z-meta z-enum z-c"><span class="z-meta z-block z-c">   BasicBlock<span class="z-punctuation z-separator z-c">,</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-enum z-c"><span class="z-meta z-block z-c">   Instruction<span class="z-punctuation z-separator z-c">,</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-enum z-c"><span class="z-meta z-block z-c">   <span class="z-keyword z-operator z-variadic z-c">...</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-enum z-c"><span class="z-meta z-block z-c"></span></span><span class="z-meta z-enum z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-end z-c">}</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span><span class="z-source z-c"><span class="z-meta z-struct z-c"><span class="z-storage z-type z-c">struct</span> <span class="z-meta z-struct z-c"><span class="z-entity z-name z-struct z-c">Value</span></span></span><span class="z-meta z-struct z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span></span></span><span class="z-meta z-struct z-c"><span class="z-meta z-block z-c">
+</span></span></span><span class="z-source z-c"><span class="z-meta z-struct z-c"><span class="z-meta z-block z-c">    <span class="z-storage z-type z-c">char</span><span class="z-keyword z-operator z-c">*</span> name<span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-struct z-c"><span class="z-meta z-block z-c">    ClassID id<span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-struct z-c"><span class="z-meta z-block z-c">    Type<span class="z-keyword z-operator z-c">*</span> ty<span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-struct z-c"><span class="z-meta z-block z-c">    Use<span class="z-keyword z-operator z-c">*</span> use_list<span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-struct z-c"><span class="z-meta z-block z-c"></span></span><span class="z-meta z-struct z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-end z-c">}</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span><span class="z-source z-c">
+</span><span class="z-source z-c"><span class="z-meta z-struct z-c"><span class="z-storage z-type z-c">struct</span> <span class="z-meta z-struct z-c"><span class="z-entity z-name z-struct z-c">Use</span></span></span><span class="z-meta z-struct z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span></span></span><span class="z-meta z-struct z-c"><span class="z-meta z-block z-c">
+</span></span></span><span class="z-source z-c"><span class="z-meta z-struct z-c"><span class="z-meta z-block z-c">   Value<span class="z-keyword z-operator z-c">*</span> user<span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-struct z-c"><span class="z-meta z-block z-c">   Use<span class="z-keyword z-operator z-c">*</span> next<span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-struct z-c"><span class="z-meta z-block z-c"></span></span><span class="z-meta z-struct z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-end z-c">}</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span><span class="z-source z-c">
+</span><span class="z-source z-c"><span class="z-meta z-struct z-c"><span class="z-storage z-type z-c">struct</span> <span class="z-meta z-struct z-c"><span class="z-entity z-name z-struct z-c">Instruction</span></span></span><span class="z-meta z-struct z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span></span></span><span class="z-meta z-struct z-c"><span class="z-meta z-block z-c">
+</span></span></span><span class="z-source z-c"><span class="z-meta z-struct z-c"><span class="z-meta z-block z-c">    Value base<span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-struct z-c"><span class="z-meta z-block z-c">    Value<span class="z-keyword z-operator z-c">*</span> arr<span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span><span class="z-punctuation z-section z-brackets z-end z-c">]</span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-struct z-c"><span class="z-meta z-block z-c"></span></span><span class="z-meta z-struct z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-end z-c">}</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span><span class="z-source z-c">
+</span></code></pre>
+<p>Instruction即User，只储存了<code>Value*</code>数组
+以下面的IR为例：</p>
+<pre data-lang="c" class="language-c z-code"><code class="language-c" data-lang="c"><span class="z-source z-c"><span class="z-keyword z-operator z-arithmetic z-c">%</span>add <span class="z-keyword z-operator z-assignment z-c">=</span> add <span class="z-keyword z-operator z-arithmetic z-c">%</span>a<span class="z-punctuation z-separator z-c">,</span> <span class="z-keyword z-operator z-arithmetic z-c">%</span>b  
+</span><span class="z-source z-c"><span class="z-keyword z-operator z-arithmetic z-c">%</span>mul <span class="z-keyword z-operator z-assignment z-c">=</span> mul <span class="z-keyword z-operator z-arithmetic z-c">%</span>add<span class="z-punctuation z-separator z-c">,</span> <span class="z-keyword z-operator z-arithmetic z-c">%</span>b
+</span></code></pre>
+<blockquote>
+<p>![[static/images/use_graph.png]]</p>
+</blockquote>
+<p>看起来很简单，那实现replaceAllUsesWith是怎么实现呢？</p>
+<pre data-lang="c" class="language-c z-code"><code class="language-c" data-lang="c"><span class="z-source z-c"><span class="z-comment z-line z-double-slash z-c"><span class="z-punctuation z-definition z-comment z-c">//</span> replace all Use of self to other
+</span></span><span class="z-source z-c"><span class="z-comment z-line z-double-slash z-c"><span class="z-punctuation z-definition z-comment z-c">//</span> example: 
+</span></span><span class="z-source z-c"><span class="z-comment z-line z-double-slash z-c"><span class="z-punctuation z-definition z-comment z-c">//</span>   %add = add %a, %b
+</span></span><span class="z-source z-c"><span class="z-comment z-line z-double-slash z-c"><span class="z-punctuation z-definition z-comment z-c">//</span>   %mul = mul %add, %b
+</span></span><span class="z-source z-c"><span class="z-comment z-line z-double-slash z-c"><span class="z-punctuation z-definition z-comment z-c">//</span> =&gt; after replaceAllUsesWith(%add, %a)
+</span></span><span class="z-source z-c"><span class="z-comment z-line z-double-slash z-c"><span class="z-punctuation z-definition z-comment z-c">//</span>   %mul = mul %a, %b
+</span></span><span class="z-source z-c"><span class="z-storage z-type z-c">void</span> <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">replaceAllUsesWith</span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c">Value<span class="z-keyword z-operator z-c">*</span> <span class="z-variable z-parameter z-c">self</span><span class="z-punctuation z-separator z-c">,</span> Value<span class="z-keyword z-operator z-c">*</span> <span class="z-variable z-parameter z-c">other</span><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-meta z-function z-c"> </span><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span></span></span><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">	<span class="z-keyword z-control z-c">while</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span><span class="z-constant z-language z-c">NULL</span> <span class="z-keyword z-operator z-comparison z-c">!=</span> self<span class="z-punctuation z-accessor z-c">.</span><span class="z-variable z-other z-member z-c">use_list</span><span class="z-punctuation z-section z-group z-end z-c">)</span></span><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">		Use<span class="z-keyword z-operator z-c">*</span> iter <span class="z-keyword z-operator z-assignment z-c">=</span> self<span class="z-punctuation z-accessor z-c">.</span><span class="z-variable z-other z-member z-c">use_list</span><span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">pop</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">		Value <span class="z-keyword z-operator z-c">*</span>user <span class="z-keyword z-operator z-assignment z-c">=</span> iter<span class="z-punctuation z-accessor z-c">.</span><span class="z-variable z-other z-member z-c">val</span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">		<span class="z-keyword z-control z-c">for</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span><span class="z-storage z-type z-c">int</span> i <span class="z-keyword z-operator z-assignment z-c">=</span><span class="z-constant z-numeric z-integer z-decimal z-c">0</span><span class="z-punctuation z-terminator z-c">;</span> i <span class="z-keyword z-operator z-comparison z-c">&lt;</span> user<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">get_operands_num</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>i<span class="z-keyword z-operator z-arithmetic z-c">++</span><span class="z-punctuation z-section z-group z-end z-c">)</span></span><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">			Value<span class="z-keyword z-operator z-c">*</span> op <span class="z-keyword z-operator z-assignment z-c">=</span> user<span class="z-punctuation z-accessor z-c">.</span><span class="z-variable z-other z-member z-c">operand</span><span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span>i<span class="z-punctuation z-section z-brackets z-end z-c">]</span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">			<span class="z-keyword z-control z-c">if</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span>op <span class="z-keyword z-operator z-comparison z-c">==</span> self<span class="z-punctuation z-section z-group z-end z-c">)</span></span><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">				other<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">add_use</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">user</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">				user<span class="z-punctuation z-accessor z-c">.</span><span class="z-variable z-other z-member z-c">operand</span><span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span>i<span class="z-punctuation z-section z-brackets z-end z-c">]</span></span> <span class="z-keyword z-operator z-assignment z-c">=</span> other<span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">			<span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">		<span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">	<span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"></span></span><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-end z-c">}</span></span></span>
+</span><span class="z-source z-c">
+</span></code></pre>
+<p>这里发现几个问题</p>
+<ol>
+<li>replace 需要扫描operands</li>
+<li>需要注意Use节点内存释放</li>
+<li>遇到<code>%add = add %a, %a</code> 容易出现double free</li>
+</ol>
+<hr />
+<p>那llvm如何处理呢？</p>
+<p>先看看llvm ir的继承体系:</p>
+<blockquote>
+<p>https://llvm.org/doxygen/classllvm_1_1Value.html</p>
+<p>![[static/images/a63ece927e2f339e157f22cf886cd3d6bcbc8a40_2_690x474.png]]</p>
+</blockquote>
+<p>然后查看源码，看看User实现方式：</p>
+<blockquote>
+<p>内联User分配，以2为例
+![[static/images/3e1c4416af8a2d18537664396f222e86b1d756d4_2_690x386.jpeg]]</p>
+</blockquote>
+<blockquote>
+<p>外挂Usee分配
+![[static/images/b60afe1c4150d5e7b1b71c3ebbf3a428305a103d_2_690x290.png]]</p>
+</blockquote>
+<p>仍以这段代码为例子：</p>
+<pre data-lang="c" class="language-c z-code"><code class="language-c" data-lang="c"><span class="z-source z-c"><span class="z-keyword z-operator z-arithmetic z-c">%</span>add <span class="z-keyword z-operator z-assignment z-c">=</span> add <span class="z-keyword z-operator z-arithmetic z-c">%</span>a<span class="z-punctuation z-separator z-c">,</span> <span class="z-keyword z-operator z-arithmetic z-c">%</span>b  
+</span><span class="z-source z-c"><span class="z-keyword z-operator z-arithmetic z-c">%</span>mul <span class="z-keyword z-operator z-assignment z-c">=</span> mul <span class="z-keyword z-operator z-arithmetic z-c">%</span>add<span class="z-punctuation z-separator z-c">,</span> <span class="z-keyword z-operator z-arithmetic z-c">%</span>b
+</span></code></pre>
+<p>对应图：</p>
+<blockquote>
+<p>![[static/images/llvm-ir-use.jpeg]]
+有点复杂的图。。。</p>
+</blockquote>
+<p>对应实现：</p>
+<blockquote>
+<p>双链表，头插法插入
+![[static/images/llvm-use-list-impl.png]]</p>
+</blockquote>
+<p>那replaceAllUsesWith实现就比较简单了：</p>
+<pre data-lang="c" class="language-c z-code"><code class="language-c" data-lang="c"><span class="z-source z-c"><span class="z-keyword z-control z-c">while</span> <span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span>UseList<span class="z-punctuation z-section z-group z-end z-c">)</span></span> <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">  Use <span class="z-keyword z-operator z-c">&amp;</span>U <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-keyword z-operator z-c">*</span>UseList<span class="z-punctuation z-terminator z-c">;</span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">  U<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">set</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">New</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></code></pre>
+<hr />
+<ul>
+<li>branch指令:</li>
+</ul>
+<blockquote>
+<p>这里还需要提到BasicBlock如何获取前驱和后缀</p>
+<ul>
+<li>前驱：
+变量UseList可以得到Inst，然后搜集inst.parent即可</li>
+<li>后继：
+遍历最后一条指令的Use，搜集类型是BasicBlock的变量即可
+注：这里的前驱和后缀都是CFG里面的概念
+然后我们还看到，Function中有遍历Block的方法，其实遍历的是Block的存储结构。
+即BasicBlock有两种遍历方式</li>
+</ul>
+<ol>
+<li>CFG遍历，通过前驱/后缀。包括了RPO，DFS等遍历方式。</li>
+<li>存储结构遍历，通过ilist的next/prev</li>
+</ol>
+</blockquote>
+<p>![[static/images/llvm-branch.png]]</p>
+<ul>
+<li>
+<p>phi指令：
+![[static/images/llvm-phi.png]]</p>
+</li>
+<li>
+<p>switch指令
+![[static/images/llvm-switch.png]]</p>
+</li>
+</ul>
+<hr />
+<p>绘图：exlicdraw
+![[static/images/llvm_value_use_layout.excalidraw]]</p>
+
+        </section>
+
+        
+        
+        
+
+        
+            
+            
+            
+
+            
+        
+            
+            
+            
+
+            
+        
+            
+            
+            
+
+            
+        
+            
+            
+            
+
+            
+        
+        
+
+    </article>
+</main>
+
+
+<link rel="stylesheet" href="https://wangbyby.github.io/katex.min.css">
+    <script defer src="https://wangbyby.github.io/js/katex.min.js"></script><span id="copy-success" class="hidden">
+        Copied!
+    </span>
+    <span id="copy-init" class="hidden">
+        Copy code to clipboard
+    </span>
+    <script defer src="https://wangbyby.github.io/js/copyCodeToClipboard.min.js"></script>
+
+
+    </div>
+    <footer>
+    <section>
+        <nav class="socials nav-navs">
+        </nav>
+
+        
+        <nav class="nav-navs">
+        </nav>
+
+        <div class="credits">
+            <small>
+                
+
+                
+                Powered by
+                <a rel=""  href="https://www.getzola.org">Zola</a>
+                &amp;
+                <a rel=""  href="https://github.com/welpo/tabi">tabi</a>
+
+                </small>
+        </div>
+    </section>
+
+    <div id="searchModal" class="search-modal js" role="dialog" aria-labelledby="modalTitle">
+    <h1 id="modalTitle" class="visually-hidden">Search</h1>
+    <div id="modal-content">
+        <div id="searchBar">
+            <div class="search-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                    <path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/>
+                </svg>
+            </div>
+            <input id="searchInput" role="combobox" autocomplete="off" spellcheck="false" aria-expanded="false" aria-controls="results-container" placeholder="Search…"/>
+            <div id="clear-search" class="close-icon interactive-icon" tabindex="0" role="button" title="Clear search">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/>
+                </svg>
+            </div>
+        </div>
+        <div id="results-container">
+            <div id="results-info"><span id="zero_results"> No results</span>
+                <span id="one_results"> $NUMBER result</span>
+                <span id="many_results"> $NUMBER results</span><span id="two_results"> $NUMBER results</span>
+                <span id="few_results"> $NUMBER results</span>
+            </div>
+            <div id="results" role="listbox"></div>
+        </div>
+    </div>
+</div>
+</footer>
+
+</body>
+
+</html>

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+    <meta charset="UTF-8"><meta http-equiv="Content-Security-Policy"
+content="default-src 'self';font-src &#x27;self&#x27; data:;img-src &#x27;self&#x27; https:&#x2F;&#x2F;* data:;media-src &#x27;self&#x27;;style-src &#x27;self&#x27;;frame-src player.vimeo.com https:&#x2F;&#x2F;www.youtube-nocookie.com;connect-src 'self';script-src 'self' 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="base" content="https://wangbyby.github.io/">
+
+    
+    <title>bywww • dom tree算法介绍</title>
+
+    
+    
+    
+
+    
+    
+
+    
+    
+    
+        
+            <link rel="stylesheet" href="https://wangbyby.github.io/custom_subset.css?h=0b9535a28bc3d5bf2321">
+        
+    
+
+    
+        <link rel="stylesheet" href="https://wangbyby.github.io/main.css?h=98c8cfb580fe7a59eb13" />
+
+    <meta name="color-scheme" content="light dark" />
+        <meta name="description" content="" />
+        <meta property="og:description" content="" />
+
+    
+
+    <meta property="og:title" content="dom tree算法介绍" />
+    <meta property="og:type" content="article" />
+
+    
+<meta property="og:locale" content="en_GB" />
+
+    <meta property="og:url" content="https:&#x2F;&#x2F;wangbyby.github.io&#x2F;domtree&#x2F;" /><meta property="og:site_name" content="bywww">
+        <noscript><link rel="stylesheet" href="https://wangbyby.github.io/no_js.css"/></noscript>
+        <script type="text/javascript" src="https://wangbyby.github.io/js/initializeTheme.min.js"></script>
+        <script defer src="https://wangbyby.github.io/js/themeSwitcher.min.js"></script><script defer src="https://wangbyby.github.io/search_index.en.js?h=495fa61fbcc607713e54"></script>
+        <script defer src="https://wangbyby.github.io/js/searchElasticlunr.min.js?h=3626c0ef99daa745b31e"></script>
+
+        </head>
+
+
+<body>
+    <header>
+    <nav class="navbar">
+        <div class="nav-title">
+            <a class="home-title" href="https://wangbyby.github.io">bywww</a>
+        </div>
+            <div class="nav-navs">
+                <ul>
+                        
+                            <li>
+                                <a class="nav-links no-hover-padding" href="https://wangbyby.github.io/blog/">blog
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a class="nav-links no-hover-padding" href="https://wangbyby.github.io/archive/">archive
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a class="nav-links no-hover-padding" href="https://wangbyby.github.io/tags/">tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a class="nav-links no-hover-padding" href="https://wangbyby.github.io/projects/">projects
+                                </a>
+                            </li>
+                        <li class="menu-icons-container">
+                        <ul class="menu-icons-group">
+                            <li class="js menu-icon">
+                                <div role="button" tabindex="0" id="search-button" class="search-icon interactive-icon" title="Click or press $SHORTCUT to open search" aria-label="Click or press $SHORTCUT to open search">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                                        <path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/>
+                                    </svg>
+                                </div>
+                            </li>
+
+                            
+                            
+
+                            <li class="theme-switcher-wrapper js"><div
+        title="Toggle dark&#x2F;light mode"
+        class="theme-switcher"
+        tabindex="0"
+        role="button"
+        aria-label="Toggle dark mode"
+        aria-pressed="false">
+    </div><div
+        title="Reset mode to default"
+        class="theme-resetter arrow"
+        tabindex="0"
+        role="button"
+        aria-hidden="true"
+        aria-label="Reset mode to default">
+    </div>
+
+</li>
+</ul>
+                    </li>
+                </ul>
+            </div>
+        
+    </nav>
+</header>
+
+    <div class="content">
+
+        
+        
+
+
+
+
+<main>
+    <article>
+        <h1 class="article-title">
+            dom tree算法介绍
+        </h1>
+
+        <ul class="meta"><li title="682 words">4 min read</li>
+        </ul>
+
+        <section class="body"><p>domtree构建算法</p>
+<h1 id="1-domtreegai-nian-jie-shao">1. domtree概念介绍</h1>
+<blockquote>
+<p>Dom(b): A node n in the CFG dominates b if n lies on every path from the entry node of the CFG to b.
+即Dom(b)是一个集合，根据定义 b in Dom(b)</p>
+</blockquote>
+<blockquote>
+<p>immediate dominator: b's immediate dominator is the node n in Dom(b) which is cloest to b.</p>
+</blockquote>
+<p>IDom(b): For a node b, the set IDom(b) contains exactly one node, the immediate dominator of b. If n is b's immediate dominator, then every node in { Dom(b) - b } is also in Dom(n)
+即集合IDom(b)只有一个元素。</p>
+<blockquote>
+<p>例子：
+<img src="/static/images/domtree/dt_image.png" alt="aa" />
+Dom(b) = {entry, n, b}
+IDom(b) = {n}</p>
+</blockquote>
+<h1 id="2-iteratve-way">2. iteratve way</h1>
+<p>可以用前向数据流分析来计算domtree：
+对于CFG G = (N, E, n0), N是点集，E是边集，n0是entry</p>
+<pre data-lang="c" class="language-c z-code"><code class="language-c" data-lang="c"><span class="z-source z-c"><span class="z-keyword z-control z-c">for</span> n in nodes
+</span><span class="z-source z-c">    Dom<span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span>n<span class="z-punctuation z-section z-brackets z-end z-c">]</span></span> <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span><span class="z-constant z-numeric z-integer z-decimal z-c">1</span><span class="z-keyword z-operator z-variadic z-c">...</span>N<span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span><span class="z-source z-c"><span class="z-storage z-type z-c">bool</span> changed <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-constant z-language z-c">true</span>
+</span><span class="z-source z-c"><span class="z-keyword z-control z-c">while</span> <span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span>changed<span class="z-punctuation z-section z-group z-end z-c">)</span></span><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">    changed <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-constant z-language z-c">false</span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">    <span class="z-keyword z-control z-c">for</span> n in <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">reverse_post_order</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">        new_set <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span><span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">        <span class="z-keyword z-control z-c">for</span> p in <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">preds</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">n</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">            new_set <span class="z-keyword z-operator z-assignment z-c">=</span> new_set ∩ <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">Dom</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">p</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">        <span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">        new_set <span class="z-keyword z-operator z-assignment z-c">=</span> new_set ∪ <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>n<span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">    
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">        <span class="z-keyword z-control z-c">if</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span>new_set <span class="z-keyword z-operator z-comparison z-c">!=</span> Dom<span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span>n<span class="z-punctuation z-section z-brackets z-end z-c">]</span></span><span class="z-punctuation z-section z-group z-end z-c">)</span></span><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">            Dom<span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span>n<span class="z-punctuation z-section z-brackets z-end z-c">]</span></span> <span class="z-keyword z-operator z-assignment z-c">=</span> new_set
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">            changed <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-constant z-language z-c">true</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">        <span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">    <span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span><span class="z-source z-c">
+</span></code></pre>
+<p>这里用reverse post order可以保证n的所有前驱都被处理后，再处理n</p>
+<h1 id="3-a-simple-fast-dominance-algorithm">3. A Simple, Fast Dominance Algorithm</h1>
+<p>前面介绍了迭代方式计算domtree算法，简单容易理解，但是效率没那么高(bitvector实现)。 bitvector每次拷贝所有节点信息。那对于稀疏的图来说，效率就难说了，所以<code>A Simple, Fast Dominance Algorithm</code>用一种sparse方式去计算domtree。</p>
+<p>除了entry节点， Dom(b) = {b} ∪ IDom(b) ∪ IDom(IDom(b)) ∪ .... ∪ {entry}
+根据这个特性，我们构建一个dom tree</p>
+<pre data-lang="c" class="language-c z-code"><code class="language-c" data-lang="c"><span class="z-source z-c"><span class="z-meta z-struct z-c"><span class="z-storage z-type z-c">struct</span> <span class="z-meta z-struct z-c"><span class="z-entity z-name z-struct z-c">dom_tree_node</span></span></span><span class="z-meta z-struct z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span></span></span><span class="z-meta z-struct z-c"><span class="z-meta z-block z-c">
+</span></span></span><span class="z-source z-c"><span class="z-meta z-struct z-c"><span class="z-meta z-block z-c">    <span class="z-storage z-type z-c">int</span> order<span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-struct z-c"><span class="z-meta z-block z-c">    cfg_node<span class="z-keyword z-operator z-c">*</span> ref<span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-struct z-c"><span class="z-meta z-block z-c">    <span class="z-meta z-struct z-c"><span class="z-storage z-type z-c">struct</span> <span class="z-meta z-struct z-c"><span class="z-entity z-name z-struct z-c">dom_tree_node</span></span></span><span class="z-meta z-struct z-c"> *idom</span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-struct z-c"><span class="z-meta z-block z-c">    vector<span class="z-keyword z-operator z-comparison z-c">&lt;</span><span class="z-meta z-struct z-c"><span class="z-storage z-type z-c">struct</span> <span class="z-meta z-struct z-c"><span class="z-entity z-name z-struct z-c">dom_tree_node</span></span></span><span class="z-meta z-struct z-c">* &gt; children</span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-struct z-c"><span class="z-meta z-block z-c"></span></span><span class="z-meta z-struct z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-end z-c">}</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span><span class="z-source z-c">
+</span></code></pre>
+<blockquote>
+<p><img src="/static/images/domtree/dt_image-2.png" alt="alt text" /></p>
+</blockquote>
+<p>算法实现：</p>
+<pre data-lang="c" class="language-c z-code"><code class="language-c" data-lang="c"><span class="z-source z-c">
+</span><span class="z-source z-c"><span class="z-keyword z-control z-c">for</span> <span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span>number<span class="z-punctuation z-separator z-c">,</span> node<span class="z-punctuation z-section z-group z-end z-c">)</span></span> in <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">post_order</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">    <span class="z-comment z-line z-double-slash z-c"><span class="z-punctuation z-definition z-comment z-c">//</span> mapping CFG node to dom tree node
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c">    mapping<span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span>node<span class="z-punctuation z-section z-brackets z-end z-c">]</span></span> <span class="z-keyword z-operator z-assignment z-c">=</span> create <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">dom_tree_node</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">node<span class="z-punctuation z-separator z-c">,</span> number</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span> 
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span><span class="z-source z-c">mapping<span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span>entry<span class="z-punctuation z-section z-brackets z-end z-c">]</span></span><span class="z-punctuation z-accessor z-c">-&gt;</span>idom <span class="z-keyword z-operator z-assignment z-c">=</span> mapping<span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span>entry<span class="z-punctuation z-section z-brackets z-end z-c">]</span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span><span class="z-source z-c">changed <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-constant z-language z-c">true</span>
+</span><span class="z-source z-c"><span class="z-keyword z-control z-c">while</span> <span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span>changed<span class="z-punctuation z-section z-group z-end z-c">)</span></span><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">    changed <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-constant z-language z-c">false</span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">    <span class="z-keyword z-control z-c">for</span> b in <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">reverse_post_order</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">expect entry</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">        new_idom <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">first</span> <span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">processed</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span> predecessor of b
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">        <span class="z-keyword z-control z-c">for</span> p in <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">other_processors</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">b</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span> <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">            <span class="z-keyword z-control z-c">if</span> mapping<span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span>p<span class="z-punctuation z-section z-brackets z-end z-c">]</span></span><span class="z-punctuation z-accessor z-c">-&gt;</span>idom <span class="z-keyword z-operator z-comparison z-c">!=</span> <span class="z-constant z-language z-c">NULL</span> <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">                new_idom <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">intersect</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">mapping<span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span>p<span class="z-punctuation z-section z-brackets z-end z-c">]</span></span><span class="z-punctuation z-separator z-c">,</span> new_idom</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">            <span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">        <span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">        <span class="z-keyword z-control z-c">if</span> mapping<span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span>b<span class="z-punctuation z-section z-brackets z-end z-c">]</span></span><span class="z-punctuation z-accessor z-c">-&gt;</span>idom <span class="z-keyword z-operator z-comparison z-c">!=</span> new_idom <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">            mapping<span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span>b<span class="z-punctuation z-section z-brackets z-end z-c">]</span></span><span class="z-punctuation z-accessor z-c">-&gt;</span>idom <span class="z-keyword z-operator z-assignment z-c">=</span> new_idom
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">            changed <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-constant z-language z-c">true</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">        <span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">    <span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span><span class="z-source z-c">
+</span><span class="z-source z-c"><span class="z-comment z-line z-double-slash z-c"><span class="z-punctuation z-definition z-comment z-c">//</span> order is the postorder numbers
+</span></span><span class="z-source z-c">function <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">intersect</span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-variable z-parameter z-c">a</span><span class="z-punctuation z-separator z-c">,</span> <span class="z-variable z-parameter z-c">b</span><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-meta z-function z-c"> </span><span class="z-keyword z-control z-flow z-return z-c">return</span> dom_tree_node<span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">    f1 <span class="z-keyword z-operator z-assignment z-c">=</span> a<span class="z-punctuation z-terminator z-c">;</span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">    f2 <span class="z-keyword z-operator z-assignment z-c">=</span> b<span class="z-punctuation z-terminator z-c">;</span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">    <span class="z-keyword z-control z-c">while</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span>f1 <span class="z-keyword z-operator z-comparison z-c">!=</span> f2<span class="z-punctuation z-section z-group z-end z-c">)</span></span><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">        <span class="z-keyword z-control z-c">while</span> <span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span>f1<span class="z-punctuation z-accessor z-c">-&gt;</span>order <span class="z-keyword z-operator z-comparison z-c">&lt;</span> f2<span class="z-punctuation z-accessor z-c">-&gt;</span>order <span class="z-punctuation z-section z-group z-end z-c">)</span></span> <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">            f1 <span class="z-keyword z-operator z-assignment z-c">=</span> f1<span class="z-punctuation z-accessor z-c">-&gt;</span>idom<span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">        <span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">        <span class="z-keyword z-control z-c">while</span> <span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span>f2<span class="z-punctuation z-accessor z-c">-&gt;</span>order <span class="z-keyword z-operator z-comparison z-c">&lt;</span> f1<span class="z-punctuation z-accessor z-c">-&gt;</span>order<span class="z-punctuation z-section z-group z-end z-c">)</span></span> <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">            f2 <span class="z-keyword z-operator z-assignment z-c">=</span> f2<span class="z-punctuation z-accessor z-c">-&gt;</span>idom<span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">        <span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">    <span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">    <span class="z-keyword z-control z-flow z-return z-c">return</span> f1<span class="z-punctuation z-terminator z-c">;</span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span><span class="z-source z-c">
+</span></code></pre>
+<blockquote>
+<p>Remember that nodes higher in the dominator tree have higher postorder numbers, which is why intersect moves the finger whose value is less than the other finger’s.</p>
+</blockquote>
+<blockquote>
+<p>其实原论文中用的是数组，但我们用树实现。
+原因是对于部分IR来说，basicblock*指针的值就可以被看为一个id。用指针+hashmap的组合更通用。</p>
+</blockquote>
+<h1 id="4-lengauer-tarjan-algorithm">4. Lengauer-Tarjan algorithm</h1>
+<p>LT算法基于</p>
+<ol>
+<li>DFS</li>
+<li>spanning-tree</li>
+</ol>
+<p>基于DFS遍历顺序，LT算法提出了<strong>semidominator</strong>概念，简写为<code>sdom</code>(注意和strict dominator区分)。</p>
+<p>sdom(w) = semidom(w) = min {v | there is a path v = v0, v1 ,..., vk=w such that vi &gt; w for 1 ≤ i ≤ k-1 }
+注：vi&gt;w指的是DFS的order</p>
+<p>对于大部分节点来说sdom和idom相同。
+故我们需要</p>
+<ol>
+<li>计算sdom</li>
+<li>sdom -&gt; idom</li>
+</ol>
+<p>计算sdom：</p>
+<pre data-lang="c" class="language-c z-code"><code class="language-c" data-lang="c"><span class="z-source z-c"><span class="z-comment z-line z-double-slash z-c"><span class="z-punctuation z-definition z-comment z-c">//</span> step 1
+</span></span><span class="z-source z-c">Create a DFS tree T
+</span><span class="z-source z-c">for v in V
+</span><span class="z-source z-c">    <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">semi</span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-variable z-parameter z-c">v</span><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-meta z-function z-c"> </span><span class="z-keyword z-operator z-assignment z-c">=</span> v
+</span><span class="z-source z-c">
+</span><span class="z-source z-c"><span class="z-keyword z-control z-c">for</span> v in <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">reverse_preorder</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">V<span class="z-keyword z-operator z-arithmetic z-c">-</span><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>entry<span class="z-punctuation z-section z-block z-end z-c">}</span></span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span><span class="z-source z-c">    <span class="z-keyword z-control z-c">for</span> q in <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">pred</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">v</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span><span class="z-source z-c">        z <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">eval</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">v<span class="z-punctuation z-separator z-c">,</span> q</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span><span class="z-source z-c">        <span class="z-keyword z-control z-c">if</span> <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">semi</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">z</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span> <span class="z-keyword z-operator z-comparison z-c">&lt;</span> <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">semi</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">v</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span><span class="z-source z-c">            <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">semi</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">v</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span> <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">semi</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">z</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span><span class="z-source z-c">
+</span><span class="z-source z-c">function <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">eval</span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-variable z-parameter z-c">v</span><span class="z-punctuation z-separator z-c">,</span> <span class="z-variable z-parameter z-c">q</span><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span></span></span><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">    <span class="z-keyword z-control z-c">if</span> v<span class="z-keyword z-operator z-comparison z-c">==</span>entry <span class="z-keyword z-control z-flow z-return z-c">return</span> v<span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">    <span class="z-keyword z-control z-c">while</span> <span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span>v <span class="z-keyword z-operator z-comparison z-c">&lt;</span> q<span class="z-punctuation z-section z-group z-end z-c">)</span></span> <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">        q <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">semi</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">q</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">    <span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">    <span class="z-keyword z-control z-flow z-return z-c">return</span> q<span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"></span></span><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-end z-c">}</span></span></span>
+</span><span class="z-source z-c">
+</span></code></pre>
+<p>剩下的sdom-&gt; idom太复杂了，没看懂。。。。</p>
+<h1 id="5-semi-nca">5. semi-nca</h1>
+<ol>
+<li>计算semi dominator</li>
+<li>利用NCA算法计算idom</li>
+</ol>
+<p>idom(v) = NCA_D( parent_T(v), sdom(v))
+D是dom tree， T是spanning tree
+算法如下：</p>
+<pre data-lang="text" class="language-text z-code"><code class="language-text" data-lang="text"><span class="z-text z-plain">
+</span><span class="z-text z-plain">1. T = create a DFS tree
+</span><span class="z-text z-plain">2. Calculate semidominator for all vertex
+</span><span class="z-text z-plain">3. D = create_dom_tree().set_root(entry)
+</span><span class="z-text z-plain">4.
+</span><span class="z-text z-plain">for v in preorder_T(V-{r}){
+</span><span class="z-text z-plain">    Ascend the all the path r -&gt; parent_T(v) in D and find the deepest vertex with which number is smaller than or equal to sdom(v). set this vertext as the parent of v in D.
+</span><span class="z-text z-plain">}
+</span><span class="z-text z-plain">
+</span></code></pre>
+<p>图例：<a href="https://blog.csdn.net/dashuniuniu/article/details/103462147?spm=1001.2014.3001.5501">参考</a></p>
+<p><img src="/static/images/domtree/dt_cfg.png" alt="CFG" /></p>
+<h3 id="step-1-spanning-tree">step 1. Spanning tree</h3>
+<blockquote>
+<p>初始CFG: <img src="/static/images/domtree/dt_cfg_dfs.png" alt="alt text" />
+Spanning Tree：<img src="/static/images/domtree/dt_dfs.png" alt="spanning tree" /></p>
+</blockquote>
+<h3 id="step-2-ji-suan-sdom">step 2. 计算sdom</h3>
+<p><img src="/static/images/domtree/dt_sdom.png" alt="alt text" /></p>
+<h3 id="step-3-ji-suan-domtree">step 3. 计算domtree</h3>
+<p><img src="/static/images/domtree/dt_domtree.png" alt="alt text" /></p>
+<blockquote>
+<p><img src="/static/images/domtree/dt_all.png" alt="alt text" /></p>
+</blockquote>
+<h1 id="6-dominance-frontiers">6. Dominance Frontiers</h1>
+<p>SSA-construction中插入phi节点时候会用到。</p>
+<blockquote>
+<p>define the Dominance Frontiers of a node b as: for a node y, that b dominates a predessor of y but does not strictly dominate y.</p>
+</blockquote>
+<p>例子：</p>
+<blockquote>
+<p><img src="/static/images/domtree/dt_image-3.png" alt="alt text" />
+DF(b) = {y}</p>
+</blockquote>
+<pre data-lang="txt" class="language-txt z-code"><code class="language-txt" data-lang="txt"><span class="z-text z-plain">for b in nodes{
+</span><span class="z-text z-plain">    if b.preds().len &gt;= 2 {
+</span><span class="z-text z-plain">        for p in b.preds(){
+</span><span class="z-text z-plain">            runner = mapping[p]
+</span><span class="z-text z-plain">            while runner != mapping[b]-&gt;idom {
+</span><span class="z-text z-plain">                add b to runner&#39;s dominance frontier set
+</span><span class="z-text z-plain">                runner = runner-&gt;idom
+</span><span class="z-text z-plain">            }
+</span><span class="z-text z-plain">        }
+</span><span class="z-text z-plain">    }
+</span><span class="z-text z-plain">}
+</span><span class="z-text z-plain">
+</span></code></pre>
+<h1 id="reference">reference</h1>
+<ul>
+<li>https://blog.csdn.net/dashuniuniu/article/details/103462147
+(为数不多的CSDN能用上的时候)</li>
+</ul>
+
+        </section>
+
+        
+        
+        
+
+        
+            
+            
+            
+
+            
+        
+            
+            
+            
+
+            
+        
+            
+            
+            
+
+            
+        
+            
+            
+            
+
+            
+        
+        
+
+    </article>
+</main>
+
+
+<link rel="stylesheet" href="https://wangbyby.github.io/katex.min.css">
+    <script defer src="https://wangbyby.github.io/js/katex.min.js"></script><span id="copy-success" class="hidden">
+        Copied!
+    </span>
+    <span id="copy-init" class="hidden">
+        Copy code to clipboard
+    </span>
+    <script defer src="https://wangbyby.github.io/js/copyCodeToClipboard.min.js"></script>
+
+
+    </div>
+    <footer>
+    <section>
+        <nav class="socials nav-navs">
+        </nav>
+
+        
+        <nav class="nav-navs">
+        </nav>
+
+        <div class="credits">
+            <small>
+                
+
+                
+                Powered by
+                <a rel=""  href="https://www.getzola.org">Zola</a>
+                &amp;
+                <a rel=""  href="https://github.com/welpo/tabi">tabi</a>
+
+                </small>
+        </div>
+    </section>
+
+    <div id="searchModal" class="search-modal js" role="dialog" aria-labelledby="modalTitle">
+    <h1 id="modalTitle" class="visually-hidden">Search</h1>
+    <div id="modal-content">
+        <div id="searchBar">
+            <div class="search-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                    <path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/>
+                </svg>
+            </div>
+            <input id="searchInput" role="combobox" autocomplete="off" spellcheck="false" aria-expanded="false" aria-controls="results-container" placeholder="Search…"/>
+            <div id="clear-search" class="close-icon interactive-icon" tabindex="0" role="button" title="Clear search">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/>
+                </svg>
+            </div>
+        </div>
+        <div id="results-container">
+            <div id="results-info"><span id="zero_results"> No results</span>
+                <span id="one_results"> $NUMBER result</span>
+                <span id="many_results"> $NUMBER results</span><span id="two_results"> $NUMBER results</span>
+                <span id="few_results"> $NUMBER results</span>
+            </div>
+            <div id="results" role="listbox"></div>
+        </div>
+    </div>
+</div>
+</footer>
+
+</body>
+
+</html>

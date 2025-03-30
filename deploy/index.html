@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+    <meta charset="UTF-8"><meta http-equiv="Content-Security-Policy"
+content="default-src 'self';font-src &#x27;self&#x27; data:;img-src &#x27;self&#x27; https:&#x2F;&#x2F;* data:;media-src &#x27;self&#x27;;style-src &#x27;self&#x27;;frame-src player.vimeo.com https:&#x2F;&#x2F;www.youtube-nocookie.com;connect-src 'self';script-src 'self' 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="base" content="https://wangbyby.github.io/">
+
+    
+    <title>bywww • 使用zola设置github.io作为个人博客</title>
+
+    
+    
+    
+
+    
+    
+
+    
+    
+    
+        
+            <link rel="stylesheet" href="https://wangbyby.github.io/custom_subset.css?h=0b9535a28bc3d5bf2321">
+        
+    
+
+    
+        <link rel="stylesheet" href="https://wangbyby.github.io/main.css?h=98c8cfb580fe7a59eb13" />
+
+    <meta name="color-scheme" content="light dark" />
+        <meta name="description" content="" />
+        <meta property="og:description" content="" />
+
+    
+
+    <meta property="og:title" content="使用zola设置github.io作为个人博客" />
+    <meta property="og:type" content="article" />
+
+    
+<meta property="og:locale" content="en_GB" />
+
+    <meta property="og:url" content="https:&#x2F;&#x2F;wangbyby.github.io&#x2F;deploy&#x2F;" /><meta property="og:site_name" content="bywww">
+        <noscript><link rel="stylesheet" href="https://wangbyby.github.io/no_js.css"/></noscript>
+        <script type="text/javascript" src="https://wangbyby.github.io/js/initializeTheme.min.js"></script>
+        <script defer src="https://wangbyby.github.io/js/themeSwitcher.min.js"></script><script defer src="https://wangbyby.github.io/search_index.en.js?h=495fa61fbcc607713e54"></script>
+        <script defer src="https://wangbyby.github.io/js/searchElasticlunr.min.js?h=3626c0ef99daa745b31e"></script>
+
+        </head>
+
+
+<body>
+    <header>
+    <nav class="navbar">
+        <div class="nav-title">
+            <a class="home-title" href="https://wangbyby.github.io">bywww</a>
+        </div>
+            <div class="nav-navs">
+                <ul>
+                        
+                            <li>
+                                <a class="nav-links no-hover-padding" href="https://wangbyby.github.io/blog/">blog
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a class="nav-links no-hover-padding" href="https://wangbyby.github.io/archive/">archive
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a class="nav-links no-hover-padding" href="https://wangbyby.github.io/tags/">tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a class="nav-links no-hover-padding" href="https://wangbyby.github.io/projects/">projects
+                                </a>
+                            </li>
+                        <li class="menu-icons-container">
+                        <ul class="menu-icons-group">
+                            <li class="js menu-icon">
+                                <div role="button" tabindex="0" id="search-button" class="search-icon interactive-icon" title="Click or press $SHORTCUT to open search" aria-label="Click or press $SHORTCUT to open search">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                                        <path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/>
+                                    </svg>
+                                </div>
+                            </li>
+
+                            
+                            
+
+                            <li class="theme-switcher-wrapper js"><div
+        title="Toggle dark&#x2F;light mode"
+        class="theme-switcher"
+        tabindex="0"
+        role="button"
+        aria-label="Toggle dark mode"
+        aria-pressed="false">
+    </div><div
+        title="Reset mode to default"
+        class="theme-resetter arrow"
+        tabindex="0"
+        role="button"
+        aria-hidden="true"
+        aria-label="Reset mode to default">
+    </div>
+
+</li>
+</ul>
+                    </li>
+                </ul>
+            </div>
+        
+    </nav>
+</header>
+
+    <div class="content">
+
+        
+        
+
+
+
+
+<main>
+    <article>
+        <h1 class="article-title">
+            使用zola设置github.io作为个人博客
+        </h1>
+
+        <ul class="meta"><li title="518 words">3 min read</li>
+        </ul>
+
+        <section class="body"><p>步骤如下：</p>
+<ol>
+<li>本地安装zola</li>
+<li>运行<code>zola init &lt;your blog dir&gt;</code>, like <code>zola init myblog</code></li>
+</ol>
+<p>目录如下：</p>
+<pre data-lang="txt" class="language-txt z-code"><code class="language-txt" data-lang="txt"><span class="z-text z-plain">myblog/
+</span><span class="z-text z-plain">├── config.toml          # 配置文件
+</span><span class="z-text z-plain">├── content/             # 内容文件（Markdown）
+</span><span class="z-text z-plain">├── sass/                # Sass 样式文件（可选）
+</span><span class="z-text z-plain">├── static/              # 静态资源（图片、CSS、JS 等）
+</span><span class="z-text z-plain">├── templates/           # 模板文件（HTML）
+</span><span class="z-text z-plain">└── themes/              # 主题文件（可选）
+</span></code></pre>
+<ul>
+<li>创建的博客就放在content下面。</li>
+<li>图片放在static/images下面，在博客里用<code>![test](/images/a.png)</code>引用</li>
+<li>博客格式：<code>+++</code>一定要有</li>
+</ul>
+<pre data-lang="txt" class="language-txt z-code"><code class="language-txt" data-lang="txt"><span class="z-text z-plain">+++
+</span><span class="z-text z-plain">title = &quot;我的第一篇文章&quot;
+</span><span class="z-text z-plain">+++
+</span><span class="z-text z-plain">
+</span><span class="z-text z-plain">## hello zola
+</span></code></pre>
+<ol start="3">
+<li><code>cd &lt;your blog dir&gt; &amp;&amp; git init</code>将这些目录加到版本控制进去。</li>
+<li>添加自定义模板<code>teplates/index.html</code>和<code>teplates/page.html</code></li>
+<li>创建github actions: <code>.github/workflows/deploy.yml</code>
+内容如下：</li>
+</ol>
+<pre data-lang="yml" class="language-yml z-code"><code class="language-yml" data-lang="yml"><span class="z-source z-yaml"><span class="z-string z-unquoted z-plain z-out z-yaml"><span class="z-entity z-name z-tag z-yaml">name</span></span><span class="z-punctuation z-separator z-key-value z-mapping z-yaml">:</span> <span class="z-string z-unquoted z-plain z-out z-yaml">Deploy Zola site to GitHub Pages</span>
+</span><span class="z-source z-yaml">
+</span><span class="z-source z-yaml"><span class="z-constant z-language z-boolean z-yaml">on</span><span class="z-punctuation z-separator z-key-value z-mapping z-yaml">:</span>
+</span><span class="z-source z-yaml">  <span class="z-string z-unquoted z-plain z-out z-yaml"><span class="z-entity z-name z-tag z-yaml">push</span></span><span class="z-punctuation z-separator z-key-value z-mapping z-yaml">:</span>
+</span><span class="z-source z-yaml">    <span class="z-string z-unquoted z-plain z-out z-yaml"><span class="z-entity z-name z-tag z-yaml">branches</span></span><span class="z-punctuation z-separator z-key-value z-mapping z-yaml">:</span>
+</span><span class="z-source z-yaml">      <span class="z-punctuation z-definition z-block z-sequence z-item z-yaml">-</span> <span class="z-string z-unquoted z-plain z-out z-yaml">master</span>  <span class="z-comment z-line z-number-sign z-yaml"><span class="z-punctuation z-definition z-comment z-line z-number-sign z-yaml">#</span> 触发部署的分支
+</span></span><span class="z-source z-yaml">
+</span><span class="z-source z-yaml"><span class="z-string z-unquoted z-plain z-out z-yaml"><span class="z-entity z-name z-tag z-yaml">jobs</span></span><span class="z-punctuation z-separator z-key-value z-mapping z-yaml">:</span>
+</span><span class="z-source z-yaml">  <span class="z-string z-unquoted z-plain z-out z-yaml"><span class="z-entity z-name z-tag z-yaml">deploy</span></span><span class="z-punctuation z-separator z-key-value z-mapping z-yaml">:</span>
+</span><span class="z-source z-yaml">    <span class="z-string z-unquoted z-plain z-out z-yaml"><span class="z-entity z-name z-tag z-yaml">runs-on</span></span><span class="z-punctuation z-separator z-key-value z-mapping z-yaml">:</span> <span class="z-string z-unquoted z-plain z-out z-yaml">ubuntu-latest</span>
+</span><span class="z-source z-yaml">    <span class="z-string z-unquoted z-plain z-out z-yaml"><span class="z-entity z-name z-tag z-yaml">steps</span></span><span class="z-punctuation z-separator z-key-value z-mapping z-yaml">:</span>
+</span><span class="z-source z-yaml">      <span class="z-punctuation z-definition z-block z-sequence z-item z-yaml">-</span> <span class="z-string z-unquoted z-plain z-out z-yaml"><span class="z-entity z-name z-tag z-yaml">name</span></span><span class="z-punctuation z-separator z-key-value z-mapping z-yaml">:</span> <span class="z-string z-unquoted z-plain z-out z-yaml">Checkout</span>
+</span><span class="z-source z-yaml">        <span class="z-string z-unquoted z-plain z-out z-yaml"><span class="z-entity z-name z-tag z-yaml">uses</span></span><span class="z-punctuation z-separator z-key-value z-mapping z-yaml">:</span> <span class="z-string z-unquoted z-plain z-out z-yaml">actions/checkout@v3</span>
+</span><span class="z-source z-yaml">
+</span><span class="z-source z-yaml">      <span class="z-punctuation z-definition z-block z-sequence z-item z-yaml">-</span> <span class="z-string z-unquoted z-plain z-out z-yaml"><span class="z-entity z-name z-tag z-yaml">name</span></span><span class="z-punctuation z-separator z-key-value z-mapping z-yaml">:</span> <span class="z-string z-unquoted z-plain z-out z-yaml">Install Zola</span>
+</span><span class="z-source z-yaml">        <span class="z-string z-unquoted z-plain z-out z-yaml"><span class="z-entity z-name z-tag z-yaml">run</span></span><span class="z-punctuation z-separator z-key-value z-mapping z-yaml">:</span> <span class="z-keyword z-control z-flow z-block-scalar z-literal z-yaml">|</span>
+</span><span class="z-source z-yaml"><span class="z-string z-unquoted z-block z-yaml">          wget https://github.com/getzola/zola/releases/download/v0.19.2/zola-v0.19.2-x86_64-unknown-linux-gnu.tar.gz
+</span></span><span class="z-source z-yaml"><span class="z-string z-unquoted z-block z-yaml">          tar -xzf zola-v0.19.2-x86_64-unknown-linux-gnu.tar.gz
+</span></span><span class="z-source z-yaml"><span class="z-string z-unquoted z-block z-yaml">          sudo mv zola /usr/local/bin
+</span></span><span class="z-source z-yaml"><span class="z-string z-unquoted z-block z-yaml">
+</span></span><span class="z-source z-yaml"><span class="z-string z-unquoted z-block z-yaml"></span>      <span class="z-punctuation z-definition z-block z-sequence z-item z-yaml">-</span> <span class="z-string z-unquoted z-plain z-out z-yaml"><span class="z-entity z-name z-tag z-yaml">name</span></span><span class="z-punctuation z-separator z-key-value z-mapping z-yaml">:</span> <span class="z-string z-unquoted z-plain z-out z-yaml">Build site</span>
+</span><span class="z-source z-yaml">        <span class="z-string z-unquoted z-plain z-out z-yaml"><span class="z-entity z-name z-tag z-yaml">run</span></span><span class="z-punctuation z-separator z-key-value z-mapping z-yaml">:</span> <span class="z-string z-unquoted z-plain z-out z-yaml">zola build</span>
+</span><span class="z-source z-yaml">
+</span><span class="z-source z-yaml">      <span class="z-punctuation z-definition z-block z-sequence z-item z-yaml">-</span> <span class="z-string z-unquoted z-plain z-out z-yaml"><span class="z-entity z-name z-tag z-yaml">name</span></span><span class="z-punctuation z-separator z-key-value z-mapping z-yaml">:</span> <span class="z-string z-unquoted z-plain z-out z-yaml">Deploy to GitHub Pages</span>
+</span><span class="z-source z-yaml">        <span class="z-string z-unquoted z-plain z-out z-yaml"><span class="z-entity z-name z-tag z-yaml">uses</span></span><span class="z-punctuation z-separator z-key-value z-mapping z-yaml">:</span> <span class="z-string z-unquoted z-plain z-out z-yaml">shalzz/zola-deploy-action@master</span>
+</span><span class="z-source z-yaml">        <span class="z-string z-unquoted z-plain z-out z-yaml"><span class="z-entity z-name z-tag z-yaml">env</span></span><span class="z-punctuation z-separator z-key-value z-mapping z-yaml">:</span>
+</span><span class="z-source z-yaml">            <span class="z-string z-unquoted z-plain z-out z-yaml"><span class="z-entity z-name z-tag z-yaml">PAGES_BRANCH</span></span><span class="z-punctuation z-separator z-key-value z-mapping z-yaml">:</span> <span class="z-string z-unquoted z-plain z-out z-yaml">gh-pages</span>
+</span><span class="z-source z-yaml">            <span class="z-string z-unquoted z-plain z-out z-yaml"><span class="z-entity z-name z-tag z-yaml">TOKEN</span></span><span class="z-punctuation z-separator z-key-value z-mapping z-yaml">:</span> <span class="z-string z-unquoted z-plain z-out z-yaml">${{ secrets.GITHUB_TOKEN }}</span>
+</span></code></pre>
+<p>这里注意分支。</p>
+<ul>
+<li>master分支是我们源文件的分支</li>
+<li>gh-pages分支是制品分支</li>
+</ul>
+<blockquote>
+<p>参考：<a href="https://www.getzola.org/documentation/deployment/github-pages/#github-actions">zola github-actions</a></p>
+</blockquote>
+<ol start="6">
+<li>
+<p>推送到 <code>git@github.com:&lt;username&gt;/&lt;username&gt;.github.io.git</code></p>
+</li>
+<li>
+<p>设置github pages:
+<img src="/static/images/image-github-pages.png" alt="alt text" /></p>
+</li>
+<li>
+<p>如果上传图片，设置<code>config.toml</code>中<code>base_url = "https://&lt;username&gt;.github.io/"</code></p>
+</li>
+<li>
+<p>等待github actions完成，就OK了</p>
+</li>
+</ol>
+<hr />
+<h1 id="bu-shu-jing-tai-wang-zhi-dao-fu-wu-qi">部署静态网址到服务器</h1>
+<p>需要</p>
+<ol>
+<li>一个云服务器，带ip地址/域名的</li>
+</ol>
+<p>步骤如下</p>
+<ol>
+<li>在云服务器安装zola（pre-build比较好）</li>
+<li><strong>在服务器安装nginx</strong></li>
+<li>拉取博客代码到服务器：<code>git clone example_blog@git</code></li>
+<li>运行命令<code>cd example_blog &amp;&amp; zola build -u ""</code>. 构建好的文件在<code>example_blog/public</code>下</li>
+<li><code>cp public /var/www/static-site -r</code></li>
+<li>给nginx权限并确保自己有权限<code>sudo chown -R $USER:$USER /var/www/static-site &amp;&amp; sudo chown -R www-data:www-data /var/www/static-site &amp;&amp; sudo chmod -R 755 /var/www/static-site</code></li>
+<li>修改nginx的配置文件（ai生成的）
+- 新建配置文件<code>/etc/nginx/sites-available/static-site.conf</code>
+- 添加内容</li>
+</ol>
+<pre class="z-code"><code><span class="z-text z-plain">```conf
+</span><span class="z-text z-plain">server {
+</span><span class="z-text z-plain">  listen 80;
+</span><span class="z-text z-plain">  server_name example.com;  # 替换为你的域名或服务器 IP（如 192.168.1.100）
+</span><span class="z-text z-plain">
+</span><span class="z-text z-plain">  root /var/www/static-site;  # 静态文件根目录
+</span><span class="z-text z-plain">  index index.html index.htm;  # 默认索引文件
+</span><span class="z-text z-plain">
+</span><span class="z-text z-plain">  location / {
+</span><span class="z-text z-plain">      try_files $uri $uri/ =404;  # 按顺序查找文件或目录，否则返回 404
+</span><span class="z-text z-plain">  }
+</span><span class="z-text z-plain">
+</span><span class="z-text z-plain">  # 可选：启用 Gzip 压缩
+</span><span class="z-text z-plain">  gzip on;
+</span><span class="z-text z-plain">  gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+</span><span class="z-text z-plain">}
+</span><span class="z-text z-plain">```
+</span><span class="z-text z-plain">
+</span><span class="z-text z-plain">- 设置符号链接`sudo ln -s /etc/nginx/sites-available/static-site.conf /etc/nginx/sites-enabled/`
+</span></code></pre>
+<ol start="8">
+<li>重启nginx  <code>sudo nginx -t &amp;&amp; sudo systemctl reload nginx</code></li>
+</ol>
+<blockquote>
+<p>坑</p>
+<ol>
+<li>本来打算用nginx做为动态转发，服务器后台跑个zola serve，结果发现zola build出来的都有端口<code>ip:1111/xxx</code>. 此路不通</li>
+<li>然后就用静态网页。最开始有403，权限问题。然后发现博客的url链接是<code>ip/ip/xxx</code>, 用<code>zola build -u ""</code>可以处理掉。然后就OK啦</li>
+</ol>
+</blockquote>
+<hr />
+<p>之前用hexo，但图片上传太麻烦了:( zola图片上传也没有那么方便。
+ai真好用，特别是这种琐碎的安装部署。</p>
+
+        </section>
+
+        
+        
+        
+
+        
+            
+            
+            
+
+            
+        
+            
+            
+            
+
+            
+        
+            
+            
+            
+
+            
+        
+            
+            
+            
+
+            
+        
+        
+
+    </article>
+</main>
+
+
+<link rel="stylesheet" href="https://wangbyby.github.io/katex.min.css">
+    <script defer src="https://wangbyby.github.io/js/katex.min.js"></script><span id="copy-success" class="hidden">
+        Copied!
+    </span>
+    <span id="copy-init" class="hidden">
+        Copy code to clipboard
+    </span>
+    <script defer src="https://wangbyby.github.io/js/copyCodeToClipboard.min.js"></script>
+
+
+    </div>
+    <footer>
+    <section>
+        <nav class="socials nav-navs">
+        </nav>
+
+        
+        <nav class="nav-navs">
+        </nav>
+
+        <div class="credits">
+            <small>
+                
+
+                
+                Powered by
+                <a rel=""  href="https://www.getzola.org">Zola</a>
+                &amp;
+                <a rel=""  href="https://github.com/welpo/tabi">tabi</a>
+
+                </small>
+        </div>
+    </section>
+
+    <div id="searchModal" class="search-modal js" role="dialog" aria-labelledby="modalTitle">
+    <h1 id="modalTitle" class="visually-hidden">Search</h1>
+    <div id="modal-content">
+        <div id="searchBar">
+            <div class="search-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                    <path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/>
+                </svg>
+            </div>
+            <input id="searchInput" role="combobox" autocomplete="off" spellcheck="false" aria-expanded="false" aria-controls="results-container" placeholder="Search…"/>
+            <div id="clear-search" class="close-icon interactive-icon" tabindex="0" role="button" title="Clear search">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/>
+                </svg>
+            </div>
+        </div>
+        <div id="results-container">
+            <div id="results-info"><span id="zero_results"> No results</span>
+                <span id="one_results"> $NUMBER result</span>
+                <span id="many_results"> $NUMBER results</span><span id="two_results"> $NUMBER results</span>
+                <span id="few_results"> $NUMBER results</span>
+            </div>
+            <div id="results" role="listbox"></div>
+        </div>
+    </div>
+</div>
+</footer>
+
+</body>
+
+</html>

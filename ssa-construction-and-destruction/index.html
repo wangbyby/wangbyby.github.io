@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+    <meta charset="UTF-8"><meta http-equiv="Content-Security-Policy"
+content="default-src 'self';font-src &#x27;self&#x27; data:;img-src &#x27;self&#x27; https:&#x2F;&#x2F;* data:;media-src &#x27;self&#x27;;style-src &#x27;self&#x27;;frame-src player.vimeo.com https:&#x2F;&#x2F;www.youtube-nocookie.com;connect-src 'self';script-src 'self' 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="base" content="https://wangbyby.github.io/">
+
+    
+    <title>bywww • SSA构建和销毁</title>
+
+    
+    
+    
+
+    
+    
+
+    
+    
+    
+        
+            <link rel="stylesheet" href="https://wangbyby.github.io/custom_subset.css?h=0b9535a28bc3d5bf2321">
+        
+    
+
+    
+        <link rel="stylesheet" href="https://wangbyby.github.io/main.css?h=98c8cfb580fe7a59eb13" />
+
+    <meta name="color-scheme" content="light dark" />
+        <meta name="description" content="" />
+        <meta property="og:description" content="" />
+
+    
+
+    <meta property="og:title" content="SSA构建和销毁" />
+    <meta property="og:type" content="article" />
+
+    
+<meta property="og:locale" content="en_GB" />
+
+    <meta property="og:url" content="https:&#x2F;&#x2F;wangbyby.github.io&#x2F;ssa-construction-and-destruction&#x2F;" /><meta property="og:site_name" content="bywww">
+        <noscript><link rel="stylesheet" href="https://wangbyby.github.io/no_js.css"/></noscript>
+        <script type="text/javascript" src="https://wangbyby.github.io/js/initializeTheme.min.js"></script>
+        <script defer src="https://wangbyby.github.io/js/themeSwitcher.min.js"></script><script defer src="https://wangbyby.github.io/search_index.en.js?h=495fa61fbcc607713e54"></script>
+        <script defer src="https://wangbyby.github.io/js/searchElasticlunr.min.js?h=3626c0ef99daa745b31e"></script>
+
+        </head>
+
+
+<body>
+    <header>
+    <nav class="navbar">
+        <div class="nav-title">
+            <a class="home-title" href="https://wangbyby.github.io">bywww</a>
+        </div>
+            <div class="nav-navs">
+                <ul>
+                        
+                            <li>
+                                <a class="nav-links no-hover-padding" href="https://wangbyby.github.io/blog/">blog
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a class="nav-links no-hover-padding" href="https://wangbyby.github.io/archive/">archive
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a class="nav-links no-hover-padding" href="https://wangbyby.github.io/tags/">tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a class="nav-links no-hover-padding" href="https://wangbyby.github.io/projects/">projects
+                                </a>
+                            </li>
+                        <li class="menu-icons-container">
+                        <ul class="menu-icons-group">
+                            <li class="js menu-icon">
+                                <div role="button" tabindex="0" id="search-button" class="search-icon interactive-icon" title="Click or press $SHORTCUT to open search" aria-label="Click or press $SHORTCUT to open search">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                                        <path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/>
+                                    </svg>
+                                </div>
+                            </li>
+
+                            
+                            
+
+                            <li class="theme-switcher-wrapper js"><div
+        title="Toggle dark&#x2F;light mode"
+        class="theme-switcher"
+        tabindex="0"
+        role="button"
+        aria-label="Toggle dark mode"
+        aria-pressed="false">
+    </div><div
+        title="Reset mode to default"
+        class="theme-resetter arrow"
+        tabindex="0"
+        role="button"
+        aria-hidden="true"
+        aria-label="Reset mode to default">
+    </div>
+
+</li>
+</ul>
+                    </li>
+                </ul>
+            </div>
+        
+    </nav>
+</header>
+
+    <div class="content">
+
+        
+        
+
+
+
+
+<main>
+    <article>
+        <h1 class="article-title">
+            SSA构建和销毁
+        </h1>
+
+        <ul class="meta"><li title="1069 words">6 min read</li>
+        </ul>
+
+        <section class="body"><blockquote>
+<p>ssa 构建和删除</p>
+</blockquote>
+<h1 id="1-ssagou-jian-suan-fa">1. SSA构建算法</h1>
+<blockquote>
+<p>依赖：</p>
+<ol>
+<li>dom tree</li>
+<li>DF</li>
+<li>llvm ir基础知识</li>
+</ol>
+</blockquote>
+<p>对以下c代码</p>
+<pre data-lang="c" class="language-c z-code"><code class="language-c" data-lang="c"><span class="z-source z-c"><span class="z-storage z-type z-c">int</span> <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">foo</span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-storage z-type z-c">int</span> <span class="z-variable z-parameter z-c">a</span><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span></span></span><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">	<span class="z-storage z-type z-c">int</span> b <span class="z-keyword z-operator z-assignment z-c">=</span> a<span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">	<span class="z-keyword z-control z-flow z-return z-c">return</span> b<span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"></span></span><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-end z-c">}</span></span></span>
+</span></code></pre>
+<p>clang会生成类似这种IR</p>
+<pre data-lang="c" class="language-c z-code"><code class="language-c" data-lang="c"><span class="z-source z-c">define i32 @<span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">foo</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">i32 <span class="z-keyword z-operator z-arithmetic z-c">%</span>a</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">	<span class="z-keyword z-operator z-arithmetic z-c">%</span>pa <span class="z-keyword z-operator z-assignment z-c">=</span> alloc i32
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">	<span class="z-keyword z-operator z-arithmetic z-c">%</span>pb <span class="z-keyword z-operator z-assignment z-c">=</span> alloc i32
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">	store <span class="z-keyword z-operator z-arithmetic z-c">%</span>a<span class="z-punctuation z-separator z-c">,</span> <span class="z-keyword z-operator z-arithmetic z-c">%</span>pa
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">	store <span class="z-keyword z-operator z-arithmetic z-c">%</span>a<span class="z-punctuation z-separator z-c">,</span> <span class="z-keyword z-operator z-arithmetic z-c">%</span>pb
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">	<span class="z-keyword z-operator z-arithmetic z-c">%</span>b1 <span class="z-keyword z-operator z-assignment z-c">=</span> load <span class="z-keyword z-operator z-arithmetic z-c">%</span>pb
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">	ret i32 <span class="z-keyword z-operator z-arithmetic z-c">%</span>b1
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></code></pre>
+<p>我们能看到llvm采用了alloc+load+store指令来实现c中局部变量的存放。
+这里参数处理<code>i32 %a; store %a, %pa</code>实际上是个比较复杂的话题，按下不表。
+这段IR的有很多冗余的load/store, 有没有什么办法消除掉呢？
+SROA（mem2reg）！
+预期的IR</p>
+<pre data-lang="c" class="language-c z-code"><code class="language-c" data-lang="c"><span class="z-source z-c">define i32 @<span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">foo</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">i32 <span class="z-keyword z-operator z-arithmetic z-c">%</span>a</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">	ret i32 <span class="z-keyword z-operator z-arithmetic z-c">%</span>a
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></code></pre>
+<p>如果控制流比较复杂呢？</p>
+<pre data-lang="c" class="language-c z-code"><code class="language-c" data-lang="c"><span class="z-source z-c"><span class="z-storage z-type z-c">int</span> b <span class="z-keyword z-operator z-assignment z-c">=</span> a<span class="z-punctuation z-terminator z-c">;</span>
+</span><span class="z-source z-c"><span class="z-keyword z-control z-c">if</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span>a <span class="z-keyword z-operator z-comparison z-c">&gt;</span> <span class="z-constant z-numeric z-integer z-decimal z-c">10</span><span class="z-punctuation z-section z-group z-end z-c">)</span></span><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">	b <span class="z-keyword z-operator z-assignment z-c">=</span> b <span class="z-keyword z-operator z-arithmetic z-c">+</span> a<span class="z-punctuation z-terminator z-c">;</span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-end z-c">}</span></span><span class="z-keyword z-control z-c">else</span><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">	b <span class="z-keyword z-operator z-assignment z-c">=</span> b <span class="z-keyword z-operator z-c">*</span> a<span class="z-punctuation z-terminator z-c">;</span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span><span class="z-source z-c"><span class="z-keyword z-control z-flow z-return z-c">return</span> b<span class="z-punctuation z-terminator z-c">;</span>
+</span><span class="z-source z-c"><span class="z-keyword z-operator z-assignment z-c">=</span><span class="z-keyword z-operator z-comparison z-c">&gt;</span> 
+</span><span class="z-source z-c">ir
+</span><span class="z-source z-c">bb0<span class="z-keyword z-operator z-ternary z-c">:</span>
+</span><span class="z-source z-c">  <span class="z-keyword z-operator z-arithmetic z-c">%</span>pb <span class="z-keyword z-operator z-assignment z-c">=</span> alloc i32
+</span><span class="z-source z-c">  store <span class="z-keyword z-operator z-arithmetic z-c">%</span>a<span class="z-punctuation z-separator z-c">,</span> <span class="z-keyword z-operator z-arithmetic z-c">%</span>pb
+</span><span class="z-source z-c">  <span class="z-keyword z-operator z-arithmetic z-c">%</span>c <span class="z-keyword z-operator z-assignment z-c">=</span> CMP_GT <span class="z-keyword z-operator z-arithmetic z-c">%</span>a<span class="z-punctuation z-separator z-c">,</span> <span class="z-constant z-numeric z-integer z-decimal z-c">10</span>
+</span><span class="z-source z-c">  br <span class="z-keyword z-operator z-arithmetic z-c">%</span>c<span class="z-punctuation z-separator z-c">,</span> <span class="z-keyword z-operator z-arithmetic z-c">%</span>bb1<span class="z-punctuation z-separator z-c">,</span> <span class="z-keyword z-operator z-arithmetic z-c">%</span>bb2
+</span><span class="z-source z-c">
+</span><span class="z-source z-c">bb1<span class="z-keyword z-operator z-ternary z-c">:</span>
+</span><span class="z-source z-c">  <span class="z-keyword z-operator z-arithmetic z-c">%</span>b0 <span class="z-keyword z-operator z-assignment z-c">=</span> load <span class="z-keyword z-operator z-arithmetic z-c">%</span>pb
+</span><span class="z-source z-c">  <span class="z-keyword z-operator z-arithmetic z-c">%</span>b1 <span class="z-keyword z-operator z-assignment z-c">=</span> add <span class="z-keyword z-operator z-arithmetic z-c">%</span>b0<span class="z-punctuation z-separator z-c">,</span> <span class="z-keyword z-operator z-arithmetic z-c">%</span>a
+</span><span class="z-source z-c">  store <span class="z-keyword z-operator z-arithmetic z-c">%</span>b1<span class="z-punctuation z-separator z-c">,</span> <span class="z-keyword z-operator z-arithmetic z-c">%</span>pb
+</span><span class="z-source z-c">  br <span class="z-keyword z-operator z-arithmetic z-c">%</span>bb4
+</span><span class="z-source z-c">
+</span><span class="z-source z-c">bb3<span class="z-keyword z-operator z-ternary z-c">:</span>
+</span><span class="z-source z-c">  <span class="z-keyword z-operator z-arithmetic z-c">%</span>b2 <span class="z-keyword z-operator z-assignment z-c">=</span> load <span class="z-keyword z-operator z-arithmetic z-c">%</span>pb
+</span><span class="z-source z-c">  <span class="z-keyword z-operator z-arithmetic z-c">%</span>b3 <span class="z-keyword z-operator z-assignment z-c">=</span> mul <span class="z-keyword z-operator z-arithmetic z-c">%</span>b2<span class="z-punctuation z-separator z-c">,</span> <span class="z-keyword z-operator z-arithmetic z-c">%</span>a
+</span><span class="z-source z-c">  store <span class="z-keyword z-operator z-arithmetic z-c">%</span>b3<span class="z-punctuation z-separator z-c">,</span> <span class="z-keyword z-operator z-arithmetic z-c">%</span>pb
+</span><span class="z-source z-c">  br <span class="z-keyword z-operator z-arithmetic z-c">%</span>bb4
+</span><span class="z-source z-c">bb4<span class="z-keyword z-operator z-ternary z-c">:</span>
+</span><span class="z-source z-c">  <span class="z-keyword z-operator z-arithmetic z-c">%</span>b4 <span class="z-keyword z-operator z-assignment z-c">=</span> load <span class="z-keyword z-operator z-arithmetic z-c">%</span>pb
+</span><span class="z-source z-c">  ret <span class="z-keyword z-operator z-arithmetic z-c">%</span>b4
+</span></code></pre>
+<p>这里我们发现，如果想要正确删除掉这些load/store，我们需要引入<code>phinode</code>,而且必须拿到控制流信息。phinode是个逻辑节点，在实际的CPU上没对应的指令/寄存器表示。所以我们在生成实际的汇编前需要再删除掉phi。</p>
+<p>接下来看如何实现SSA构建：</p>
+<p>原理分为两步, insertPHI, Rename， 伪代码如下：</p>
+<pre data-lang="c" class="language-c z-code"><code class="language-c" data-lang="c"><span class="z-source z-c">
+</span><span class="z-source z-c">procedure <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">InsertPHI</span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-variable z-parameter z-c">variable_list</span><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c">    </span><span class="z-keyword z-control z-c">for</span> each variable v in variable_list
+</span><span class="z-source z-c">        WorkList ← ∅
+</span><span class="z-source z-c">        EverOnWorkList ← ∅
+</span><span class="z-source z-c">        AlreadyHasPhiFunc ← ∅
+</span><span class="z-source z-c">        <span class="z-keyword z-control z-c">for</span> each node n containing an assignment to v
+</span><span class="z-source z-c">            WorkList ← WorkList ∪ <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>n<span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span><span class="z-source z-c">        end
+</span><span class="z-source z-c">
+</span><span class="z-source z-c">        EverOnWorkList ← WorkList
+</span><span class="z-source z-c">        <span class="z-keyword z-control z-c">while</span> WorkList ≠ ∅
+</span><span class="z-source z-c">            Remove some node n from <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">WorkList</span></span><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c">            </span><span class="z-keyword z-control z-c">for</span> each d ∈ <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">DF</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">n</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span><span class="z-source z-c">                <span class="z-keyword z-control z-c">if</span> d ∉ AlreadyHasPhiFunc
+</span><span class="z-source z-c">                    Insert a φ<span class="z-keyword z-operator z-arithmetic z-c">-</span>function <span class="z-keyword z-control z-c">for</span> v at d
+</span><span class="z-source z-c">                    AlreadyHasPhiFunc ← AlreadyHasPhiFunc ∪ <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>d<span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span><span class="z-source z-c">                    <span class="z-keyword z-control z-c">if</span> d ∉ EverOnWorkList
+</span><span class="z-source z-c">                        WorkList ← WorkList ∪ <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>d<span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span><span class="z-source z-c">                        EverOnWorkList ← EverOnWorkList ∪ <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>d<span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span><span class="z-source z-c">                    end
+</span><span class="z-source z-c">                <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">end</span></span><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c">            </span>end
+</span><span class="z-source z-c">        end
+</span><span class="z-source z-c">    <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">end</span></span><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c"></span>end <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">procedure</span></span><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c">  
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c"></span>procedure <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">GenName</span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c">variable <span class="z-variable z-parameter z-c">v</span><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c">    </span>vn <span class="z-keyword z-operator z-assignment z-c">=</span> new <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">Value</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">v</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span><span class="z-source z-c">    Push vn onto Stacks<span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span>v<span class="z-punctuation z-section z-brackets z-end z-c">]</span></span>
+</span><span class="z-source z-c">    <span class="z-keyword z-control z-flow z-return z-c">return</span> v
+</span><span class="z-source z-c">end <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">procedure</span></span><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c">  
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c"></span>procedure <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">Rename</span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c">block <span class="z-variable z-parameter z-c">b</span><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c">    </span><span class="z-keyword z-control z-c">if</span> b previously visited <span class="z-keyword z-control z-flow z-return z-c">return</span>
+</span><span class="z-source z-c">    <span class="z-keyword z-control z-c">for</span> each φ<span class="z-keyword z-operator z-arithmetic z-c">-</span>function p in b
+</span><span class="z-source z-c">        v <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">LHS</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">p</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span><span class="z-source z-c">        vn <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">GenName</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">v</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span> and replace v with vn
+</span><span class="z-source z-c">    end
+</span><span class="z-source z-c">
+</span><span class="z-source z-c">    for each statement s in <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">b</span></span><span class="z-meta z-function z-c"> </span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c">in <span class="z-variable z-parameter z-c">order</span><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c">        </span><span class="z-keyword z-control z-c">for</span> each variable v ∈ <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">RHS</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">s</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span><span class="z-source z-c">            replace v by <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">Top</span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-variable z-parameter z-c">Stacks</span><span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span>v<span class="z-punctuation z-section z-brackets z-end z-c">]</span></span><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c">        </span>end
+</span><span class="z-source z-c">
+</span><span class="z-source z-c">        <span class="z-keyword z-control z-c">for</span> each variable v ∈ <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">LHS</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">s</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span><span class="z-source z-c">            vn <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">GenName</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">v</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span> and replace v with vn
+</span><span class="z-source z-c">        end
+</span><span class="z-source z-c">
+</span><span class="z-source z-c">        for each s ∈ <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">succ</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">b</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span> <span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span>in CFG<span class="z-punctuation z-section z-group z-end z-c">)</span></span>
+</span><span class="z-source z-c">            j ← position in s’s φ<span class="z-keyword z-operator z-arithmetic z-c">-</span>function corresponding to block b
+</span><span class="z-source z-c">            <span class="z-keyword z-control z-c">for</span> each φ<span class="z-keyword z-operator z-arithmetic z-c">-</span>function p in s
+</span><span class="z-source z-c">                replace the jth operand of <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">RHS</span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-variable z-parameter z-c">p</span><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-meta z-function z-c"> </span>by <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">Top</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">Stacks<span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span>v<span class="z-punctuation z-section z-brackets z-end z-c">]</span></span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span><span class="z-source z-c">            end
+</span><span class="z-source z-c">        <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">end</span></span><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c">    </span>end
+</span><span class="z-source z-c">
+</span><span class="z-source z-c">    <span class="z-keyword z-control z-c">for</span> each s ∈ <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">child</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">b</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span> <span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span>in DT<span class="z-punctuation z-section z-group z-end z-c">)</span></span>
+</span><span class="z-source z-c">        <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">Rename</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">s</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span><span class="z-source z-c">    <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">end</span></span><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c">    </span><span class="z-keyword z-control z-c">for</span> each φ<span class="z-keyword z-operator z-arithmetic z-c">-</span>function or statement t in b
+</span><span class="z-source z-c">        <span class="z-keyword z-control z-c">for</span> each vi ∈ <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">LHS</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">t</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span><span class="z-source z-c">            <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">Pop</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">Stacks<span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span>v<span class="z-punctuation z-section z-brackets z-end z-c">]</span></span></span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span><span class="z-source z-c">        <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">end</span></span><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c">    </span>end
+</span><span class="z-source z-c">end <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">procedure</span></span><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c"></span>SSAConstruction<span class="z-keyword z-operator z-ternary z-c">:</span>
+</span><span class="z-source z-c">    <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">InsertPHI</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">list</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span><span class="z-source z-c">    <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">Rename</span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-variable z-parameter z-c">entry</span><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c"></span>end
+</span></code></pre>
+<p>我们看到这种伪代码的形式和LLVMIR区别很大。因为IR格式不一样，接下来看llvm ir下如何实现mem2reg</p>
+<pre data-lang="c" class="language-c z-code"><code class="language-c" data-lang="c"><span class="z-source z-c"><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">mem2reg</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">Function f</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">	list <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span><span class="z-punctuation z-section z-brackets z-end z-c">]</span></span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">	<span class="z-keyword z-control z-c">for</span> inst in f<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">entry</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">		<span class="z-keyword z-control z-c">if</span> inst is alloc and <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">isPromotable</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">inst</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">			<span class="z-comment z-line z-double-slash z-c"><span class="z-punctuation z-definition z-comment z-c">//</span> 有些alloc不能被删除，like volatile
+</span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">			list<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">push</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">inst</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">		<span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">	<span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">	<span class="z-keyword z-control z-c">if</span> list<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">empty</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span> <span class="z-keyword z-control z-flow z-return z-c">return</span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">	Phi2Alloc <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">InsertPHI</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">list</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">	<span class="z-comment z-line z-double-slash z-c"><span class="z-punctuation z-definition z-comment z-c">//</span> init map: alloc -&gt; stack&lt;value&gt;
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c">	<span class="z-comment z-line z-double-slash z-c"><span class="z-punctuation z-definition z-comment z-c">//</span> with first value undef
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c">	incomings_map <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span><span class="z-punctuation z-section z-block z-end z-c">}</span></span> 
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">	<span class="z-keyword z-control z-c">for</span> alloc in list <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">		incomings_map<span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span>alloc<span class="z-punctuation z-section z-brackets z-end z-c">]</span></span> <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span>undef<span class="z-punctuation z-section z-brackets z-end z-c">]</span></span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">	<span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">	<span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">Rename</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">f<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">entry</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-separator z-c">,</span> incomings_map<span class="z-punctuation z-separator z-c">,</span> Phi2Alloc</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span><span class="z-source z-c">
+</span><span class="z-source z-c"><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">InsertPHI</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">list</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">	Phi2Alloc <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span><span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">	<span class="z-keyword z-control z-c">for</span> alloc in list<span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">		WorkList <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span><span class="z-punctuation z-section z-brackets z-end z-c">]</span></span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">		<span class="z-keyword z-control z-c">for</span> user in alloc<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">use_list</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">			<span class="z-keyword z-control z-c">if</span> user is store <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">				WorkList<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">push</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">user<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">parent</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">			<span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">		<span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">		EverOnWorkList <span class="z-keyword z-operator z-assignment z-c">=</span> WorkList<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">clone</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">		AlreadyHasPhi <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span><span class="z-punctuation z-section z-brackets z-end z-c">]</span></span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">		<span class="z-keyword z-control z-c">while</span> <span class="z-keyword z-operator z-arithmetic z-c">!</span>WorkList<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">empty</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span> <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">			n <span class="z-keyword z-operator z-assignment z-c">=</span> WorkList<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">pop</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">			<span class="z-keyword z-control z-c">for</span> d in <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">DF</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">n</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span> <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">				<span class="z-keyword z-control z-c">if</span> d not in AlreadyHasPhi <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">					phi <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">create_phi</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span></span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">					phi<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">set_all_incomings</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">undef</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span></span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">					d<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">insert_front</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">phi</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span></span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">					Phi2Alloc<span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span>phi<span class="z-punctuation z-section z-brackets z-end z-c">]</span></span> <span class="z-keyword z-operator z-assignment z-c">=</span> alloc
+</span></span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">
+</span></span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">					AlreadyHasPhi<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">add</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">d</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span></span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">					<span class="z-keyword z-control z-c">if</span> d not in EverOnWorkList <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">						WorkList<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">push</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">d</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span></span></span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">						EverOnWorkList<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">push</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">d</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span></span></span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">					<span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">				<span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">			<span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">		<span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">	<span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">	<span class="z-keyword z-control z-flow z-return z-c">return</span> Phi2Alloc
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span><span class="z-source z-c">
+</span><span class="z-source z-c"><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">PhiRename</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">bb<span class="z-punctuation z-separator z-c">,</span> incomings_map<span class="z-punctuation z-separator z-c">,</span> Phi2Alloc</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">	<span class="z-keyword z-control z-c">if</span> bb visited<span class="z-punctuation z-separator z-c">,</span> <span class="z-keyword z-control z-flow z-return z-c">return</span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">	<span class="z-keyword z-control z-c">for</span> inst in bb <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">		<span class="z-keyword z-control z-c">if</span> inst is phi <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">			<span class="z-keyword z-control z-c">if</span> inst not in Phi2Alloc
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">				<span class="z-keyword z-control z-flow z-continue z-c">continue</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">			alloc <span class="z-keyword z-operator z-assignment z-c">=</span> Phi2Alloc<span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span>inst<span class="z-punctuation z-section z-brackets z-end z-c">]</span></span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">			incomings_map<span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span>alloc<span class="z-punctuation z-section z-brackets z-end z-c">]</span></span><span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">push</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">phi</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span> <span class="z-comment z-line z-double-slash z-c"><span class="z-punctuation z-definition z-comment z-c">//</span> update top
+</span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">		
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">			<span class="z-keyword z-control z-flow z-continue z-c">continue</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">		<span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">		<span class="z-keyword z-control z-c">if</span> inst is load <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">			<span class="z-comment z-line z-double-slash z-c"><span class="z-punctuation z-definition z-comment z-c">//</span> %inst = load %address
+</span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">			ad <span class="z-keyword z-operator z-assignment z-c">=</span> inst<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">get_address</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">			<span class="z-keyword z-control z-c">if</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span>ad is alloc<span class="z-punctuation z-section z-group z-end z-c">)</span></span> <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">				top <span class="z-keyword z-operator z-assignment z-c">=</span> incomings_map<span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span>ad<span class="z-punctuation z-section z-brackets z-end z-c">]</span></span><span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">top</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">				inst<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">replaceAllUsesWith</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">top</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">			<span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">			<span class="z-keyword z-control z-flow z-continue z-c">continue</span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">		<span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">		<span class="z-keyword z-control z-c">if</span> inst is store <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">			ad <span class="z-keyword z-operator z-assignment z-c">=</span> inst<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">get_address</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">			<span class="z-comment z-line z-double-slash z-c"><span class="z-punctuation z-definition z-comment z-c">//</span> store %x, %address
+</span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">			<span class="z-keyword z-control z-c">if</span> ad is alloc <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">				<span class="z-comment z-line z-double-slash z-c"><span class="z-punctuation z-definition z-comment z-c">//</span> update top
+</span></span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">				incomings_map<span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span>ad<span class="z-punctuation z-section z-brackets z-end z-c">]</span></span><span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">push</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">inst<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">getValue</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">			<span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">		<span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">	<span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">	<span class="z-keyword z-control z-c">for</span> succ in b<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">getSuccessors</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span> <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span> <span class="z-comment z-line z-double-slash z-c"><span class="z-punctuation z-definition z-comment z-c">//</span> cfg
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">		<span class="z-keyword z-control z-c">for</span> phi in succ<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">getPhiNodes</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span> <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">			alloc <span class="z-keyword z-operator z-assignment z-c">=</span> Phi2Alloc<span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span>phi<span class="z-punctuation z-section z-brackets z-end z-c">]</span></span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">			top <span class="z-keyword z-operator z-assignment z-c">=</span> incomings_map<span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span>alloc<span class="z-punctuation z-section z-brackets z-end z-c">]</span></span><span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">top</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">			phi<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">update_by_block</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">b<span class="z-punctuation z-separator z-c">,</span> top</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span> <span class="z-comment z-line z-double-slash z-c"><span class="z-punctuation z-definition z-comment z-c">//</span> update for incoming
+</span></span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">		<span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">	<span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">	<span class="z-keyword z-control z-c">for</span> child in <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">DomTree</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">b</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">children</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span> <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">		<span class="z-comment z-line z-double-slash z-c"><span class="z-punctuation z-definition z-comment z-c">//</span> may cause stack over flow...
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">		<span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">Rename</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">child<span class="z-punctuation z-separator z-c">,</span> incomings_map<span class="z-punctuation z-separator z-c">,</span> Phi2Alloc</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">	<span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c">	<span class="z-comment z-line z-double-slash z-c"><span class="z-punctuation z-definition z-comment z-c">//</span> do pop stack
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c">	<span class="z-keyword z-control z-c">for</span> inst in b <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">		<span class="z-keyword z-control z-c">if</span> inst is phi <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">			alloc <span class="z-keyword z-operator z-assignment z-c">=</span> Phi2Alloc<span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span>phi<span class="z-punctuation z-section z-brackets z-end z-c">]</span></span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">			incomings_map<span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span>alloc<span class="z-punctuation z-section z-brackets z-end z-c">]</span></span><span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">pop</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">			<span class="z-keyword z-control z-flow z-continue z-c">continue</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">		<span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">		<span class="z-keyword z-control z-c">if</span> inst is store <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">			ad <span class="z-keyword z-operator z-assignment z-c">=</span> inst<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">getAddress</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">			incomings_map<span class="z-meta z-brackets z-c"><span class="z-punctuation z-section z-brackets z-begin z-c">[</span>ad<span class="z-punctuation z-section z-brackets z-end z-c">]</span></span><span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">pop</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">		<span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">	<span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span><span class="z-source z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span><span class="z-source z-c">
+</span></code></pre>
+<p>当然，以上代码不是llvm mem2reg实际实现代码。</p>
+<p>llvm实现做了一些优化，domtree遍历优化，特殊情况处理等。</p>
+<hr />
+<h1 id="ssa-destruction">SSA destruction</h1>
+<p>如何销毁SSA形式，删除phinode。</p>
+<blockquote>
+<p>llvm的phi-elimination是在mir阶段发生。</p>
+</blockquote>
+<p>一般来说，SSA destruction是将phinode替换为copy指令。</p>
+<ol>
+<li>暴力做法，对于<code>p = phi (%a1, %bb1), (%a2, %bb2) ....</code>，在bb1,bb2... 尾部插入 <code>p = copy %a...</code> 然后删除掉phi节点。很不幸，改算法是错误的。
+考虑到lost copy和swap problem：</li>
+</ol>
+<p>![[static/images/Pasted image 20250314140205.png]]![[static/images/Pasted image 20250314140226.png]]</p>
+<blockquote>
+<p>ref <a href="https://inria.hal.science/inria-00349925v1/document">*Revisiting Out-of-SSA Translation for Correctness, Code Quality, and Efficiency</a></p>
+</blockquote>
+<p>我们的暴力算法会生成</p>
+<pre data-lang="c" class="language-c z-code"><code class="language-c" data-lang="c"><span class="z-source z-c">
+</span><span class="z-source z-c">swap problem<span class="z-keyword z-operator z-ternary z-c">:</span>
+</span><span class="z-source z-c">b0<span class="z-keyword z-operator z-ternary z-c">:</span>
+</span><span class="z-source z-c">	a1 <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-keyword z-operator z-variadic z-c">...</span>
+</span><span class="z-source z-c">	b1 <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-keyword z-operator z-variadic z-c">...</span>
+</span><span class="z-source z-c">	a2 <span class="z-keyword z-operator z-assignment z-c">=</span> copy a1
+</span><span class="z-source z-c">	b2 <span class="z-keyword z-operator z-assignment z-c">=</span> copy b1
+</span><span class="z-source z-c">	jump <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">b1</span></span><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c"></span>b1<span class="z-keyword z-operator z-ternary z-c">:</span>
+</span><span class="z-source z-c">	a2 <span class="z-keyword z-operator z-assignment z-c">=</span> copy b2 <span class="z-keyword z-operator z-comparison z-c">&lt;</span><span class="z-keyword z-operator z-arithmetic z-c">--</span><span class="z-keyword z-operator z-arithmetic z-c">-</span> 没有swap
+</span><span class="z-source z-c">	b2 <span class="z-keyword z-operator z-assignment z-c">=</span> copy a2
+</span><span class="z-source z-c">
+</span><span class="z-source z-c">	<span class="z-keyword z-control z-c">if</span> p jump b1
+</span><span class="z-source z-c">	jump <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">b2</span></span><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c"></span>b2<span class="z-keyword z-operator z-ternary z-c">:</span>
+</span><span class="z-source z-c">	<span class="z-keyword z-operator z-variadic z-c">...</span>
+</span><span class="z-source z-c">
+</span><span class="z-source z-c">lost<span class="z-keyword z-operator z-arithmetic z-c">-</span>copy<span class="z-keyword z-operator z-arithmetic z-c">-</span>problem
+</span><span class="z-source z-c">
+</span><span class="z-source z-c">b0<span class="z-keyword z-operator z-ternary z-c">:</span>
+</span><span class="z-source z-c">	x1 <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-keyword z-operator z-variadic z-c">...</span>
+</span><span class="z-source z-c">	x2 <span class="z-keyword z-operator z-assignment z-c">=</span> copy x1
+</span><span class="z-source z-c">	jump <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">b1</span></span><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c"></span>b1<span class="z-keyword z-operator z-ternary z-c">:</span>
+</span><span class="z-source z-c">	x3 <span class="z-keyword z-operator z-assignment z-c">=</span> x2 <span class="z-keyword z-operator z-arithmetic z-c">+</span> <span class="z-constant z-numeric z-integer z-decimal z-c">1</span>
+</span><span class="z-source z-c">	x2 <span class="z-keyword z-operator z-assignment z-c">=</span> copy x3
+</span><span class="z-source z-c">	<span class="z-keyword z-control z-c">if</span> p jump b1
+</span><span class="z-source z-c">	jump <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">b2</span></span><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c"></span>b2<span class="z-keyword z-operator z-ternary z-c">:</span>
+</span><span class="z-source z-c">	<span class="z-keyword z-operator z-variadic z-c">...</span> <span class="z-keyword z-operator z-assignment z-c">=</span> x2  <span class="z-keyword z-operator z-comparison z-c">&lt;</span><span class="z-keyword z-operator z-arithmetic z-c">--</span><span class="z-keyword z-operator z-arithmetic z-c">--</span> 这里错误
+</span><span class="z-source z-c">
+</span></code></pre>
+<ol start="2">
+<li>split critical edges算法</li>
+</ol>
+<blockquote>
+<p>图中红边就是critical edge:
+![[static/images/Pasted image 20250314141430.png]]</p>
+</blockquote>
+<p>![[static/images/Pasted image 20250314141816.png]]</p>
+<p>![[static/images/Pasted image 20250314142302.png]]
+swap problem结果看起来不太对哦。
+看起来是插入copy出了问题, 再看一眼<code>a2=phi(a1, b2);b2=phi(b1,a2)</code>
+![[static/images/Pasted image 20250314142521.png]]
+是个环。。。</p>
+<p>我们发现swap problem中</p>
+<ul>
+<li>a2和b2的生命周期重叠了</li>
+<li>并且插入copy方式也需要改进</li>
+</ul>
+<ol start="3">
+<li>isolating phi + parallel copy</li>
+</ol>
+<blockquote>
+<p>先介绍几个概念</p>
+<ul>
+<li>CSSA(Conventional SSA) form is defined as SSA form for which each phi-web is interference-free.</li>
+<li>TSSA(Transformed SSA) form is non-conventional SSA, may have phi-web is not interference-free.</li>
+</ul>
+</blockquote>
+<p>swap problem和lost-copy problem中 都是TSSA，而不是CSSA。
+如何将TSSA转换为CSSA？并且在CSSA中插入copy是否还需要注意类似swapproblem的情况？</p>
+<p>所以我们接下来的算法：</p>
+<ol>
+<li>Insert parallel copies for all φ-functions （TSSA =&gt; CSSA）</li>
+<li>eliminate phis in CSSA</li>
+<li>Sequentialize parallel copies, possibly with one more variable and some additional copies</li>
+<li>some optimization</li>
+</ol>
+<blockquote>
+<p>CSSA形式
+![[static/images/lost-copy.png]]![[static/images/swap.png]]
+这代码逻辑看起来是没问题了，就是代码质量堪忧。。。</p>
+</blockquote>
+<p>消除phi节点后：</p>
+<p>![[static/images/lost-copy-phi-elim.png]]
+![[static/images/swap-phi-elim.png]]
+上一小节提到的swap中copy的问题仍然存在，所以接下来要介绍，parallel copies的概念。
+我们将这些插入的copy指令视为parallel copies，然后采用算法求解copy插入顺序</p>
+<blockquote>
+<p>![[static/images/Pasted image 20250314150937.png]]
+ref <a href="https://inria.hal.science/inria-00349925v1/document">Revisiting Out-of-SSA Translation for Correctness, Code Quality, and Efficiency</a>
+不幸的是，这个算法有点小问题。
+实际上是个图遍历算法：<a href="http://web.cs.ucla.edu/~palsberg/paper/cc09.pdf">cc09.pdf</a></p>
+</blockquote>
+<p>我们用python写个demo：</p>
+<pre data-lang="python" class="language-python z-code"><code class="language-python" data-lang="python"><span class="z-source z-python"><span class="z-meta z-class z-python"><span class="z-storage z-type z-class z-python"><span class="z-keyword z-declaration z-class z-python">class</span></span> <span class="z-entity z-name z-class z-python"><span class="z-meta z-generic-name z-python">Copy</span></span><span class="z-punctuation z-section z-class z-begin z-python">:</span></span>
+</span><span class="z-source z-python"><span class="z-meta z-function z-python">    <span class="z-storage z-type z-function z-python"><span class="z-keyword z-declaration z-function z-python">def</span></span> <span class="z-entity z-name z-function z-python"><span class="z-support z-function z-magic z-python">__init__</span></span></span><span class="z-meta z-function z-parameters z-python"><span class="z-punctuation z-section z-parameters z-begin z-python">(</span></span><span class="z-meta z-function z-parameters z-python"><span class="z-variable z-parameter z-python">self</span><span class="z-punctuation z-separator z-parameters z-python">,</span> <span class="z-variable z-parameter z-python">src</span><span class="z-punctuation z-separator z-parameters z-python">,</span> <span class="z-variable z-parameter z-python">dst</span><span class="z-punctuation z-section z-parameters z-end z-python">)</span></span><span class="z-meta z-function z-python"><span class="z-punctuation z-section z-function z-begin z-python">:</span></span>
+</span><span class="z-source z-python">        <span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">src</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">src</span></span>
+</span><span class="z-source z-python">        <span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">dst</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">dst</span></span>
+</span><span class="z-source z-python"><span class="z-meta z-function z-python">    <span class="z-storage z-type z-function z-python"><span class="z-keyword z-declaration z-function z-python">def</span></span> <span class="z-entity z-name z-function z-python"><span class="z-support z-function z-magic z-python">__repr__</span></span></span><span class="z-meta z-function z-parameters z-python"><span class="z-punctuation z-section z-parameters z-begin z-python">(</span></span><span class="z-meta z-function z-parameters z-python"><span class="z-variable z-parameter z-python">self</span><span class="z-punctuation z-section z-parameters z-end z-python">)</span></span><span class="z-meta z-function z-python"><span class="z-punctuation z-section z-function z-begin z-python">:</span></span>
+</span><span class="z-source z-python">        <span class="z-keyword z-control z-flow z-return z-python">return</span> <span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python"><span class="z-punctuation z-definition z-string z-begin z-python">&quot;</span></span></span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python"><span class="z-constant z-other z-placeholder z-python">%s</span> &lt;- <span class="z-constant z-other z-placeholder z-python">%s</span><span class="z-punctuation z-definition z-string z-end z-python">&quot;</span></span></span> <span class="z-keyword z-operator z-arithmetic z-python">%</span> <span class="z-meta z-sequence z-tuple z-python"><span class="z-punctuation z-section z-sequence z-begin z-python">(</span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">dst</span></span><span class="z-punctuation z-separator z-sequence z-python">,</span> <span class="z-meta z-qualified-name z-python"><span class="z-variable z-language z-python">self</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">src</span></span><span class="z-punctuation z-section z-sequence z-end z-python">)</span></span>
+</span><span class="z-source z-python">
+</span><span class="z-source z-python"><span class="z-meta z-function z-python"><span class="z-storage z-type z-function z-python"><span class="z-keyword z-declaration z-function z-python">def</span></span> <span class="z-entity z-name z-function z-python"><span class="z-meta z-generic-name z-python">seq_copy</span></span></span><span class="z-meta z-function z-parameters z-python"><span class="z-punctuation z-section z-parameters z-begin z-python">(</span></span><span class="z-meta z-function z-parameters z-python"><span class="z-variable z-parameter z-python">seq</span><span class="z-punctuation z-section z-parameters z-end z-python">)</span></span><span class="z-meta z-function z-python"><span class="z-punctuation z-section z-function z-begin z-python">:</span></span>
+</span><span class="z-source z-python">    <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">ready</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-sequence z-list z-empty z-python"><span class="z-punctuation z-section z-sequence z-begin z-python">[</span><span class="z-punctuation z-section z-sequence z-end z-python">]</span></span>
+</span><span class="z-source z-python">    <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">todo</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-sequence z-list z-empty z-python"><span class="z-punctuation z-section z-sequence z-begin z-python">[</span><span class="z-punctuation z-section z-sequence z-end z-python">]</span></span>
+</span><span class="z-source z-python">    <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">pred</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-mapping z-empty z-python"><span class="z-punctuation z-section z-mapping z-begin z-python">{</span><span class="z-punctuation z-section z-mapping z-end z-python">}</span></span>
+</span><span class="z-source z-python">    <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">loc</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-mapping z-empty z-python"><span class="z-punctuation z-section z-mapping z-begin z-python">{</span><span class="z-punctuation z-section z-mapping z-end z-python">}</span></span>
+</span><span class="z-source z-python">    <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">n</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python"><span class="z-punctuation z-definition z-string z-begin z-python">&quot;</span></span></span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python">tmp<span class="z-punctuation z-definition z-string z-end z-python">&quot;</span></span></span>
+</span><span class="z-source z-python">  
+</span><span class="z-source z-python">    <span class="z-meta z-item-access z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">pred</span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-begin z-python">[</span></span><span class="z-meta z-item-access z-arguments z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">n</span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-end z-python">]</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-constant z-language z-python">None</span>
+</span><span class="z-source z-python">    <span class="z-meta z-statement z-loop z-for z-python"><span class="z-keyword z-control z-loop z-for z-python">for</span> <span class="z-meta z-generic-name z-python">i</span> <span class="z-keyword z-control z-loop z-for z-in z-python">in</span></span><span class="z-meta z-statement z-loop z-for z-python"> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">seq</span></span></span><span class="z-meta z-statement z-loop z-for z-python"><span class="z-punctuation z-section z-block z-loop z-for z-python">:</span></span>
+</span><span class="z-source z-python">        <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">a</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">i</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">src</span></span>
+</span><span class="z-source z-python">        <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">b</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">i</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">dst</span></span>
+</span><span class="z-source z-python">        <span class="z-meta z-item-access z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">loc</span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-begin z-python">[</span></span><span class="z-meta z-item-access z-arguments z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">b</span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-end z-python">]</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-constant z-language z-python">None</span>
+</span><span class="z-source z-python">        <span class="z-meta z-item-access z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">pred</span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-begin z-python">[</span></span><span class="z-meta z-item-access z-arguments z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">a</span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-end z-python">]</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-constant z-language z-python">None</span>
+</span><span class="z-source z-python">
+</span><span class="z-source z-python">    <span class="z-meta z-statement z-loop z-for z-python"><span class="z-keyword z-control z-loop z-for z-python">for</span> <span class="z-meta z-generic-name z-python">i</span> <span class="z-keyword z-control z-loop z-for z-in z-python">in</span></span><span class="z-meta z-statement z-loop z-for z-python"> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">seq</span></span></span><span class="z-meta z-statement z-loop z-for z-python"><span class="z-punctuation z-section z-block z-loop z-for z-python">:</span></span>
+</span><span class="z-source z-python">        <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">a</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">i</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">src</span></span>
+</span><span class="z-source z-python">        <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">b</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">i</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">dst</span></span>
+</span><span class="z-source z-python">        <span class="z-meta z-item-access z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">loc</span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-begin z-python">[</span></span><span class="z-meta z-item-access z-arguments z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">a</span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-end z-python">]</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">a</span></span>
+</span><span class="z-source z-python">        <span class="z-meta z-item-access z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">pred</span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-begin z-python">[</span></span><span class="z-meta z-item-access z-arguments z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">b</span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-end z-python">]</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">a</span></span>
+</span><span class="z-source z-python">        <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">todo</span></span><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">append</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">b</span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+</span><span class="z-source z-python">
+</span><span class="z-source z-python">    <span class="z-meta z-statement z-loop z-for z-python"><span class="z-keyword z-control z-loop z-for z-python">for</span> <span class="z-meta z-generic-name z-python">i</span> <span class="z-keyword z-control z-loop z-for z-in z-python">in</span></span><span class="z-meta z-statement z-loop z-for z-python"> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">seq</span></span></span><span class="z-meta z-statement z-loop z-for z-python"><span class="z-punctuation z-section z-block z-loop z-for z-python">:</span></span>
+</span><span class="z-source z-python">        <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">a</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">i</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">src</span></span>
+</span><span class="z-source z-python">        <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">b</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">i</span><span class="z-punctuation z-accessor z-dot z-python">.</span><span class="z-meta z-generic-name z-python">dst</span></span>
+</span><span class="z-source z-python">        <span class="z-meta z-statement z-conditional z-if z-python"><span class="z-keyword z-control z-conditional z-if z-python">if</span> <span class="z-meta z-item-access z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">loc</span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-begin z-python">[</span></span><span class="z-meta z-item-access z-arguments z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">b</span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-end z-python">]</span></span> <span class="z-keyword z-operator z-logical z-python">is</span> <span class="z-constant z-language z-python">None</span><span class="z-punctuation z-section z-block z-conditional z-if z-python">:</span></span>
+</span><span class="z-source z-python">            <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">ready</span></span><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">append</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">b</span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+</span><span class="z-source z-python">    <span class="z-meta z-statement z-loop z-while z-python"><span class="z-keyword z-control z-loop z-while z-python">while</span> <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-support z-function z-builtin z-python">len</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">todo</span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span> <span class="z-keyword z-operator z-comparison z-python">!=</span> <span class="z-constant z-numeric z-integer z-decimal z-python">0</span><span class="z-punctuation z-section z-block z-loop z-while z-python">:</span></span>
+</span><span class="z-source z-python">        <span class="z-meta z-statement z-loop z-while z-python"><span class="z-keyword z-control z-loop z-while z-python">while</span> <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-support z-function z-builtin z-python">len</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">ready</span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span> <span class="z-keyword z-operator z-comparison z-python">!=</span> <span class="z-constant z-numeric z-integer z-decimal z-python">0</span><span class="z-punctuation z-section z-block z-loop z-while z-python">:</span></span>
+</span><span class="z-source z-python">            <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">b</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">ready</span></span><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">pop</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+</span><span class="z-source z-python">            <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">a</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-item-access z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">pred</span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-begin z-python">[</span></span><span class="z-meta z-item-access z-arguments z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">b</span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-end z-python">]</span></span>
+</span><span class="z-source z-python">            <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">c</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-item-access z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">loc</span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-begin z-python">[</span></span><span class="z-meta z-item-access z-arguments z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">a</span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-end z-python">]</span></span>
+</span><span class="z-source z-python">            <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-support z-function z-builtin z-python">print</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python"><span class="z-punctuation z-definition z-string z-begin z-python">&quot;</span></span></span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python">emit copy <span class="z-constant z-other z-placeholder z-python"><span class="z-punctuation z-definition z-placeholder z-begin z-python">{</span><span class="z-punctuation z-definition z-placeholder z-end z-python">}</span></span> &lt;- <span class="z-constant z-other z-placeholder z-python"><span class="z-punctuation z-definition z-placeholder z-begin z-python">{</span><span class="z-punctuation z-definition z-placeholder z-end z-python">}</span></span><span class="z-punctuation z-definition z-string z-end z-python">&quot;</span></span></span><span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">format</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">b</span></span><span class="z-punctuation z-separator z-arguments z-python">,</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">c</span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+</span><span class="z-source z-python">            <span class="z-meta z-item-access z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">loc</span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-begin z-python">[</span></span><span class="z-meta z-item-access z-arguments z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">a</span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-end z-python">]</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">b</span></span>
+</span><span class="z-source z-python">            <span class="z-meta z-statement z-conditional z-if z-python"><span class="z-keyword z-control z-conditional z-if z-python">if</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">a</span></span> <span class="z-keyword z-operator z-comparison z-python">==</span><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">c</span></span> <span class="z-keyword z-operator z-logical z-python">and</span> <span class="z-meta z-item-access z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">pred</span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-begin z-python">[</span></span><span class="z-meta z-item-access z-arguments z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">a</span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-end z-python">]</span></span> <span class="z-keyword z-operator z-logical z-python">is</span> <span class="z-keyword z-operator z-logical z-python">not</span> <span class="z-constant z-language z-python">None</span><span class="z-punctuation z-section z-block z-conditional z-if z-python">:</span></span>
+</span><span class="z-source z-python">                <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">ready</span></span><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">append</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">a</span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+</span><span class="z-source z-python">        <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">b</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">todo</span></span><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">pop</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-constant z-numeric z-integer z-decimal z-python">0</span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+</span><span class="z-source z-python">        <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">l</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-item-access z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">loc</span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-begin z-python">[</span></span><span class="z-meta z-item-access z-arguments z-python"><span class="z-meta z-item-access z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">pred</span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-begin z-python">[</span></span><span class="z-meta z-item-access z-arguments z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">b</span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-end z-python">]</span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-end z-python">]</span></span>
+</span><span class="z-source z-python">
+</span><span class="z-source z-python">        <span class="z-meta z-statement z-conditional z-if z-python"><span class="z-keyword z-control z-conditional z-if z-python">if</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">b</span></span> <span class="z-keyword z-operator z-comparison z-python">==</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">l</span></span><span class="z-punctuation z-section z-block z-conditional z-if z-python">:</span></span> <span class="z-comment z-line z-number-sign z-python"><span class="z-punctuation z-definition z-comment z-python">#</span> &lt;&lt;&lt;&lt;&lt; 这里
+</span></span><span class="z-source z-python">            <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-support z-function z-builtin z-python">print</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python"><span class="z-punctuation z-definition z-string z-begin z-python">&quot;</span></span></span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python">emit copy <span class="z-constant z-other z-placeholder z-python"><span class="z-punctuation z-definition z-placeholder z-begin z-python">{</span><span class="z-punctuation z-definition z-placeholder z-end z-python">}</span></span>&lt;- <span class="z-constant z-other z-placeholder z-python"><span class="z-punctuation z-definition z-placeholder z-begin z-python">{</span><span class="z-punctuation z-definition z-placeholder z-end z-python">}</span></span><span class="z-punctuation z-definition z-string z-end z-python">&quot;</span></span></span><span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">format</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">n</span></span><span class="z-punctuation z-separator z-arguments z-python">,</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">b</span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+</span><span class="z-source z-python">            <span class="z-meta z-item-access z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">loc</span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-begin z-python">[</span></span><span class="z-meta z-item-access z-arguments z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">b</span></span></span><span class="z-meta z-item-access z-python"><span class="z-punctuation z-section z-brackets z-end z-python">]</span></span> <span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">n</span></span>
+</span><span class="z-source z-python">            <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">ready</span></span><span class="z-meta z-qualified-name z-python"><span class="z-punctuation z-accessor z-dot z-python">.</span></span><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">append</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">b</span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+</span><span class="z-source z-python">           
+</span><span class="z-source z-python"><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">seq</span></span><span class="z-keyword z-operator z-assignment z-python">=</span> <span class="z-meta z-sequence z-list z-python"><span class="z-punctuation z-section z-sequence z-begin z-python">[</span>
+</span></span><span class="z-source z-python"><span class="z-meta z-sequence z-list z-python">    <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">Copy</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python"><span class="z-punctuation z-definition z-string z-begin z-python">&quot;</span></span></span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python">b<span class="z-punctuation z-definition z-string z-end z-python">&quot;</span></span></span><span class="z-punctuation z-separator z-arguments z-python">,</span> <span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python"><span class="z-punctuation z-definition z-string z-begin z-python">&quot;</span></span></span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python">a<span class="z-punctuation z-definition z-string z-end z-python">&quot;</span></span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span><span class="z-punctuation z-separator z-sequence z-python">,</span>
+</span></span><span class="z-source z-python"><span class="z-meta z-sequence z-list z-python">    <span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">Copy</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python"><span class="z-punctuation z-definition z-string z-begin z-python">&quot;</span></span></span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python">a<span class="z-punctuation z-definition z-string z-end z-python">&quot;</span></span></span><span class="z-punctuation z-separator z-arguments z-python">,</span> <span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python"><span class="z-punctuation z-definition z-string z-begin z-python">&quot;</span></span></span><span class="z-meta z-string z-python"><span class="z-string z-quoted z-double z-python">b<span class="z-punctuation z-definition z-string z-end z-python">&quot;</span></span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span><span class="z-punctuation z-separator z-sequence z-python">,</span>
+</span></span><span class="z-source z-python"><span class="z-meta z-sequence z-list z-python"><span class="z-punctuation z-section z-sequence z-end z-python">]</span></span>
+</span><span class="z-source z-python">
+</span><span class="z-source z-python"><span class="z-meta z-function-call z-python"><span class="z-meta z-qualified-name z-python"><span class="z-variable z-function z-python"><span class="z-meta z-generic-name z-python">seq_copy</span></span></span></span><span class="z-meta z-function-call z-arguments z-python"><span class="z-punctuation z-section z-arguments z-begin z-python">(</span><span class="z-meta z-qualified-name z-python"><span class="z-meta z-generic-name z-python">seq</span></span><span class="z-punctuation z-section z-arguments z-end z-python">)</span></span>
+</span></code></pre>
+<blockquote>
+<p>运行脚本，啥也不输出。
+但是如果我们将 <code>b==l</code>改成<code>b!=l</code>, 就会输出
+emit copy tmp&lt;- a
+emit copy a &lt;- b
+emit copy b &lt;- tmp</p>
+</blockquote>
+<p>至此，我们完成了phi-elimination的一半，合法化问题解决了。但是性能问题没解决。</p>
+<hr />
+<p>优化：TODO</p>
+<hr />
+<p>我们重新关注下parallel copies 。</p>
+<pre data-lang="c" class="language-c z-code"><code class="language-c" data-lang="c"><span class="z-source z-c">
+</span><span class="z-source z-c">对于
+</span><span class="z-source z-c">
+</span><span class="z-source z-c">
+</span><span class="z-source z-c">bb1<span class="z-keyword z-operator z-ternary z-c">:</span>
+</span><span class="z-source z-c">	a1 <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-keyword z-operator z-variadic z-c">...</span>
+</span><span class="z-source z-c">	b1 <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-keyword z-operator z-variadic z-c">...</span>
+</span><span class="z-source z-c">	c1 <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-keyword z-operator z-variadic z-c">...</span>
+</span><span class="z-source z-c">	jump <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">bb</span></span><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c"></span>bb2<span class="z-keyword z-operator z-ternary z-c">:</span>
+</span><span class="z-source z-c">	a2 <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-keyword z-operator z-variadic z-c">...</span>
+</span><span class="z-source z-c">	b2 <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-keyword z-operator z-variadic z-c">...</span>
+</span><span class="z-source z-c">	c2 <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-keyword z-operator z-variadic z-c">...</span>
+</span><span class="z-source z-c">	jump <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">bb</span></span><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c"></span>bb3<span class="z-keyword z-operator z-ternary z-c">:</span>
+</span><span class="z-source z-c">	a3 <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-keyword z-operator z-variadic z-c">...</span>
+</span><span class="z-source z-c">	b3 <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-keyword z-operator z-variadic z-c">...</span>
+</span><span class="z-source z-c">	c3 <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-keyword z-operator z-variadic z-c">...</span>
+</span><span class="z-source z-c">	jump <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">bb</span></span><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c">
+</span></span><span class="z-source z-c"><span class="z-meta z-function z-c"></span>bb<span class="z-keyword z-operator z-ternary z-c">:</span>
+</span><span class="z-source z-c">	a <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">phi</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">a1<span class="z-punctuation z-separator z-c">,</span> a2<span class="z-punctuation z-separator z-c">,</span> a3</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span><span class="z-source z-c">	b <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">phi</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">b1<span class="z-punctuation z-separator z-c">,</span> b2<span class="z-punctuation z-separator z-c">,</span> b3</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span><span class="z-source z-c">	c <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">phi</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">c1<span class="z-punctuation z-separator z-c">,</span> c2<span class="z-punctuation z-separator z-c">,</span> c3</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span><span class="z-source z-c">
+</span></code></pre>
+<hr />
+<blockquote>
+<p>注意<code>\\</code>可能会被识别为<code>\</code>, 用<code>\newline</code>更好</p>
+</blockquote>
+<p>$\begin{bmatrix} a \newline b \newline c \end{bmatrix}
+= Φ \begin{bmatrix} a1 &amp; a2 &amp; a3 \newline b1 &amp; b2 &amp; b3 \newline c1 &amp;c2 &amp; c3 \end{bmatrix} $</p>
+<p>那么对于bb1来说，就有parallel copies: $a \gets a1, b \gets b1, c \gets c1$。
+其对应的<strong>Location Transfer Graph</strong>为$G = (V, E), V = \lbrace a,b,c, a1, b1, c1\rbrace, E = \lbrace a \gets a1, b \gets b1, c \gets c1 \rbrace$</p>
+<p>再看下swap problem里面的</p>
+<pre data-lang="c" class="language-c z-code"><code class="language-c" data-lang="c"><span class="z-source z-c">a2 <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">phi</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">a1<span class="z-punctuation z-separator z-c">,</span> b2</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span><span class="z-source z-c">b2 <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">phi</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">b1<span class="z-punctuation z-separator z-c">,</span> a2</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span>
+</span></code></pre>
+<ol>
+<li>前驱1的parallel copies</li>
+</ol>
+<pre data-lang="mermaid" class="language-mermaid z-code"><code class="language-mermaid" data-lang="mermaid"><span class="z-text z-plain">flowchart TD
+</span><span class="z-text z-plain">  a1 --&gt; a2
+</span><span class="z-text z-plain">  b1 --&gt; b2
+</span></code></pre>
+<ol start="2">
+<li>前驱2的parallel copies</li>
+</ol>
+<pre data-lang="mermaid" class="language-mermaid z-code"><code class="language-mermaid" data-lang="mermaid"><span class="z-text z-plain">flowchart TD
+</span><span class="z-text z-plain">  a2 --&gt; b2
+</span><span class="z-text z-plain">  b2 --&gt; a2
+</span></code></pre>
+<hr />
+<p>参考</p>
+<ul>
+<li>https://www.cs.utexas.edu/~pingali/CS380C/2010/papers/ssaCytron.pdf</li>
+<li>https://ics.uci.edu/~yeouln/course/ssa.pdf</li>
+<li><a href="https://inria.hal.science/inria-00349925v1/document">*Revisiting Out-of-SSA Translation for Correctness, Code Quality, and Efficiency</a></li>
+<li><a href="http://web.cs.ucla.edu/~palsberg/paper/cc09.pdf">cc09.pdf</a></li>
+</ul>
+
+        </section>
+
+        
+        
+        
+
+        
+            
+            
+            
+
+            
+        
+            
+            
+            
+
+            
+        
+            
+            
+            
+
+            
+        
+            
+            
+            
+
+            
+        
+        
+
+    </article>
+</main>
+
+
+<link rel="stylesheet" href="https://wangbyby.github.io/katex.min.css">
+    <script defer src="https://wangbyby.github.io/js/katex.min.js"></script><span id="copy-success" class="hidden">
+        Copied!
+    </span>
+    <span id="copy-init" class="hidden">
+        Copy code to clipboard
+    </span>
+    <script defer src="https://wangbyby.github.io/js/copyCodeToClipboard.min.js"></script>
+
+
+    </div>
+    <footer>
+    <section>
+        <nav class="socials nav-navs">
+        </nav>
+
+        
+        <nav class="nav-navs">
+        </nav>
+
+        <div class="credits">
+            <small>
+                
+
+                
+                Powered by
+                <a rel=""  href="https://www.getzola.org">Zola</a>
+                &amp;
+                <a rel=""  href="https://github.com/welpo/tabi">tabi</a>
+
+                </small>
+        </div>
+    </section>
+
+    <div id="searchModal" class="search-modal js" role="dialog" aria-labelledby="modalTitle">
+    <h1 id="modalTitle" class="visually-hidden">Search</h1>
+    <div id="modal-content">
+        <div id="searchBar">
+            <div class="search-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                    <path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/>
+                </svg>
+            </div>
+            <input id="searchInput" role="combobox" autocomplete="off" spellcheck="false" aria-expanded="false" aria-controls="results-container" placeholder="Search…"/>
+            <div id="clear-search" class="close-icon interactive-icon" tabindex="0" role="button" title="Clear search">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
+                <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/>
+                </svg>
+            </div>
+        </div>
+        <div id="results-container">
+            <div id="results-info"><span id="zero_results"> No results</span>
+                <span id="one_results"> $NUMBER result</span>
+                <span id="many_results"> $NUMBER results</span><span id="two_results"> $NUMBER results</span>
+                <span id="few_results"> $NUMBER results</span>
+            </div>
+            <div id="results" role="listbox"></div>
+        </div>
+    </div>
+</div>
+</footer>
+
+</body>
+
+</html>

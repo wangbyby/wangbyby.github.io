@@ -8,20 +8,17 @@
         "type": "tabs",
         "children": [
           {
-            "id": "54b0c420ebbb0dcf",
+            "id": "da27693efcb9d739",
             "type": "leaf",
             "state": {
-              "type": "canvas",
+              "type": "markdown",
               "state": {
-                "file": "未命名.canvas",
-                "viewState": {
-                  "x": 0,
-                  "y": 0,
-                  "zoom": 0
-                }
+                "file": "content/llvm_SDNode.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "lucide-layout-dashboard",
-              "title": "未命名"
+              "icon": "lucide-file",
+              "title": "llvm_SDNode"
             }
           }
         ]
@@ -77,8 +74,7 @@
               "title": "书签"
             }
           }
-        ],
-        "currentTab": 2
+        ]
       }
     ],
     "direction": "horizontal",
@@ -98,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "未命名.canvas",
+                "file": "content/llvm_SDNode.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -108,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "未命名 的反向链接列表"
+              "title": "llvm_SDNode 的反向链接列表"
             }
           },
           {
@@ -173,13 +169,31 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "54b0c420ebbb0dcf",
+  "active": "da27693efcb9d739",
   "lastOpenFiles": [
-    "content/llvm Value Use User内存布局.md",
+    "content/llvm_SDNode_draw.excalidraw.md",
+    "content/loop介绍.md",
+    "content/SSA construction and destruction.md",
+    "content/llvm-use-list.excalidraw",
+    "content/llvm_SDNode.md",
+    "content/llvm_SDNode_draw.excalidraw",
+    "static/images/llvm_value_use_layout.excalidraw",
+    "content/domtree.excalidraw",
+    "content/domtree.excalidraw.md",
+    "content/llvm-use-list.excalidraw.md",
+    "static/images/llvm_value_use_layout.excalidraw.md",
+    "Excalidraw/Drawing 2025-04-05 21.48.41.excalidraw.md",
+    "Excalidraw/Drawing 2025-04-05 21.48.40.excalidraw.md",
+    "Excalidraw/Drawing 2025-04-05 21.46.08.excalidraw.md",
+    "Excalidraw/Drawing 2025-04-05 21.46.44.excalidraw.md",
+    "Excalidraw/Drawing 2025-04-05 21.46.43.excalidraw.md",
+    "Excalidraw/Drawing 2025-04-05 21.46.42.excalidraw.md",
+    "content/Drawing 2025-04-05 21.45.00.excalidraw.md",
     "未命名.canvas",
+    "Excalidraw/Drawing 2025-04-05 20.36.13.excalidraw.md",
+    "content/llvm Value Use User内存布局.md",
     "Excalidraw/Drawing 2025-04-01 22.35.47.excalidraw.md",
     "Excalidraw",
-    "content/SSA construction and destruction.md",
     "content/_index.md"
   ]
 }

@@ -4,7 +4,7 @@ title = "SSA构建和销毁"
 +++
 
 
->ssa 构建和删除
+>phinode的创建和消除
 
 # 1. SSA构建算法
 

@@ -1,4 +1,4 @@
 [submodule "themes/tabi"]
 	path = themes/tabi
-	url = https://gitee.com/bybywww/tabi.git
+	url = git@gitee.com:bybywww/tabi.git
 	depth = 1

@@ -1,3 +1,4 @@
 [submodule "themes/tabi"]
 	path = themes/tabi
 	url = https://github.com/wangbyby/tabi.git
+	depth = 1

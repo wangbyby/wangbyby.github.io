@@ -79,10 +79,7 @@ $$ x^n = t_{n1} x^{(1)} + t_{n2} x^{(2)} + ... + t_{nn} x^{(n)} $$
 
 $ \lbrace c_0,+,c_1,+,c_2,+,...,+,c_n \rbrace_k (l) = \sum \limits_{p=0} ^{n} c_p \dbinom{l_k}{p} $
 
-其中
-$c_i$都是常数
-$\dbinom{l}{p} = \frac { l(l-1)...(l-p+1) } { p! }  $
-并且$\dbinom{x}{0} = 1 $
+其中$c_i$都是常数, $\dbinom{l}{p} = \frac { l(l-1)...(l-p+1) } { p! }$, 并且$\dbinom{x}{0} = 1 $
 
 以$G(x) = 2x^2 + x + 1$ 为例
 $G(x) = 2x^2 + x + 1 = c_0 \dbinom{x}{0} + c_1 \dbinom{x}{1} + c2 \dbinom{x}{2} = c_0 + c_1x + c_2\frac{x(x-1)}{2} $
@@ -91,10 +88,12 @@ $G(x) = 2x^2 + x + 1 = c_0 \dbinom{x}{0} + c_1 \dbinom{x}{1} + c2 \dbinom{x}{2} 
 
 也能用`finite differentiation table` 计算
 
-还是看论文2的例子吧$\frac{5}{2}l_1^2+\frac{11}{2}l_1+3$对应：
+还是看论文2的例子吧, $\frac{5}{2}l_1^2+\frac{11}{2}l_1+3$对应：
 ![alt text](image-2.png)
-8 = 11 - 3
-5 = 13 - 8
+$8 = 11 - 3$
+$5 = 13 - 8$
+
+> 要长脑子了
 
 ## CR之间的计算
 
@@ -110,7 +109,10 @@ $  \lbrace \Theta_a, +, \Theta_b \rbrace_k *  \lbrace \Theta_c, +, \Theta_d \rbr
 详见`Fast Recognition of Scalar Evolutions on Three-Address SSA Code`
 
 
->peeled REC可以忽略掉
+- 实现细节
+    - 参考llvm就行，前置需要cfg, domtree, loopinfo
+   - peeled REC可以忽略掉
+
 
 
 ## llvm 中实现

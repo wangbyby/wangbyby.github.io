@@ -297,8 +297,9 @@ llvm实现做了一些优化，domtree遍历优化，特殊情况处理等。
 
 一般来说，SSA destruction是将phinode替换为copy指令。
 
-1. 暴力做法，对于`p = phi (%a1, %bb1), (%a2, %bb2) ....`，在bb1,bb2... 尾部插入 `p = copy %a...` 然后删除掉phi节点。很不幸，改算法是错误的。
-考虑到lost copy和swap problem：
+1. 暴力做法，对于`p = phi (%a1, %bb1), (%a2, %bb2) ....`，在bb1,bb2... 尾部插入 `p = copy %a...` 然后删除掉phi节点。但是该做法结果不对。
+
+考虑到lost copy problem和swap problem：
 
 ![[static/images/Pasted image 20250314140205.png]]![[static/images/Pasted image 20250314140226.png]]
 >ref [*Revisiting Out-of-SSA Translation for Correctness, Code Quality, and Efficiency](https://inria.hal.science/inria-00349925v1/document)
@@ -339,7 +340,7 @@ b2:
 ```
 
 
-2. split critical edges算法
+1. split critical edges算法
 >图中红边就是critical edge: 
 > ![[static/images/Pasted image 20250314141430.png]]
 
@@ -422,6 +423,8 @@ def seq_copy(seq):
         b = i.dst
         if loc[b] is None:
             ready.append(b)
+
+
     while len(todo) != 0:
         while len(ready) != 0:
             b = ready.pop()
@@ -455,9 +458,24 @@ seq_copy(seq)
 
 至此，我们完成了phi-elimination的一半，合法化问题解决了。但是性能问题没解决。
 
+对于lost copy problem，在BB块前插入copy指令是必须的。（如果采用Split Critical Edges的方式，循环的代码质量会下降）
+对于swap problem，需检测环的出现。
+
+copy插入位置问题，lost copy 和swap problem插入顺序还不一样。。。。
+~~这帮人写论文能不能靠谱点~~
+
 ---
 
-优化：TODO
+## 优化问题
+
+关键字：copy de-coalescing
+
+即如何最小化插入copy指令 
+1. 在CSSA上面对parallel copies 优化
+2. 先生成很多冗余的copy指令，然后再优化这些copy指令
+
+第一种方式有些困难，个人认为难点在于parallel copies相关生命周期如何计算。
+第二种方式就很传统了, interference graph + union find， 不干涉的放在一个点集里面。
 
 
 
@@ -531,5 +549,5 @@ flowchart TD
 
 - https://www.cs.utexas.edu/~pingali/CS380C/2010/papers/ssaCytron.pdf
 - https://ics.uci.edu/~yeouln/course/ssa.pdf
-- [*Revisiting Out-of-SSA Translation for Correctness, Code Quality, and Efficiency](https://inria.hal.science/inria-00349925v1/document)
+- [Revisiting Out-of-SSA Translation for Correctness, Code Quality, and Efficiency](https://inria.hal.science/inria-00349925v1/document)
 - [cc09.pdf](http://web.cs.ucla.edu/~palsberg/paper/cc09.pdf)

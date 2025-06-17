@@ -121,7 +121,7 @@ $  \lbrace \Theta_a, +, \Theta_b \rbrace_k *  \lbrace \Theta_c, +, \Theta_d \rbr
 
 `opt -passes=print<scalar-evolution> a.ll `
 
-如果不太清楚就去`llvm/test/Analysis/ScalarEvolution`目录下copy。
+如果不太清楚命令就去相关pass的测试目录里找，比如scev就是`llvm/test/Analysis/ScalarEvolution`。
 
 1. 实现细节
 llvm中并没有`peeled REC`相关逻辑
@@ -198,11 +198,14 @@ Compiler returned: 0
 -------------------------------------------------------------------------------
 
 
-参考：
-1.  Chains of Recurrences - a method to expedite the evaluation of closed-form functions 
-    https://bohr.wlu.ca/ezima/papers/ISSAC94_p242-bachmann.pdf
-2. Fast Recognition of Scalar Evolutions on Three-Address SSA Code
-   https://www.researchgate.net/publication/267701684_Fast_Recognition_of_Scalar_Evolutions_on_Three-Address_SSA_Code
+## 参考：
+1. Chain of Recurrences: A Method to Expedite the Evaluation of Closed-Form Functions
+2. Symbolic Evaluation of Chains of Recurrences for Loop Optimization
+3. Pop, S., Cohen, A., & Silber, G.-A. (2005). Induction variable analysis with delayed
+abstractions. In Proceedings of the First International Conference on High Performance
+Embedded Architectures and Compilers. HiPEAC’05 (pp. 218–232).
 
-3. https://llvm.org/devmtg/2009-10/ScalarEvolutionAndLoopOptimization.pdf
-4. https://llvm.org/devmtg/2018-04/slides/Absar-ScalarEvolution.pdf
+4. https://www.cri.ensmp.fr/classement/doc/A-381.pdf
+5. https://www.researchgate.net/publication/267701684_Fast_Recognition_of_Scalar_Evolutions_on_Three-Address_SSA_Code
+6. https://bohr.wlu.ca/ezima/papers/ISSAC94_p242-bachmann.pdf
+7. https://llvm.org/devmtg/2009-10/ScalarEvolutionAndLoopOptimization.pdf

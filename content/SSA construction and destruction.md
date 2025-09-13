@@ -461,8 +461,31 @@ seq_copy(seq)
 对于lost copy problem，在BB块前插入copy指令是必须的。（如果采用Split Critical Edges的方式，循环的代码质量会下降）
 对于swap problem，需检测环的出现。
 
-copy插入位置问题，lost copy 和swap problem插入顺序还不一样。。。。
+copy插入位置问题，lost copy 和swap problem插入顺序还不一样。
 ~~这帮人写论文能不能靠谱点~~
+
+----------------
+2025-9-13日更新
+以上的算法面对如下代码还是有些问题
+很简单的用例，格式化整型的代码实现。
+```c
+int value = ....;
+do{
+	int a = value % base;
+	value = value / base;
+
+	buf[len++] = a;
+
+} while(value)
+
+```
+原因还是copy插入顺序。（parallel copies的遍历顺序）
+
+解决方法，额。
+根据split critical edges的方法。
+如果phi的incoming block是critical edge 的src block，就创建 `tmp=copy vi; a' = tmp`, 并将phi替换为`a=a'`。非关键边就直接插入`a' = vj `
+很简单的实现，但是还是挺有效。。。
+
 
 ---
 

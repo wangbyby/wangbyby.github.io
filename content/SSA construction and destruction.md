@@ -486,6 +486,7 @@ do{
 如果phi的incoming block是critical edge 的src block，就创建 `tmp=copy vi; a' = tmp`, 并将phi替换为`a=a'`。非关键边就直接插入`a' = vj `
 很简单的实现，但是还是挺有效。。。
 
+>其实就是llvm中关掉split critical edge的算法。
 
 ---
 

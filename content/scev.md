@@ -115,7 +115,7 @@ $  \lbrace \Theta_a, +, \Theta_b \rbrace_k *  \lbrace \Theta_c, +, \Theta_d \rbr
   - 论文中需要注意 Top，Down的符号 ~~怎么感觉和常量传播里不一样，是我弄错了？~~
  > - We also provide an additional TREC, denoted by ⊤, to capture any evolution that we fail to recognize. (in 2 Trees of Recurrences)
  > - ⊥ that stands for a not yet analyzed variable. (in 3.1 Algorithm)
-
+ > ⊤ == CouldNotCompute, ⊥ == start state
 
 
 

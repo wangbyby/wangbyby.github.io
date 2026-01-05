@@ -19,7 +19,23 @@ IDom(b): For a node b, the set IDom(b) contains exactly one node, the immediate 
 即集合IDom(b)只有一个元素。
 
 > 例子：
-> ![aa](/static/images/domtree/dt_image.png)
+> 
+>```txt
+>    +-------+
+>    | entry |
+>    +-------+
+>       |
+>       v
+>    +-------+
+>+-->|   n   |
+>|   +-------+
+>|    |   \
+>|    |    \
+>|    v     v
+>|   +---+  +---+
+>+---| a |<-| b |
+>    +---+  +---+
+>```
 > Dom(b) = {entry, n, b}
 > IDom(b) = {n}
 
@@ -66,7 +82,51 @@ struct dom_tree_node{
 
 ```
 
->![alt text](/static/images/domtree/dt_image-2.png)
+```dot
+digraph cfg {
+    rankdir=TB;
+    node [shape=box];
+    
+    // 节点
+    entry [label="entry"];
+    n [label="n"];
+    a [label="a"];
+    b [label="b"];
+    
+    // 支配关系（idom）
+    entry -> n;
+    n -> a;
+    n -> b;
+    b -> a;
+    a -> n;
+}
+
+```
+
+```dot
+digraph DominatorTree {
+    rankdir=TB;
+    node [shape=box];
+    
+    // 节点
+    entry [label="entry"];
+    n [label="n"];
+    a [label="a"];
+    b [label="b"];
+    
+    
+    entry -> n [label="children", color=red, fontcolor=red];
+    n -> a [label="children", color=red, fontcolor=red];
+    n -> b [label="children", color=red, fontcolor=red];
+    
+    // 添加子节点关系（children）
+    entry -> n [label="idom", dir=back, color=blue, fontcolor=blue];
+    n -> a [label="idom", dir=back, color=blue, fontcolor=blue];
+    n -> b [label="idom", dir=back, color=blue, fontcolor=blue];
+}
+
+```
+
 
 算法实现：
 ```c
@@ -203,8 +263,27 @@ SSA-construction中插入phi节点时候会用到。
 > define the Dominance Frontiers of a node b as: for a node y, that b dominates a predessor of y but does not strictly dominate y.
 
 例子：
->![alt text](/static/images/domtree/dt_image-3.png)
-> DF(b) = {y}
+
+```dot
+digraph example3 {
+    rankdir=TB;
+    node [shape=box];
+    
+    // 节点
+    entry [label="entry"];
+    b [label="b"];
+    x [label="x"];
+    y [label="y"];
+    
+    entry->b;
+    b->x;
+    x->y;
+    entry->y;
+    
+}
+```
+>DF(b) = {y}
+ 
 
 ```txt
 for b in nodes{

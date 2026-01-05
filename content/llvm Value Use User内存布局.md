@@ -42,7 +42,7 @@ Instruction即User，只储存了`Value*`数组
 ```
 
 
->![[static/images/use_graph.png]]
+>![[/static/images/use_graph.png]]
 
 看起来很简单，那实现replaceAllUsesWith是怎么实现呢？
 ```c
@@ -78,8 +78,7 @@ void replaceAllUsesWith(Value* self, Value* other) {
 
 先看看llvm ir的继承体系:
 >https://llvm.org/doxygen/classllvm_1_1Value.html
->
->![[static/images/a63ece927e2f339e157f22cf886cd3d6bcbc8a40_2_690x474.png]]
+> Value是基类，User继承自Value。
 
 然后查看源码，看看User实现方式：
 
@@ -97,13 +96,50 @@ void replaceAllUsesWith(Value* self, Value* other) {
 ```
 
 对应图：
->![[static/images/llvm-ir-use.jpeg]]
->有点复杂的图。。。
+>![[/static/images/llvm-ir-use.jpeg]]
+
 
 对应实现：
+```cpp
+// 双链表，头插法插入
 
-> 双链表，头插法插入
->![[static/images/llvm-use-list-impl.png]]
+void User::setOperand(unsigned i, Value *Val) {
+  assert(i < NumUserOperands && "setOperand() out of range!");
+  assert((!isa<Constant>((const Value*)this) ||
+        isa<GlobalValue>((const Value*)this)) &&
+        "Cannot mutate a constant with setOperand!");
+  getOperandList()[i] = Val; // 调用Use::operator=(Value *RHS)
+}
+
+Value *Use::operator=(Value *RHS) {
+  set(RHS);  // 调用Use::set(Value *V)
+  return RHS;
+}
+
+void Use::set(Value *V) {
+  if (Val) removeFromList();
+  Val = V;
+  if (V) V->addUse(*this); // 调用Value::addUse(Use &U)
+}
+
+void Use::removeFromList() {
+  *Prev = Next;
+  if (Next)
+    Next->Prev = Prev;
+}
+
+void Value::addUse(Use &U) { U.addToList(&UseList); } // 调用Use::addToList(Use **List)
+
+void Use::addToList(Use **List) {
+  Next = *List;
+  if (Next)
+    Next->Prev = &Next;
+  Prev = List;
+  *Prev = this;
+}
+
+Use *User::getOperandList() {...}
+```
 
 那replaceAllUsesWith实现就比较简单了：
 ```c
@@ -139,6 +175,7 @@ while (UseList) {
 
 - switch指令
 ![[static/images/llvm-switch.png]]
+
 
 ----
 

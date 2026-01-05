@@ -260,7 +260,7 @@ Spanning Tree：![spanning tree](/static/images/domtree/dt_dfs.png)
 
 SSA-construction中插入phi节点时候会用到。
 
-> define the Dominance Frontiers of a node b as: for a node y, that b dominates a predessor of y but does not strictly dominate y.
+*define the Dominance Frontiers of a node b as: for a node y, that b dominates a predessor of y but does not strictly dominate y.*
 
 例子：
 

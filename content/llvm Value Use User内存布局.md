@@ -152,6 +152,8 @@ while (UseList) {
 
 ----
 
+### 一些特殊指令
+
 - branch指令:
 >
 >这里还需要提到BasicBlock如何获取前驱和后缀
@@ -165,16 +167,10 @@ while (UseList) {
 >1. CFG遍历，通过前驱/后缀。包括了RPO，DFS等遍历方式。
 >2. 存储结构遍历，通过ilist的next/prev
 
-
-
-![[static/images/llvm-branch.png]]
-
 - phi指令：
-![[static/images/llvm-phi.png]]
+basicblock是额外存储的，所以很容易出现basicblock未更新导致错误。新版本的llvm好像更新了。 
 
-
-- switch指令
-![[static/images/llvm-switch.png]]
+- switch指令。会把cond，default，case都作为Use内联进来。
 
 
 ----

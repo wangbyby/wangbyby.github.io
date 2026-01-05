@@ -20,7 +20,7 @@ myblog/
 └── themes/              # 主题文件（可选）
 ```
 - 创建的博客就放在content下面。
-- 图片放在static/images下面，在博客里用`![test](/images/a.png)`引用
+- 图片放在static/images下面，在博客里用`![test](/images/<xxx>.png)`引用
 - 博客格式：`+++`一定要有
 ```txt
 +++

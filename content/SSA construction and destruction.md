@@ -284,9 +284,6 @@ PhiRename(bb, incomings_map, Phi2Alloc){
 
 llvm实现做了一些优化，domtree遍历优化，特殊情况处理等。
 
-
-
-
 ----
 
 # SSA destruction
@@ -301,8 +298,41 @@ llvm实现做了一些优化，domtree遍历优化，特殊情况处理等。
 
 考虑到lost copy problem和swap problem：
 
-![[static/images/Pasted image 20250314140205.png]]![[static/images/Pasted image 20250314140226.png]]
->ref [*Revisiting Out-of-SSA Translation for Correctness, Code Quality, and Efficiency](https://inria.hal.science/inria-00349925v1/document)
+
+```txt
+
+// Revisiting Out-of-SSA Translation for Correctness, Code Quality, and Efficiency
+// https://inria.hal.science/inria-00349925v1/document
+
+lost copy problem:
+
+b0:
+	x1 =...
+	jmp b1
+
+b1:						  
+	x2 = phi(x1, x3)      
+	x3 = x2 + 1			  
+	...
+	jmp p, b1, b2
+
+
+-----------------------
+
+swap problem:
+
+b0:
+	a1 =...
+	b1 =...
+	jmp b1
+
+b1:          
+	a2 = phi(a1, b2)      
+	b2 = phi(b1, a2)      
+    ...                      
+	jmp p, b1, b2        		  
+	
+```
 
 我们的暴力算法会生成
 ```c
@@ -323,6 +353,9 @@ b1:
 b2:
 	...
 
+
+--------------------------------------------
+
 lost-copy-problem
 
 b0:
@@ -340,24 +373,90 @@ b2:
 ```
 
 
-1. split critical edges算法
->图中红边就是critical edge: 
-> ![[static/images/Pasted image 20250314141430.png]]
+### split critical edges
 
 
-![[static/images/Pasted image 20250314141816.png]]
+图中红边就是critical edge: 
+```dot
 
-![[static/images/Pasted image 20250314142302.png]]
+digraph G {
+    // 不可见节点（不显示标签）
+    xxx [label="", shape=none, width=0, height=0];
+    others [label="", shape=none, width=0, height=0];
+    
+    // 可见节点
+    b1 [label="b1", shape=circle, style=filled, fillcolor=lightgray];
+    b2 [label="b2", shape=circle, style=filled, fillcolor=lightgray];
+    
+    // 边
+    xxx -> b2 [];  
+    b1 -> b2 [color=red, penwidth=2];
+    b1 -> others [];  
+    
+    // 调整布局
+    rankdir=TD;  // 从左到右排列
+}
+
+```
+
+对lost copy和swap应用该算法：
+
+```txt
+
+lost-copy-problem
+
+b0:
+	x1 =...
+	x2 = copy x1
+	jmp b1
+
+b1:
+	x3 = x2 + 1
+	jmp p, b3, b2
+
+b3:
+	x2 = copy x3
+	jmp b1
+
+b2:
+	... = x2
+
+---------------------------------------------------
+
+swap problem
+
+bb0:
+	a1 =...
+	b1 =...
+	a2 = copy a1
+	b2 = copy b1
+	jmp bb1
+
+bb1:
+
+	jmp p, bb3, bb2
+
+bb3:
+	a2 = copy b2  <--- 没有swap
+	b2 = copy a2
+	jmp bb1
+
+bb2:
+	... = a2
+	... = b2
+
+```
+
 swap problem结果看起来不太对哦。
-看起来是插入copy出了问题, 再看一眼`a2=phi(a1, b2);b2=phi(b1,a2)`
-![[static/images/Pasted image 20250314142521.png]]
+看起来是插入copy出了问题, 再看一眼`a2=phi(a1, b2);b2=phi(b1,a2)` a2, b2形成了环。
 是个环。。。
 
 我们发现swap problem中
 - a2和b2的生命周期重叠了
 - 并且插入copy方式也需要改进
 
-3. isolating phi + parallel copy
+### isolating phi + parallel copy
+
 >先介绍几个概念
 >- CSSA(Conventional SSA) form is defined as SSA form for which each phi-web is interference-free.
 >- TSSA(Transformed SSA) form is non-conventional SSA, may have phi-web is not interference-free.
@@ -365,26 +464,161 @@ swap problem结果看起来不太对哦。
 swap problem和lost-copy problem中 都是TSSA，而不是CSSA。
 如何将TSSA转换为CSSA？并且在CSSA中插入copy是否还需要注意类似swapproblem的情况？
 
-所以我们接下来的算法：
+所以我们接下来的算法步骤是：
 1. Insert parallel copies for all φ-functions （TSSA => CSSA）
 2. eliminate phis in CSSA
 3. Sequentialize parallel copies, possibly with one more variable and some additional copies
 4. some optimization
 
 
->CSSA形式
->![[static/images/lost-copy.png]]![[static/images/swap.png]]
->这代码逻辑看起来是没问题了，就是代码质量堪忧。。。
+首先转换为cssa格式
+```txt
+
+lost copy problem
+
+b0:
+	x1 =...
+	x1' = copy x1
+	jmp b1
+
+b1:
+	x2' = phi(x1', x3')
+	x2 = copy x2'
+	x3 = x2 + 1
+	x3' = copy x3
+
+	jmp p, b1, b2
+
+b2:
+	... = x2
+
+
+----------------------------------------
+
+swap problem:
+
+B0:
+	a1 =...
+	b1 =...
+	a1' = copy a1
+	b1' = copy b1
+	jmp B1
+
+B1:
+	a2' = phi(a1', b2')
+	b2' = phi(b1', a2')
+	a2 = copy a2'
+	b2 = copy b2'
+	b2' = copy b2
+	a2' = copy a2
+   	...
+	jmp p, B1, B2
+
+B2:
+	... = a2
+	... = b2
+
+```
 
 消除phi节点后：
 
-![[static/images/lost-copy-phi-elim.png]]
-![[static/images/swap-phi-elim.png]]
+```txt
+
+lost copy problem
+
+b0:
+	x1 =...
+	x1' = copy x1
+	x2' = copy x1'      // x1' in x2' = phi(x1', x3')
+	jmp b1
+
+b1:
+	x2 = copy x2'
+	x3 = x2 + 1
+	x3' = copy x3
+	x2' = x3'            // x3' in x2' = phi(x1', x3')
+	jmp p, b1, b2
+
+b2:
+	... = x2
+
+
+----------------------------------------
+
+swap problem:
+
+B0:
+	a1 =...
+	b1 =...
+	a1' = copy a1
+	b1' = copy b1
+	a2' = copy a1'   // a1' in a2' = phi(a1', b2')
+	b2' = copy b1'	 // b1' in b2' = phi(b1', a2')
+	jmp B1
+
+B1:
+	a2 = copy a2'
+	b2 = copy b2'
+	b2' = copy b2
+	a2' = copy a2
+   	a2' = copy b2'  // a2' in a2' = phi(a1', b2')
+	b2' = copy a2'  // b2' in b2' = phi(b1', a2')
+	jmp p, B1, B2
+
+B2:
+	... = a2
+	... = b2
+
+```
 上一小节提到的swap中copy的问题仍然存在，所以接下来要介绍，parallel copies的概念。
 我们将这些插入的copy指令视为parallel copies，然后采用算法求解copy插入顺序
 
->![[static/images/Pasted image 20250314150937.png]]
->ref [Revisiting Out-of-SSA Translation for Correctness, Code Quality, and Efficiency](https://inria.hal.science/inria-00349925v1/document)
+```txt
+// Revisiting Out-of-SSA Translation for Correctness, Code Quality, and Efficiency (https://inria.hal.science/inria-00349925v1/document)
+
+// @args
+// Set P of parallel copies of the form a -> b, a != b
+// n: one extra fresh variable
+// @output:  List of copies in sequential order
+def parallel_copy_sequentialization(P:set, n: variable) 
+	
+	ready = []
+	to_do = []
+	pred(n) = none // a map
+
+	for a -> b in p
+		loc(b) = none               // init
+		pred(b) = none
+	end for
+
+	for a -> b in p    
+		loc(a) = a                    /* needed and not copied yet */
+		pred(b) = a                   /* (unique) predecessor *
+		to_do.append(b)               /* copy into b to be done */
+
+	for a->b in p
+		if loc(b) == none
+			ready.append(b)            /* b is not used and can be overwritten */
+		
+	while to_do != []
+		while ready != []
+			b = ready.pop()
+			a = pred(b)
+			c = loc(a)
+			emit copy c -> b
+			
+			loc(a) = b
+			if a == c and pred(a) != none
+				ready.append(a)
+		b = to_do.pop()
+		l = loc(pred(b))
+		if b == l
+			emit copy b -> n
+			loc(b) = n
+			ready.append(b)
+
+```
+
 >不幸的是，这个算法有点小问题。
 >实际上是个图遍历算法：[cc09.pdf](http://web.cs.ucla.edu/~palsberg/paper/cc09.pdf)
 
@@ -464,11 +698,12 @@ seq_copy(seq)
 copy插入位置问题，lost copy 和swap problem插入顺序还不一样。
 ~~这帮人写论文能不能靠谱点~~
 
-----------------
-2025-9-13日更新
-以上的算法面对如下代码还是有些问题
-很简单的用例，格式化整型的代码实现。
+### llvm采用的算法
+
+llvm有split critical edge也有不依赖split critical edge的实现。
+parallel copy面对如下代码还是有些问题
 ```c
+// 格式化整型的代码实现
 int value = ....;
 do{
 	int a = value % base;
@@ -480,13 +715,12 @@ do{
 
 ```
 原因还是copy插入顺序。（parallel copies的遍历顺序）
-
 解决方法，额。
-根据split critical edges的方法。
+根据llvm中split critical edges的方法。
 如果phi的incoming block是critical edge 的src block，就创建 `tmp=copy vi; a' = tmp`, 并将phi替换为`a=a'`。非关键边就直接插入`a' = vj `
 很简单的实现，但是还是挺有效。。。
 
->其实就是llvm中关掉split critical edge的算法。
+为什么不split block呢？因为跳转太多会导致性能下降，特别是在loop中。
 
 ---
 
@@ -504,6 +738,8 @@ do{
 
 
 ----
+
+## others
 
 我们重新关注下parallel copies 。
 ```c

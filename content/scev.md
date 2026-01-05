@@ -67,8 +67,19 @@ $$ x^n = t_{n1} x^{(1)} + t_{n2} x^{(2)} + ... + t_{nn} x^{(n)} $$
 
 其中$ s_{ij}, t_{ij} $ 是Stirling numbers 
 
-![alt text](image-1.png)
->懒得打字了，看图吧
+$$
+\begin{aligned}
+&\textbf{Lemma 1.}Let \{\varphi_0, \varphi_1, \varphi_2, \ldots, \varphi_k\} be\space a\space simple \space CR. \newline
+&Then, \newline
+&\lbrace \varphi_0, +, \varphi_1, +, \ldots, \varphi_k \rbrace(i) \newline
+&= \varphi_0+\varphi_1i^{(1)} +  \frac{\varphi_2}{2!} i^{(2)} + \ldots+\frac{\varphi_k}{k!} i^{(k)}  \quad (3) \newline
+&= \varphi_0+ i \sum_{j=1}^{k} \frac{\varphi_j}{j!} s_{j1}+ i^2 \sum_{j=2}^{k} \frac{\varphi_j}{j!} s_{j2}+ \cdots+ i^k \frac{\varphi_k}{k!} s_{kk} \newline
+&\{\varphi_0, \varphi_1, \varphi_2, \ldots, \varphi_k\}(i) \newline
+&= \varphi_0 * \varphi_1^{i^{(1)}} * \varphi_2^{\frac{i^{(2)}}{2!}}* \cdots * \varphi_k^{\frac{i^{(k)}}{k!}} \quad (4) \newline
+&=\exp\Bigl(\log(\varphi_0)+ \log(\varphi_1) i^{(1)}+ \frac{\log(\varphi_2)}{2!} i^{(2)}+ \cdots+ \frac{\log(\varphi_k)}{k!} i^{(k)}\Bigr)
+\end{aligned}
+$$
+
 
 所以CR与多项式公式之间的转换就很重要了。
 比如说$G(x) = 2x^2 + x + 1$ 对应 $\lbrace ?, +, ?, +, ? \rbrace$
@@ -89,11 +100,19 @@ $G(x) = 2x^2 + x + 1 = c_0 \dbinom{x}{0} + c_1 \dbinom{x}{1} + c2 \dbinom{x}{2} 
 也能用`finite differentiation table` 计算
 
 还是看论文2的例子吧, $\frac{5}{2}l_1^2+\frac{11}{2}l_1+3$对应：
-![alt text](image-2.png)
+```txt
+
+l1 |  0   1   2   3   4
+---+--------------------
+c0 |  3  11  24  42  65
+c1 |  8  13  18  23
+c2 |  5   5   5
+c3 |  0   0
+```
+
 $8 = 11 - 3$
 $5 = 13 - 8$
 
-> 要长脑子了
 
 ## CR之间的计算
 
@@ -130,8 +149,26 @@ $  \lbrace \Theta_a, +, \Theta_b \rbrace_k *  \lbrace \Theta_c, +, \Theta_d \rbr
 1. 实现细节
 llvm中并没有`peeled REC`相关逻辑
 
-![alt text](image.png) 
->ref 2,  llvm中c对应unknown
+例如这段代码
+```c
++----------------------------------+        a = 1, 5, 9, ..., 101
+| loop ℓ1                          |          = 4ℓ1 + 1
+|   a = φ(1, b);                   |
+|   if (a >= 100) goto end1;       |        e = 5, 11, 17, ..., 95, 101,
+|   b = a + 4;                     |            9, 15, 21, ..., 95, 101
+|                                  |          = 6ℓ2 + 4ℓ1 + 5
+|   loop ℓ2                        |
+|     c = φ(a, e);                 |        c = 1, 5, 11, ..., 89, 95,
+|     e = φ(b, f);                 |            5, 9, 15, ..., 89, 95
+|     if (e >= 100) goto end2;     |         llvm中c对应unknown[2]
+|     f = e + 6;                   |
+|   end2:                          |
+| end1:                            |
++----------------------------------+
+
+```
+
+ir代码:
 
 ```ir
  @.str = private unnamed_addr constant [3 x i8] c"%d\00", align 1

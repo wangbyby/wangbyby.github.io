@@ -5,7 +5,7 @@
 
 ## Liveness Analysis
 
-经典的数据流分析
+经典的数据流分析, 后向(倒序)分析.
 
 ```txt
 
@@ -16,7 +16,7 @@ live_in[b]  = use[b] ∪ (live_out[b] − def[b])
 
 ## live interval
 
-llvm依赖这个，就是 def-use 分段
+llvm依赖这个，就是 def-use 分段.
 
 ## reaching define 到达定值
 
@@ -133,7 +133,10 @@ web1: {2,6,12}, {10, 14}
 
 ## 2. build_adj_matrix
 
-下三角邻接矩阵
+算法核心, 使用下三角邻接矩阵.
+关键是如何判定两个web是否干涉. 
+如果用 Reaching def会有很多假阳性出现. 所以需要liveness来判定.
+
 
 ## 3. coalesce_regs
 
@@ -185,7 +188,7 @@ return success
 ## 总结
 
 不难看出图着色还是比较耗时的. reaching define的计算, adj matrix的计算, 再加上迭代到不动点. 
-生成的代码质量上, 对live range建模不太完善, spill
+生成的代码质量上, 对live range建模不太完善, spill判定也比较简单.
 
 # linear scan
 
@@ -246,7 +249,7 @@ spillAt(i){ // 启发式算法
 2. active最大长度是R
 3. spill的依据是启发式算法, 论文里面就是根据live range长度进行判定
 
-改进的:
+改进点:
 1. live intervals太宽泛,可以利用某些空洞
 2. spill计算太简陋, 可以结合更多信息
 3. copy coalescing, 尝试删除`a = copy b`这样的复制指令

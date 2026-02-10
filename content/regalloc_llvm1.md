@@ -82,8 +82,12 @@ class LiveIntervalUnion{
 `llvm/include/llvm/CodeGen/LiveRegMatrix.h`
 
 用来追踪虚拟寄存器的干涉情况，是一个二维结构， `slot index` x `reg units`.
-核心是`LiveIntervalUnion::Array Matrix;`.
-
+- 用`LiveIntervalUnion::Array Matrix;`表示这个二维结构.
+- `InterferenceKind`作为干涉查询结果。`InterferenceKind checkInterference(const LiveInterval &VirtReg, MCRegister PhysReg)`
+  - IK_Free 没干涉
+  - IK_VirtReg， 虚拟寄存器和物理寄存器干涉。
+  - IK_RegUnit, 不太清楚
+  - IK_RegMask，主要是call里面的regmask
 
 ```cpp
 
@@ -107,14 +111,6 @@ class LiveRegMatrix : public MachineFunctionPass {
   BitVector RegMaskUsable;
 
 public:
-  //===--------------------------------------------------------------------===//
-  // High-level interface.
-  //===--------------------------------------------------------------------===//
-  //
-  // Check for interference before assigning virtual registers to physical
-  // registers.
-  //
-
   enum InterferenceKind {
     /// No interference, go ahead and assign.
     IK_Free = 0,
@@ -314,12 +310,8 @@ void RegAllocBase::allocatePhysRegs(){
 
 
 ## RegAllocBasic
-
-llvm/lib/CodeGen/RegAllocBasic.cpp
-
-很简易的实现.
-
-selectOrSplit
+llvm/lib/CodeGen/RegAllocBasic.cpp 
+很简易的实现. 还是先看selectOrSplit的实现
 1. 先检测有没有可用物理寄存器。 有就直接返回
 2. 没有则尝试将更低weight的已分配寄存器溢出
 3. 还是不行就将自己溢出。

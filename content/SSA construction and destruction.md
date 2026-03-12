@@ -717,8 +717,13 @@ do{
 原因还是copy插入顺序。（parallel copies的遍历顺序）
 解决方法，额。
 根据llvm中split critical edges的方法。
-如果phi的incoming block是critical edge 的src block，就创建 `tmp=copy vi; a' = tmp`, 并将phi替换为`a=a'`。非关键边就直接插入`a' = vj `
+如果phi的incoming block是critical edge 的src block，例如 `bb0：a0 = phi a1,bb1, a2, bb2` 其中bb2是critical edge，那么在bb1尾部创建`tmp = copy a1`, 在bb0头部`a0 = copy tmp`, 在bb2尾部`tmp = copy a2`.
+如果没有critical edge, 直接copy，bb1尾部创建`a0 = copy a1`,bb2尾部`a0 = copy a2`.
+
 很简单的实现，但是还是挺有效。。。
+
+https://gcc.godbolt.org/z/aMWPjK3a9
+
 
 为什么不split block呢？因为跳转太多会导致性能下降，特别是在loop中。
 
@@ -811,3 +816,248 @@ flowchart TD
 - https://ics.uci.edu/~yeouln/course/ssa.pdf
 - [Revisiting Out-of-SSA Translation for Correctness, Code Quality, and Efficiency](https://inria.hal.science/inria-00349925v1/document)
 - [cc09.pdf](http://web.cs.ucla.edu/~palsberg/paper/cc09.pdf)
+
+
+----
+llvm实现。
+
+```txt
+int cond_random();
+
+void swap_p(int a, int b, int *arr){
+
+    while(cond_random() ){
+        int tmp = a;
+        a = b;
+        b = tmp;
+    }
+    *arr++ = a;
+    *arr++ = b;
+}
+
+
+void lost_copy(int a, int *p){
+
+    while(cond_random()){
+        a+=1;
+    }
+    *p = a;
+}
+
+```
+
+### lost copy
+
+```txt
+
+# Machine code for function lost_copy(int, int*): IsSSA, TracksLiveness
+Function Live Ins: $edi in %3, $rsi in %4
+
+bb.0.entry:
+  successors: %bb.1(0x80000000); %bb.1(100.00%)
+  liveins: $edi, $rsi
+  %4:gr64 = COPY killed $rsi
+  %3:gr32 = COPY killed $edi
+  %0:gr32 = DEC32r killed %3:gr32(tied-def 0), implicit-def dead $eflags; example.cpp:19:5
+
+bb.1.while.cond:
+; predecessors: %bb.0, %bb.1
+  successors: %bb.2(0x04000000), %bb.1(0x7c000000); %bb.2(3.12%), %bb.1(96.88%)
+
+  %1:gr32 = PHI %0:gr32, %bb.0, %2:gr32, %bb.1, debug-instr-number 1
+  ADJCALLSTACKDOWN64 0, 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp; example.cpp:19:11
+  CALL64pcrel32 target-flags(x86-plt) @cond_random(), <regmask $bh $bl $bp $bph $bpl $bx $ebp $ebx $hbp $hbx $rbp $rbx $r12 $r13 $r14 $r15 $r12b $r13b $r14b $r15b $r12bh $r13bh $r14bh $r15bh $r12d $r13d $r14d $r15d $r12w $r13w $r14w $r15w $r12wh and 3 more...>, implicit $rsp, implicit $ssp, implicit-def $rsp, implicit-def $ssp, implicit-def $eax; example.cpp:19:11
+  ADJCALLSTACKUP64 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp; example.cpp:19:11
+  %5:gr32 = COPY killed $eax; example.cpp:19:11
+  %2:gr32 = INC32r killed %1:gr32(tied-def 0), implicit-def dead $eflags; example.cpp:19:5
+  TEST32rr killed %5:gr32, %5:gr32, implicit-def $eflags; example.cpp:19:11
+  JCC_1 %bb.1, 5, implicit killed $eflags; example.cpp:19:5
+  JMP_1 %bb.2; example.cpp:19:5
+
+bb.2.while.end:
+; predecessors: %bb.1
+
+  MOV32mr killed %4:gr64, 1, $noreg, 0, $noreg, killed %2:gr32 :: (store (s32) into %ir.p); example.cpp:22:8
+  RET 0; example.cpp:23:1
+
+# End machine code for function lost_copy(int, int*).
+
+
+# Machine code for function lost_copy(int, int*): NoPHIs, TracksLiveness
+Function Live Ins: $edi in %3, $rsi in %4
+
+bb.0.entry:
+  successors: %bb.1(0x80000000); %bb.1(100.00%)
+  liveins: $edi, $rsi
+  %4:gr64 = COPY killed $rsi
+  %3:gr32 = COPY killed $edi
+  %0:gr32 = DEC32r killed %3:gr32(tied-def 0), implicit-def dead $eflags; example.cpp:19:5
+  %6:gr32 = COPY killed %0:gr32
+
+bb.1.while.cond:
+; predecessors: %bb.0, %bb.1
+  successors: %bb.2(0x04000000), %bb.1(0x7c000000); %bb.2(3.12%), %bb.1(96.88%)
+
+  %1:gr32 = COPY killed %6:gr32
+  ADJCALLSTACKDOWN64 0, 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp; example.cpp:19:11
+  CALL64pcrel32 target-flags(x86-plt) @cond_random(), <regmask $bh $bl $bp $bph $bpl $bx $ebp $ebx $hbp $hbx $rbp $rbx $r12 $r13 $r14 $r15 $r12b $r13b $r14b $r15b $r12bh $r13bh $r14bh $r15bh $r12d $r13d $r14d $r15d $r12w $r13w $r14w $r15w $r12wh and 3 more...>, implicit $rsp, implicit $ssp, implicit-def $rsp, implicit-def $ssp, implicit-def $eax; example.cpp:19:11
+  ADJCALLSTACKUP64 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp; example.cpp:19:11
+  %5:gr32 = COPY killed $eax; example.cpp:19:11
+  %2:gr32 = INC32r killed %1:gr32(tied-def 0), implicit-def dead $eflags; example.cpp:19:5
+  TEST32rr killed %5:gr32, %5:gr32, implicit-def $eflags; example.cpp:19:11
+  %6:gr32 = COPY %2:gr32
+  JCC_1 %bb.1, 5, implicit killed $eflags; example.cpp:19:5
+  JMP_1 %bb.2; example.cpp:19:5
+
+bb.2.while.end:
+; predecessors: %bb.1
+
+  MOV32mr killed %4:gr64, 1, $noreg, 0, $noreg, killed %2:gr32 :: (store (s32) into %ir.p); example.cpp:22:8
+  RET 0; example.cpp:23:1
+
+# End machine code for function lost_copy(int, int*).
+
+# Machine code for function lost_copy(int, int*): NoPHIs, TracksLiveness, TiedOpsRewritten
+Function Live Ins: $edi in %3, $rsi in %4
+
+0B	bb.0.entry:
+	  successors: %bb.1(0x80000000); %bb.1(100.00%)
+	  liveins: $edi, $rsi
+16B	  %4:gr64 = COPY $rsi
+32B	  %6:gr32 = COPY $edi
+64B	  %6:gr32 = DEC32r %6:gr32(tied-def 0), implicit-def dead $eflags; example.cpp:19:5
+
+96B	bb.1.while.cond:
+	; predecessors: %bb.0, %bb.1
+	  successors: %bb.2(0x04000000), %bb.1(0x7c000000); %bb.2(3.12%), %bb.1(96.88%)
+
+128B	  ADJCALLSTACKDOWN64 0, 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp; example.cpp:19:11
+144B	  CALL64pcrel32 target-flags(x86-plt) @cond_random(), <regmask $bh $bl $bp $bph $bpl $bx $ebp $ebx $hbp $hbx $rbp $rbx $r12 $r13 $r14 $r15 $r12b $r13b $r14b $r15b $r12bh $r13bh $r14bh $r15bh $r12d $r13d $r14d $r15d $r12w $r13w $r14w $r15w $r12wh and 3 more...>, implicit $rsp, implicit $ssp, implicit-def $rsp, implicit-def $ssp, implicit-def $eax; example.cpp:19:11
+160B	  ADJCALLSTACKUP64 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp; example.cpp:19:11
+176B	  %5:gr32 = COPY killed $eax; example.cpp:19:11
+208B	  %6:gr32 = INC32r %6:gr32(tied-def 0), implicit-def dead $eflags; example.cpp:19:5
+224B	  TEST32rr %5:gr32, %5:gr32, implicit-def $eflags; example.cpp:19:11
+256B	  JCC_1 %bb.1, 5, implicit killed $eflags; example.cpp:19:5
+272B	  JMP_1 %bb.2; example.cpp:19:5
+
+288B	bb.2.while.end:
+	; predecessors: %bb.1
+
+304B	  MOV32mr %4:gr64, 1, $noreg, 0, $noreg, %6:gr32 :: (store (s32) into %ir.p); example.cpp:22:8
+320B	  RET 0; example.cpp:23:1
+
+# End machine code for function lost_copy(int, int*).
+
+```
+
+### swap
+
+```txt
+
+# Machine code for function swap_p(int, int, int*): IsSSA, TracksLiveness
+Function Live Ins: $edi in %2, $esi in %3, $rdx in %4
+
+bb.0.entry:
+  successors: %bb.1(0x80000000); %bb.1(100.00%)
+  liveins: $edi, $esi, $rdx
+  %4:gr64 = COPY killed $rdx
+  %3:gr32 = COPY killed $esi
+  %2:gr32 = COPY killed $edi
+
+bb.1.while.cond:
+; predecessors: %bb.0, %bb.1
+  successors: %bb.2(0x04000000), %bb.1(0x7c000000); %bb.2(3.12%), %bb.1(96.88%)
+
+  %0:gr32 = PHI %3:gr32, %bb.0, %1:gr32, %bb.1, debug-instr-number 2
+  %1:gr32 = PHI %2:gr32, %bb.0, %0:gr32, %bb.1, debug-instr-number 1
+  ADJCALLSTACKDOWN64 0, 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp; example.cpp:7:11
+  CALL64pcrel32 target-flags(x86-plt) @cond_random(), <regmask $bh $bl $bp $bph $bpl $bx $ebp $ebx $hbp $hbx $rbp $rbx $r12 $r13 $r14 $r15 $r12b $r13b $r14b $r15b $r12bh $r13bh $r14bh $r15bh $r12d $r13d $r14d $r15d $r12w $r13w $r14w $r15w $r12wh and 3 more...>, implicit $rsp, implicit $ssp, implicit-def $rsp, implicit-def $ssp, implicit-def $eax; example.cpp:7:11
+  ADJCALLSTACKUP64 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp; example.cpp:7:11
+  %5:gr32 = COPY killed $eax; example.cpp:7:11
+  TEST32rr killed %5:gr32, %5:gr32, implicit-def $eflags; example.cpp:7:11
+  JCC_1 %bb.1, 5, implicit killed $eflags; example.cpp:7:5
+  JMP_1 %bb.2; example.cpp:7:5
+
+bb.2.while.end:
+; predecessors: %bb.1
+
+  MOV32mr %4:gr64, 1, $noreg, 0, $noreg, killed %1:gr32 :: (store (s32) into %ir.arr); example.cpp:12:12
+  MOV32mr killed %4:gr64, 1, $noreg, 4, $noreg, killed %0:gr32 :: (store (s32) into %ir.incdec.ptr); example.cpp:13:12
+  RET 0; example.cpp:14:1
+
+# End machine code for function swap_p(int, int, int*).
+
+
+# Machine code for function swap_p(int, int, int*): NoPHIs, TracksLiveness
+Function Live Ins: $edi in %2, $esi in %3, $rdx in %4
+
+bb.0.entry:
+  successors: %bb.1(0x80000000); %bb.1(100.00%)
+  liveins: $edi, $esi, $rdx
+  %4:gr64 = COPY killed $rdx
+  %3:gr32 = COPY killed $esi
+  %2:gr32 = COPY killed $edi
+  %6:gr32 = COPY killed %3:gr32
+  %7:gr32 = COPY killed %2:gr32
+
+bb.1.while.cond:
+; predecessors: %bb.0, %bb.1
+  successors: %bb.2(0x04000000), %bb.1(0x7c000000); %bb.2(3.12%), %bb.1(96.88%)
+
+  %1:gr32 = COPY killed %7:gr32
+  %0:gr32 = COPY killed %6:gr32
+  ADJCALLSTACKDOWN64 0, 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp; example.cpp:7:11
+  CALL64pcrel32 target-flags(x86-plt) @cond_random(), <regmask $bh $bl $bp $bph $bpl $bx $ebp $ebx $hbp $hbx $rbp $rbx $r12 $r13 $r14 $r15 $r12b $r13b $r14b $r15b $r12bh $r13bh $r14bh $r15bh $r12d $r13d $r14d $r15d $r12w $r13w $r14w $r15w $r12wh and 3 more...>, implicit $rsp, implicit $ssp, implicit-def $rsp, implicit-def $ssp, implicit-def $eax; example.cpp:7:11
+  ADJCALLSTACKUP64 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp; example.cpp:7:11
+  %5:gr32 = COPY killed $eax; example.cpp:7:11
+  TEST32rr killed %5:gr32, %5:gr32, implicit-def $eflags; example.cpp:7:11
+  %6:gr32 = COPY %1:gr32
+  %7:gr32 = COPY %0:gr32
+  JCC_1 %bb.1, 5, implicit killed $eflags; example.cpp:7:5
+  JMP_1 %bb.2; example.cpp:7:5
+
+bb.2.while.end:
+; predecessors: %bb.1
+
+  MOV32mr %4:gr64, 1, $noreg, 0, $noreg, killed %1:gr32 :: (store (s32) into %ir.arr); example.cpp:12:12
+  MOV32mr killed %4:gr64, 1, $noreg, 4, $noreg, killed %0:gr32 :: (store (s32) into %ir.incdec.ptr); example.cpp:13:12
+  RET 0; example.cpp:14:1
+
+# End machine code for function swap_p(int, int, int*).
+
+
+# Machine code for function swap_p(int, int, int*): NoPHIs, TracksLiveness, TiedOpsRewritten
+Function Live Ins: $edi in %2, $esi in %3, $rdx in %4
+
+0B	bb.0.entry:
+	  successors: %bb.1(0x80000000); %bb.1(100.00%)
+	  liveins: $edi, $esi, $rdx
+16B	  %4:gr64 = COPY $rdx
+32B	  %6:gr32 = COPY $esi
+48B	  %7:gr32 = COPY $edi
+
+96B	bb.1.while.cond:
+	; predecessors: %bb.0, %bb.1
+	  successors: %bb.2(0x04000000), %bb.1(0x7c000000); %bb.2(3.12%), %bb.1(96.88%)
+
+112B	  %1:gr32 = COPY %7:gr32
+128B	  %7:gr32 = COPY %6:gr32
+144B	  ADJCALLSTACKDOWN64 0, 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp; example.cpp:7:11
+160B	  CALL64pcrel32 target-flags(x86-plt) @cond_random(), <regmask $bh $bl $bp $bph $bpl $bx $ebp $ebx $hbp $hbx $rbp $rbx $r12 $r13 $r14 $r15 $r12b $r13b $r14b $r15b $r12bh $r13bh $r14bh $r15bh $r12d $r13d $r14d $r15d $r12w $r13w $r14w $r15w $r12wh and 3 more...>, implicit $rsp, implicit $ssp, implicit-def $rsp, implicit-def $ssp, implicit-def $eax; example.cpp:7:11
+176B	  ADJCALLSTACKUP64 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp; example.cpp:7:11
+192B	  %5:gr32 = COPY killed $eax; example.cpp:7:11
+208B	  TEST32rr %5:gr32, %5:gr32, implicit-def $eflags; example.cpp:7:11
+224B	  %6:gr32 = COPY %1:gr32
+256B	  JCC_1 %bb.1, 5, implicit killed $eflags; example.cpp:7:5
+272B	  JMP_1 %bb.2; example.cpp:7:5
+
+288B	bb.2.while.end:
+	; predecessors: %bb.1
+
+304B	  MOV32mr %4:gr64, 1, $noreg, 0, $noreg, %1:gr32 :: (store (s32) into %ir.arr); example.cpp:12:12
+320B	  MOV32mr %4:gr64, 1, $noreg, 4, $noreg, %7:gr32 :: (store (s32) into %ir.incdec.ptr); example.cpp:13:12
+336B	  RET 0; example.cpp:14:1
+
+# End machine code for function swap_p(int, int, int*).
+
+```

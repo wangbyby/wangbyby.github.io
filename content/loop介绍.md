@@ -51,6 +51,80 @@ Then
 
 ----
 
+# loop识别
+假设已经有domtree。
+根据loop的定义，从遍历domtree开始构建loop。
+
+用后序方式遍历domtree，即先识别内层loop，然后识别外层loop。
+
+```cpp
+
+void initLoopInfo(){
+	stack = [root];
+	while(stack.size()){
+
+		auto*top = stack.back();
+
+		if( !all_children_visited(top) ){
+			for c in top.children(){
+				stack.push(c)
+			}
+		}else{
+			stack.pop();
+			
+			// 1. find back edge
+			backedgs = []
+			for pred in top.getBlock().pred(){
+				if( top.doms( pred ) ){
+					backedgs.push(pred)
+				}
+			}
+			if (pred.size()){
+				loop = createLoop()
+				discoverLoop(loop, backedgs)
+			}
+		}
+	}
+}
+
+// 有回边，loop header可以查找循环体了。
+// 寻找backedges的前驱即可。
+void discoverLoop(loop, backedgs){
+
+	while(backedgs.size()){
+		auto* n = backedgs.back();
+		backedgs.pop_back();
+
+		sub_loop = info.get(n)
+		if(sub_loop == nullptr){
+			if(!loop.getHeader().dom(n)){
+				continue
+			}
+			loop.add(n)
+			for p in n.pred(){
+				backedgs.push(p)
+			}
+		}else{
+			// 有内层循环了
+			sub = sub_loop->getOuterMostLoop()
+			loop.add_sub(sub)
+
+			n = sub.getHeader()
+			// 不处理sub对应的所有block
+			for p in n.preds(){
+				if( getLoop(p) != sub ){
+					backedgs.push(p)
+				}
+			}
+		}
+
+	}
+}
+
+```
+
+-----
+
 - [Compilers I Chapter 1: Introduction](https://www.doc.ic.ac.uk/~phjk/Compilers/Lectures/pdfs/Ch7-part2-DominatorsAndNaturalLoops.pdf)
 - [On loops, dominators, and dominance frontiers (acm.org)](https://dl.acm.org/doi/pdf/10.1145/570886.570887)
 - [Microsoft PowerPoint - loopOptimization [Compatibility Mode] (utexas.edu)](https://www.cs.utexas.edu/~pingali/CS375/2010Sp/lectures/LoopOptimizations.pdf)

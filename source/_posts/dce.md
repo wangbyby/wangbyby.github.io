@@ -1,7 +1,7 @@
-+++
-title = "dead code elimination介绍"
+---
+title: "dead code elimination介绍"
 
-+++
+---
 
 
 # 死代码消除

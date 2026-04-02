@@ -1,8 +1,7 @@
-+++
-title = "使用zola设置github.io作为个人博客"
-slug = "deploy"
+---
+title: "使用zola设置github.io作为个人博客"
 
-+++
+---
 
 步骤如下：
 
@@ -23,9 +22,9 @@ myblog/
 - 图片放在static/images下面，在博客里用`![test](/images/<xxx>.png)`引用
 - 博客格式：`+++`一定要有
 ```txt
-+++
+---
 title = "我的第一篇文章"
-+++
+---
 
 ## hello zola
 ```

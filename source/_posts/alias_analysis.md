@@ -1,7 +1,7 @@
-+++
-title = "alias analysis简介"
+---
+title: "alias analysis简介"
 
-+++
+---
 
 # 0. 写这个文档的原因
 

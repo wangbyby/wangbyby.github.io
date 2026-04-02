@@ -1,3 +1,6 @@
+---
+title: "inline asm"
+---
 
 ```c
 asm volatile (

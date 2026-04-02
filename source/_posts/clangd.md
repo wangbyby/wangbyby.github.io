@@ -1,7 +1,7 @@
-+++
-title = "clang配置"
+---
+title: "clang配置"
 
-+++
+---
 
 
 clangd+vscode在win11上经常崩溃，记录下可能的解决方案。

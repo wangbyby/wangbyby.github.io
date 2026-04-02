@@ -1,2 +1,5 @@
 public/
 templates/**
+
+node_modules/**
+db.json

@@ -1,9 +1,8 @@
-TODO
 
-+++
-title = "LLVM Schedule"
+---
+title: "LLVM Inst Schedule"
 
-+++
+---
 
 # LLVM 指令调度
 

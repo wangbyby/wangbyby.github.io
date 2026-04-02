@@ -1,0 +1,33 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta http-equiv="X-UA-Compatible" content="IE=edge"><title>llvm SDNode 介绍 | by</title><link rel="shortcut icon" href="/images/avatar.png" type="image/x-icon">
+<link rel="stylesheet" href="/styles/site.css">
+<meta name="generator" content="Hexo 8.1.1"><link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+</head><body><header class="container" id="header"><div class="header"><div class="header-left"><div class="avatar"><img src="/images/avatar.png"></div><div class="author"><div class="author-name"><a href="/">by</a></div><div class="about-me"></div></div></div><div class="header-right"><ul class="navigation"><li><a href="/archives">Archives</a></li></ul></div><div class="about-me-mask"><div class="about-me-wrap"><div class="about-me__header"><div class="avatar"><img src="/images/avatar.png"></div></div><ul class="socials"><li class="social-item"><span class="label"><img src="/images/socials/github.svg" alt="https://github.com/wangbyby"></span><a href="https://github.com/wangbyby" target="_blank" rel="noopener" title="https://github.com/wangbyby">https://github.com/wangbyby</a></li></ul></div></div></div></header><div class="container post"><section class="article"><div class="title">llvm SDNode 介绍</div><div class="date">Posted on 2026-04-02</div><div class="content"><blockquote>
+<p>指令选择</p>
+</blockquote>
+<h2 id="1-数据结构与内存布局"><a href="#1-数据结构与内存布局" class="headerlink" title="1. 数据结构与内存布局"></a>1. 数据结构与内存布局</h2><p>内存结构如下：</p>
+<p>问题是指针指向关系是前向还是后向？</p>
+<h2 id="2-SelectionDAG-结构介绍"><a href="#2-SelectionDAG-结构介绍" class="headerlink" title="2. SelectionDAG 结构介绍"></a>2. SelectionDAG 结构介绍</h2><blockquote>
+<p>作用域：block level</p>
+</blockquote>
+<p>以这段IR为例：(参考<a href="%5BMacLean-Fargnoli-ABeginnersGuide-to-SelectionDAG.pdf%5D(https://llvm.org/devmtg/2024-10/slides/tutorial/MacLean-Fargnoli-ABeginnersGuide-to-SelectionDAG.pdf)">^1</a>)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">then:</span><br><span class="line">	%y = add i32 %a, 5</span><br><span class="line">	%z = mul i32 %y, 3</span><br><span class="line">	br label %join</span><br></pre></td></tr></table></figure>
+
+
+<p>内存占用有点过于大了。。。<br>[[llvm_SDNode_draw.excalidraw]]</p>
+<blockquote>
+<p>SDUse和llvm::Use同理</p>
+</blockquote>
+<p>N：参考</p>
+</div><div class="tags"></div></section></div><div class="container"><ul class="nav"><li><span>Previous: </span> <a href="/2026/04/02/inline_asm/">inline asm</a></li><li><span>Next: </span> <a href="/2026/04/02/SSA/">SSA构建和销毁</a></li></ul></div><div id="backToTop"><div class="back-arrow back-arrow-left"></div><div class="back-arrow back-arrow-right"></div></div><footer class="container"><div class="rights"><span>Powered by </span><a href="http://hexo.io" target="_blank">Hexo</a><span>, Theme </span><a href="https://github.com/gary-Shen/hexo-theme-bear" target="_blank">Bear</a><span>.</span></div></footer>
+<script src="/script/jquery.min.js"></script>
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+<script src="/script/index.js"></script>
+<script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-61220413-1', 'auto');
+ga('send', 'pageview');</script>
+<script src="/script/post.js"></script>
+</body></html>

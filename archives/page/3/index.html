@@ -1,0 +1,384 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta http-equiv="X-UA-Compatible" content="IE=edge"><title>by</title><link rel="shortcut icon" href="/images/avatar.png" type="image/x-icon">
+<link rel="stylesheet" href="/styles/site.css">
+<meta name="generator" content="Hexo 8.1.1"><link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+</head><body><header class="container" id="header"><div class="header"><div class="header-left"><div class="avatar"><img src="/images/avatar.png"></div><div class="author"><div class="author-name"><a href="/">by</a></div><div class="about-me"></div></div></div><div class="header-right"><ul class="navigation"><li><a href="/archives">Archives</a></li></ul></div><div class="about-me-mask"><div class="about-me-wrap"><div class="about-me__header"><div class="avatar"><img src="/images/avatar.png"></div></div><ul class="socials"><li class="social-item"><span class="label"><img src="/images/socials/github.svg" alt="https://github.com/wangbyby"></span><a href="https://github.com/wangbyby" target="_blank" rel="noopener" title="https://github.com/wangbyby">https://github.com/wangbyby</a></li></ul></div></div></div></header><div class="container"><div class="year-wrap"><div class="year"><a class="title" href="/archives/2026">2026</a></div></div><div class="archives"><div class="post-archive"><div class="post-archive__content"><div class="post-archive__month">Apr</div><div class="post-archive__body"><a class="post-archive__title" href="/2026/04/02/dce/" title="dead code elimination介绍">dead code elimination介绍</a><div class="post-archive__excerpt"><div class="post-archive__excerpt-content" title="死代码消除在ssa上比较好实现，根据use-def chain传播如果只是运算指令，且没有users，就是dead的指令。其实就是一个use-&amp;gt;def的传播
+1234567891011121314151617181920212223worklist = &amp;#123;&amp;#125;for bb in func&amp;#123;    for inst in bb &amp;#123;        if (inst not in worklist)            worklist.push(inst)    &amp;#125;&amp;#125;while(!worklist.empty()) &amp;#123;    inst = worklist.pop()    if( inst is pure &amp;amp;&amp;amp; inst.num_users()== 0 )&amp;#123;        // dead instruction        for(op in inst.operands())&amp;#123;            inst.remove(op)            if class(op) == instruction and isDead(op) &amp;#123;                worklist.insert(op)            &amp;#125;        &amp;#125;    &amp;#125;&amp;#125;
+"><h1 id="死代码消除"><a href="#死代码消除" class="headerlink" title="死代码消除"></a>死代码消除</h1><p>在ssa上比较好实现，根据use-def chain传播<br>如果只是运算指令，且没有users，就是dead的指令。<br>其实就是一个use-&gt;def的传播</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">worklist = &#123;&#125;</span><br><span class="line"><span class="keyword">for</span> bb in func&#123;</span><br><span class="line">    <span class="keyword">for</span> inst in bb &#123;</span><br><span class="line">        <span class="keyword">if</span> (inst not in worklist)</span><br><span class="line">            worklist.push(inst)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span>(!worklist.empty()) &#123;</span><br><span class="line">    inst = worklist.pop()</span><br><span class="line">    <span class="keyword">if</span>( inst is pure &amp;&amp; inst.num_users()== <span class="number">0</span> )&#123;</span><br><span class="line">        <span class="comment">// dead instruction</span></span><br><span class="line">        <span class="keyword">for</span>(op in inst.operands())&#123;</span><br><span class="line">            inst.remove(op)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> class(op) == instruction and isDead(op) &#123;</span><br><span class="line">                worklist.insert(op)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+</div></div></div></div></div><div class="post-archive"><div class="post-archive__content"><div class="post-archive__month">Apr</div><div class="post-archive__body"><a class="post-archive__title" href="/2026/04/02/deploy/" title="使用zola设置github.io作为个人博客">使用zola设置github.io作为个人博客</a><div class="post-archive__excerpt"><div class="post-archive__excerpt-content" title="步骤如下：
+
+本地安装zola
+运行zola init &amp;lt;your blog dir&amp;gt;, like zola init myblog
+
+目录如下：
+1234567myblog/├── config.toml          # 配置文件├── content/             # 内容文件（Markdown）├── sass/                # Sass 样式文件（可选）├── static/              # 静态资源（图片、CSS、JS 等）├── templates/           # 模板文件（HTML）└── themes/              # 主题文件（可选）
+
+创建的博客就放在content下面。
+图片放在static&amp;#x2F;images下面，在博客里用![test](/images/&amp;lt;xxx&amp;gt;.png)引用
+博客格式：+++一定要有
+
+12345---title = &amp;quot;我的第一篇文章&amp;quot;---## hello zola
+
+
+cd &amp;lt;your blog dir&amp;gt; &amp;amp;&amp;amp; git init将这些目录加到版本控制进去。
+添加自定义模板teplates/index.html和teplates/page.html
+创建github actions: .github/workflows/deploy.yml内容如下：
+
+12345678910111213141516171819202122232425262728name: Deploy Zola site to GitHub Pageson:  push:    branches:      - master  # 触发部署的分支jobs:  deploy:    runs-on: ubuntu-latest    steps:      - name: Checkout        uses: actions/checkout@v3      - name: Install Zola        run: |          wget https://github.com/getzola/zola/releases/download/v0.19.2/zola-v0.19.2-x86_64-unknown-linux-gnu.tar.gz          tar -xzf zola-v0.19.2-x86_64-unknown-linux-gnu.tar.gz          sudo mv zola /usr/local/bin      - name: Build site        run: zola build      - name: Deploy to GitHub Pages        uses: shalzz/zola-deploy-action@master        env:            PAGES_BRANCH: gh-pages            TOKEN: $&amp;#123;&amp;#123; secrets.GITHUB_TOKEN &amp;#125;&amp;#125;
+这里注意分支。
+
+master分支是我们源文件的分支
+gh-pages分支是制品分支
+
+
+参考：zola github-actions
+
+
+推送到 git@github.com:&amp;lt;username&amp;gt;/&amp;lt;username&amp;gt;.github.io.git
+
+设置github pages:
+
+如果上传图片，设置config.toml中base_url = &amp;quot;https://&amp;lt;username&amp;gt;.github.io/&amp;quot;
+
+等待github actions完成，就OK了
+
+
+
+部署静态网址到服务器需要
+
+一个云服务器，带ip地址&amp;#x2F;域名的
+
+步骤如下
+
+在云服务器安装zola（pre-build比较好）
+在服务器安装nginx
+拉取博客代码到服务器：git clone example_blog@git
+运行命令cd example_blog &amp;amp;&amp;amp; zola build -u &amp;quot;&amp;quot;. 构建好的文件在example_blog/public下
+cp public /var/www/static-site -r
+给nginx权限并确保自己有权限sudo chown -R $USER:$USER /var/www/static-site &amp;amp;&amp;amp; sudo chown -R www-data:www-data /var/www/static-site &amp;amp;&amp;amp; sudo chmod -R 755 /var/www/static-site
+修改nginx的配置文件（ai生成的）- 新建配置文件/etc/nginx/sites-available/static-site.conf- 添加内容
+
+123456789101112131415server &amp;#123;  listen 80;  server_name example.com;  # 替换为你的域名或服务器 IP（如 192.168.1.100）  root /var/www/static-site;  # 静态文件根目录  index index.html index.htm;  # 默认索引文件  location / &amp;#123;      try_files $uri $uri/ =404;  # 按顺序查找文件或目录，否则返回 404  &amp;#125;  # 可选：启用 Gzip 压缩  gzip on;  gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;&amp;#125;
+
+- 设置符号链接`sudo ln -s /etc/nginx/sites-available/static-site.conf /etc/nginx/sites-enabled/`
+
+
+重启nginx  sudo nginx -t &amp;amp;&amp;amp; sudo systemctl reload nginx
+
+
+坑
+
+本来打算用nginx做为动态转发，服务器后台跑个zola serve，结果发现zola build出来的都有端口ip:1111/xxx. 此路不通
+然后就用静态网页。最开始有403，权限问题。然后发现博客的url链接是ip/ip/xxx, 用zola build -u &amp;quot;&amp;quot;可以处理掉。然后就OK啦
+
+
+
+之前用hexo，但图片上传太麻烦了:( zola图片上传也没有那么方便。ai真好用，特别是这种琐碎的安装部署。
+"><p>步骤如下：</p>
+<ol>
+<li>本地安装zola</li>
+<li>运行<code>zola init &lt;your blog dir&gt;</code>, like <code>zola init myblog</code></li>
+</ol>
+<p>目录如下：</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">myblog/</span><br><span class="line">├── config.toml          # 配置文件</span><br><span class="line">├── content/             # 内容文件（Markdown）</span><br><span class="line">├── sass/                # Sass 样式文件（可选）</span><br><span class="line">├── static/              # 静态资源（图片、CSS、JS 等）</span><br><span class="line">├── templates/           # 模板文件（HTML）</span><br><span class="line">└── themes/              # 主题文件（可选）</span><br></pre></td></tr></table></figure>
+<ul>
+<li>创建的博客就放在content下面。</li>
+<li>图片放在static&#x2F;images下面，在博客里用<code>![test](/images/&lt;xxx&gt;.png)</code>引用</li>
+<li>博客格式：<code>+++</code>一定要有</li>
+</ul>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">title = &quot;我的第一篇文章&quot;</span><br><span class="line">---</span><br><span class="line"></span><br><span class="line">## hello zola</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li><code>cd &lt;your blog dir&gt; &amp;&amp; git init</code>将这些目录加到版本控制进去。</li>
+<li>添加自定义模板<code>teplates/index.html</code>和<code>teplates/page.html</code></li>
+<li>创建github actions: <code>.github/workflows/deploy.yml</code><br>内容如下：</li>
+</ol>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">Deploy</span> <span class="string">Zola</span> <span class="string">site</span> <span class="string">to</span> <span class="string">GitHub</span> <span class="string">Pages</span></span><br><span class="line"></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">master</span>  <span class="comment"># 触发部署的分支</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">deploy:</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Checkout</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">actions/checkout@v3</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Install</span> <span class="string">Zola</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">|</span></span><br><span class="line"><span class="string">          wget https://github.com/getzola/zola/releases/download/v0.19.2/zola-v0.19.2-x86_64-unknown-linux-gnu.tar.gz</span></span><br><span class="line"><span class="string">          tar -xzf zola-v0.19.2-x86_64-unknown-linux-gnu.tar.gz</span></span><br><span class="line"><span class="string">          sudo mv zola /usr/local/bin</span></span><br><span class="line"><span class="string"></span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Build</span> <span class="string">site</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">zola</span> <span class="string">build</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Deploy</span> <span class="string">to</span> <span class="string">GitHub</span> <span class="string">Pages</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">shalzz/zola-deploy-action@master</span></span><br><span class="line">        <span class="attr">env:</span></span><br><span class="line">            <span class="attr">PAGES_BRANCH:</span> <span class="string">gh-pages</span></span><br><span class="line">            <span class="attr">TOKEN:</span> <span class="string">$&#123;&#123;</span> <span class="string">secrets.GITHUB_TOKEN</span> <span class="string">&#125;&#125;</span></span><br></pre></td></tr></table></figure>
+<p>这里注意分支。</p>
+<ul>
+<li>master分支是我们源文件的分支</li>
+<li>gh-pages分支是制品分支</li>
+</ul>
+<blockquote>
+<p>参考：<a target="_blank" rel="noopener" href="https://www.getzola.org/documentation/deployment/github-pages/#github-actions">zola github-actions</a></p>
+</blockquote>
+<ol start="6">
+<li><p>推送到 <code>git@github.com:&lt;username&gt;/&lt;username&gt;.github.io.git</code></p>
+</li>
+<li><p>设置github pages:<br><img src="/static/images/image-github-pages.png" alt="alt text"></p>
+</li>
+<li><p>如果上传图片，设置<code>config.toml</code>中<code>base_url = &quot;https://&lt;username&gt;.github.io/&quot;</code></p>
+</li>
+<li><p>等待github actions完成，就OK了</p>
+</li>
+</ol>
+<hr>
+<h1 id="部署静态网址到服务器"><a href="#部署静态网址到服务器" class="headerlink" title="部署静态网址到服务器"></a>部署静态网址到服务器</h1><p>需要</p>
+<ol>
+<li>一个云服务器，带ip地址&#x2F;域名的</li>
+</ol>
+<p>步骤如下</p>
+<ol>
+<li>在云服务器安装zola（pre-build比较好）</li>
+<li><strong>在服务器安装nginx</strong></li>
+<li>拉取博客代码到服务器：<code>git clone example_blog@git</code></li>
+<li>运行命令<code>cd example_blog &amp;&amp; zola build -u &quot;&quot;</code>. 构建好的文件在<code>example_blog/public</code>下</li>
+<li><code>cp public /var/www/static-site -r</code></li>
+<li>给nginx权限并确保自己有权限<code>sudo chown -R $USER:$USER /var/www/static-site &amp;&amp; sudo chown -R www-data:www-data /var/www/static-site &amp;&amp; sudo chmod -R 755 /var/www/static-site</code></li>
+<li>修改nginx的配置文件（ai生成的）<br>- 新建配置文件<code>/etc/nginx/sites-available/static-site.conf</code><br>- 添加内容</li>
+</ol>
+<pre><code><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">  listen 80;</span><br><span class="line">  server_name example.com;  # 替换为你的域名或服务器 IP（如 192.168.1.100）</span><br><span class="line"></span><br><span class="line">  root /var/www/static-site;  # 静态文件根目录</span><br><span class="line">  index index.html index.htm;  # 默认索引文件</span><br><span class="line"></span><br><span class="line">  location / &#123;</span><br><span class="line">      try_files $uri $uri/ =404;  # 按顺序查找文件或目录，否则返回 404</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  # 可选：启用 Gzip 压缩</span><br><span class="line">  gzip on;</span><br><span class="line">  gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+- 设置符号链接`sudo ln -s /etc/nginx/sites-available/static-site.conf /etc/nginx/sites-enabled/`
+</code></pre>
+<ol start="8">
+<li>重启nginx  <code>sudo nginx -t &amp;&amp; sudo systemctl reload nginx</code></li>
+</ol>
+<blockquote>
+<p>坑</p>
+<ol>
+<li>本来打算用nginx做为动态转发，服务器后台跑个zola serve，结果发现zola build出来的都有端口<code>ip:1111/xxx</code>. 此路不通</li>
+<li>然后就用静态网页。最开始有403，权限问题。然后发现博客的url链接是<code>ip/ip/xxx</code>, 用<code>zola build -u &quot;&quot;</code>可以处理掉。然后就OK啦</li>
+</ol>
+</blockquote>
+<hr>
+<p>之前用hexo，但图片上传太麻烦了:( zola图片上传也没有那么方便。<br>ai真好用，特别是这种琐碎的安装部署。</p>
+</div></div></div></div></div><div class="post-archive"><div class="post-archive__content"><div class="post-archive__month">Apr</div><div class="post-archive__body"><a class="post-archive__title" href="/2026/04/02/domtree/" title="dom tree算法介绍">dom tree算法介绍</a><div class="post-archive__excerpt"><div class="post-archive__excerpt-content" title="domtree构建算法
+1. domtree概念介绍
+Dom(b): A node n in the CFG dominates b if n lies on every path from the entry node of the CFG to b.即Dom(b)是一个集合，根据定义 b in Dom(b)
+
+
+immediate dominator: b’s immediate dominator is the node n in Dom(b) which is cloest to b.
+
+IDom(b): For a node b, the set IDom(b) contains exactly one node, the immediate dominator of b. If n is b’s immediate dominator, then every node in { Dom(b) - b } is also in Dom(n)即集合IDom(b)只有一个元素。
+
+例子：
+1234567891011121314   +-------+   | entry |   +-------+      |      v   +-------+&amp;gt;+--&amp;gt;|   n   |&amp;gt;|   +-------+&amp;gt;|    |   \&amp;gt;|    |    \&amp;gt;|    v     v&amp;gt;|   +---+  +---+&amp;gt;+---| a |&amp;lt;-| b |   +---+  +---+
+Dom(b) &amp;#x3D; {entry, n, b}IDom(b) &amp;#x3D; {n}
+
+2. iteratve way可以用前向数据流分析来计算domtree：对于CFG G &amp;#x3D; (N, E, n0), N是点集，E是边集，n0是entry
+12345678910111213141516171819for n in nodes    Dom[n] = &amp;#123;1...N&amp;#125;bool changed = truewhile (changed)&amp;#123;    changed = false    for n in reverse_post_order()&amp;#123;        new_set = &amp;#123;&amp;#125;        for p in preds(n)&amp;#123;            new_set = new_set ∩ Dom(p)        &amp;#125;        new_set = new_set ∪ &amp;#123;n&amp;#125;            if(new_set != Dom[n])&amp;#123;            Dom[n] = new_set            changed = true        &amp;#125;    &amp;#125;&amp;#125;
+这里用reverse post order可以保证n的所有前驱都被处理后，再处理n
+3. A Simple, Fast Dominance Algorithm前面介绍了迭代方式计算domtree算法，简单容易理解，但是效率没那么高(bitvector实现)。 bitvector每次拷贝所有节点信息。那对于稀疏的图来说，效率就难说了，所以A Simple, Fast Dominance Algorithm用一种sparse方式去计算domtree。
+除了entry节点， Dom(b) &amp;#x3D; {b} ∪ IDom(b) ∪ IDom(IDom(b)) ∪ …. ∪ {entry}根据这个特性，我们构建一个dom tree
+1234567struct dom_tree_node&amp;#123;    int order;    cfg_node* ref;    struct dom_tree_node *idom;    vector&amp;lt;struct dom_tree_node* &amp;gt; children;&amp;#125;;
+
+123456789101112131415161718digraph cfg &amp;#123;    rankdir=TB;    node [shape=box];        // 节点    entry [label=&amp;quot;entry&amp;quot;];    n [label=&amp;quot;n&amp;quot;];    a [label=&amp;quot;a&amp;quot;];    b [label=&amp;quot;b&amp;quot;];        // 支配关系（idom）    entry -&amp;gt; n;    n -&amp;gt; a;    n -&amp;gt; b;    b -&amp;gt; a;    a -&amp;gt; n;&amp;#125;
+
+123456789101112131415161718192021digraph DominatorTree &amp;#123;    rankdir=TB;    node [shape=box];        // 节点    entry [label=&amp;quot;entry&amp;quot;];    n [label=&amp;quot;n&amp;quot;];    a [label=&amp;quot;a&amp;quot;];    b [label=&amp;quot;b&amp;quot;];            entry -&amp;gt; n [label=&amp;quot;children&amp;quot;, color=red, fontcolor=red];    n -&amp;gt; a [label=&amp;quot;children&amp;quot;, color=red, fontcolor=red];    n -&amp;gt; b [label=&amp;quot;children&amp;quot;, color=red, fontcolor=red];        // 添加子节点关系（children）    entry -&amp;gt; n [label=&amp;quot;idom&amp;quot;, dir=back, color=blue, fontcolor=blue];    n -&amp;gt; a [label=&amp;quot;idom&amp;quot;, dir=back, color=blue, fontcolor=blue];    n -&amp;gt; b [label=&amp;quot;idom&amp;quot;, dir=back, color=blue, fontcolor=blue];&amp;#125;
+
+
+算法实现：
+1234567891011121314151617181920212223242526272829303132333435363738for (number, node) in post_order()&amp;#123;    // mapping CFG node to dom tree node    mapping[node] = create dom_tree_node(node, number) &amp;#125;mapping[entry]-&amp;gt;idom = mapping[entry];changed = truewhile (changed)&amp;#123;    changed = false    for b in reverse_post_order(expect entry)&amp;#123;        new_idom = first (processed) predecessor of b        for p in other_processors(b) &amp;#123;            if mapping[p]-&amp;gt;idom != NULL &amp;#123;                new_idom = intersect(mapping[p], new_idom)            &amp;#125;        &amp;#125;        if mapping[b]-&amp;gt;idom != new_idom &amp;#123;            mapping[b]-&amp;gt;idom = new_idom            changed = true        &amp;#125;    &amp;#125;&amp;#125;// order is the postorder numbersfunction intersect(a, b) return dom_tree_node&amp;#123;    f1 = a;    f2 = b;    while(f1 != f2)&amp;#123;        while (f1-&amp;gt;order &amp;lt; f2-&amp;gt;order ) &amp;#123;            f1 = f1-&amp;gt;idom;        &amp;#125;        while (f2-&amp;gt;order &amp;lt; f1-&amp;gt;order) &amp;#123;            f2 = f2-&amp;gt;idom;        &amp;#125;    &amp;#125;    return f1;&amp;#125;
+
+Remember that nodes higher in the dominator tree have higher postorder numbers, which is why intersect moves the finger whose value is less than the other finger’s.
+
+
+其实原论文中用的是数组，但我们用树实现。原因是对于部分IR来说，basicblock*指针的值就可以被看为一个id。用指针+hashmap的组合更通用。
+
+4. Lengauer-Tarjan algorithmLT算法基于
+
+DFS 
+spanning-tree
+
+基于DFS遍历顺序，LT算法提出了semidominator概念，简写为sdom(注意和strict dominator区分)。
+sdom(w) &amp;#x3D; semidom(w) &amp;#x3D; min {v | there is a path v &amp;#x3D; v0, v1 ,…, vk&amp;#x3D;w such that vi &amp;gt; w for 1 ≤ i ≤ k-1 }注：vi&amp;gt;w指的是DFS的order
+对于大部分节点来说sdom和idom相同。故我们需要
+
+计算sdom
+sdom -&amp;gt; idom
+
+计算sdom：
+12345678910111213141516171819// step 1Create a DFS tree Tfor v in V    semi(v) = vfor v in reverse_preorder(V-&amp;#123;entry&amp;#125;)    for q in pred(v)        z = eval(v, q)        if semi(z) &amp;lt; semi(v)            semi(v) = semi(z)function eval(v, q)&amp;#123;    if v==entry return v;    while (v &amp;lt; q) &amp;#123;        q = semi(q)    &amp;#125;    return q;&amp;#125;
+
+剩下的sdom-&amp;gt; idom太复杂了，没看懂。。。。
+5. semi-nca
+计算semi dominator
+利用NCA算法计算idom
+
+idom(v) &amp;#x3D; NCA_D( parent_T(v), sdom(v))D是dom tree， T是spanning tree算法如下：
+1234567891. T = create a DFS tree2. Calculate semidominator for all vertex3. D = create_dom_tree().set_root(entry)4.for v in preorder_T(V-&amp;#123;r&amp;#125;)&amp;#123;    Ascend the all the path r -&amp;gt; parent_T(v) in D and find the deepest vertex with which number is smaller than or equal to sdom(v). set this vertext as the parent of v in D.&amp;#125;
+
+图例：参考
+
+step 1. Spanning tree
+初始CFG: Spanning Tree：
+
+step 2. 计算sdom
+step 3. 计算domtree
+
+
+
+6. Dominance FrontiersSSA-construction中插入phi节点时候会用到。
+define the Dominance Frontiers of a node b as: for a node y, that b dominates a predessor of y but does not strictly dominate y.
+例子：
+12345678910111213141516digraph example3 &amp;#123;    rankdir=TB;    node [shape=box];        // 节点    entry [label=&amp;quot;entry&amp;quot;];    b [label=&amp;quot;b&amp;quot;];    x [label=&amp;quot;x&amp;quot;];    y [label=&amp;quot;y&amp;quot;];        entry-&amp;gt;b;    b-&amp;gt;x;    x-&amp;gt;y;    entry-&amp;gt;y;    &amp;#125;
+
+DF(b) &amp;#x3D; {y}
+
+123456789101112for b in nodes&amp;#123;    if b.preds().len &amp;gt;= 2 &amp;#123;        for p in b.preds()&amp;#123;            runner = mapping[p]            while runner != mapping[b]-&amp;gt;idom &amp;#123;                add b to runner&amp;#x27;s dominance frontier set                runner = runner-&amp;gt;idom            &amp;#125;        &amp;#125;    &amp;#125;&amp;#125;
+
+reference
+https://blog.csdn.net/dashuniuniu/article/details/103462147(为数不多的CSDN能用上的时候)
+
+"><p>domtree构建算法</p>
+<h1 id="1-domtree概念介绍"><a href="#1-domtree概念介绍" class="headerlink" title="1. domtree概念介绍"></a>1. domtree概念介绍</h1><blockquote>
+<p>Dom(b): A node n in the CFG dominates b if n lies on every path from the entry node of the CFG to b.<br>即Dom(b)是一个集合，根据定义 b in Dom(b)</p>
+</blockquote>
+<blockquote>
+<p>immediate dominator: b’s immediate dominator is the node n in Dom(b) which is cloest to b.</p>
+</blockquote>
+<p>IDom(b): For a node b, the set IDom(b) contains exactly one node, the immediate dominator of b. If n is b’s immediate dominator, then every node in { Dom(b) - b } is also in Dom(n)<br>即集合IDom(b)只有一个元素。</p>
+<blockquote>
+<p>例子：</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">   +-------+</span><br><span class="line">   | entry |</span><br><span class="line">   +-------+</span><br><span class="line">      |</span><br><span class="line">      v</span><br><span class="line">   +-------+</span><br><span class="line">&gt;+--&gt;|   n   |</span><br><span class="line">&gt;|   +-------+</span><br><span class="line">&gt;|    |   \</span><br><span class="line">&gt;|    |    \</span><br><span class="line">&gt;|    v     v</span><br><span class="line">&gt;|   +---+  +---+</span><br><span class="line">&gt;+---| a |&lt;-| b |</span><br><span class="line">   +---+  +---+</span><br></pre></td></tr></table></figure>
+<p>Dom(b) &#x3D; {entry, n, b}<br>IDom(b) &#x3D; {n}</p>
+</blockquote>
+<h1 id="2-iteratve-way"><a href="#2-iteratve-way" class="headerlink" title="2. iteratve way"></a>2. iteratve way</h1><p>可以用前向数据流分析来计算domtree：<br>对于CFG G &#x3D; (N, E, n0), N是点集，E是边集，n0是entry</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> n in nodes</span><br><span class="line">    Dom[n] = &#123;<span class="number">1.</span>..N&#125;</span><br><span class="line"><span class="type">bool</span> changed = <span class="literal">true</span></span><br><span class="line"><span class="keyword">while</span> (changed)&#123;</span><br><span class="line">    changed = <span class="literal">false</span></span><br><span class="line">    <span class="keyword">for</span> n in reverse_post_order()&#123;</span><br><span class="line">        new_set = &#123;&#125;</span><br><span class="line">        <span class="keyword">for</span> p in preds(n)&#123;</span><br><span class="line">            new_set = new_set ∩ Dom(p)</span><br><span class="line">        &#125;</span><br><span class="line">        new_set = new_set ∪ &#123;n&#125;</span><br><span class="line">    </span><br><span class="line">        <span class="keyword">if</span>(new_set != Dom[n])&#123;</span><br><span class="line">            Dom[n] = new_set</span><br><span class="line">            changed = <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>这里用reverse post order可以保证n的所有前驱都被处理后，再处理n</p>
+<h1 id="3-A-Simple-Fast-Dominance-Algorithm"><a href="#3-A-Simple-Fast-Dominance-Algorithm" class="headerlink" title="3. A Simple, Fast Dominance Algorithm"></a>3. A Simple, Fast Dominance Algorithm</h1><p>前面介绍了迭代方式计算domtree算法，简单容易理解，但是效率没那么高(bitvector实现)。 bitvector每次拷贝所有节点信息。那对于稀疏的图来说，效率就难说了，所以<code>A Simple, Fast Dominance Algorithm</code>用一种sparse方式去计算domtree。</p>
+<p>除了entry节点， Dom(b) &#x3D; {b} ∪ IDom(b) ∪ IDom(IDom(b)) ∪ …. ∪ {entry}<br>根据这个特性，我们构建一个dom tree</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">dom_tree_node</span>&#123;</span></span><br><span class="line">    <span class="type">int</span> order;</span><br><span class="line">    cfg_node* ref;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">dom_tree_node</span> *<span class="title">idom</span>;</span></span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="class"><span class="keyword">struct</span> <span class="title">dom_tree_node</span>* &gt;</span> children;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">digraph cfg &#123;</span><br><span class="line">    rankdir=TB;</span><br><span class="line">    node [shape=box];</span><br><span class="line">    </span><br><span class="line">    // 节点</span><br><span class="line">    entry [label=&quot;entry&quot;];</span><br><span class="line">    n [label=&quot;n&quot;];</span><br><span class="line">    a [label=&quot;a&quot;];</span><br><span class="line">    b [label=&quot;b&quot;];</span><br><span class="line">    </span><br><span class="line">    // 支配关系（idom）</span><br><span class="line">    entry -&gt; n;</span><br><span class="line">    n -&gt; a;</span><br><span class="line">    n -&gt; b;</span><br><span class="line">    b -&gt; a;</span><br><span class="line">    a -&gt; n;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">digraph DominatorTree &#123;</span><br><span class="line">    rankdir=TB;</span><br><span class="line">    node [shape=box];</span><br><span class="line">    </span><br><span class="line">    // 节点</span><br><span class="line">    entry [label=&quot;entry&quot;];</span><br><span class="line">    n [label=&quot;n&quot;];</span><br><span class="line">    a [label=&quot;a&quot;];</span><br><span class="line">    b [label=&quot;b&quot;];</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    entry -&gt; n [label=&quot;children&quot;, color=red, fontcolor=red];</span><br><span class="line">    n -&gt; a [label=&quot;children&quot;, color=red, fontcolor=red];</span><br><span class="line">    n -&gt; b [label=&quot;children&quot;, color=red, fontcolor=red];</span><br><span class="line">    </span><br><span class="line">    // 添加子节点关系（children）</span><br><span class="line">    entry -&gt; n [label=&quot;idom&quot;, dir=back, color=blue, fontcolor=blue];</span><br><span class="line">    n -&gt; a [label=&quot;idom&quot;, dir=back, color=blue, fontcolor=blue];</span><br><span class="line">    n -&gt; b [label=&quot;idom&quot;, dir=back, color=blue, fontcolor=blue];</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p>算法实现：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">for</span> (number, node) in <span class="title function_">post_order</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="comment">// mapping CFG node to dom tree node</span></span><br><span class="line">    mapping[node] = create dom_tree_node(node, number) </span><br><span class="line">&#125;</span><br><span class="line">mapping[entry]-&gt;idom = mapping[entry];</span><br><span class="line">changed = <span class="literal">true</span></span><br><span class="line"><span class="keyword">while</span> (changed)&#123;</span><br><span class="line">    changed = <span class="literal">false</span></span><br><span class="line">    <span class="keyword">for</span> b in reverse_post_order(expect entry)&#123;</span><br><span class="line">        new_idom = first (processed) predecessor of b</span><br><span class="line">        <span class="keyword">for</span> p in other_processors(b) &#123;</span><br><span class="line">            <span class="keyword">if</span> mapping[p]-&gt;idom != <span class="literal">NULL</span> &#123;</span><br><span class="line">                new_idom = intersect(mapping[p], new_idom)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> mapping[b]-&gt;idom != new_idom &#123;</span><br><span class="line">            mapping[b]-&gt;idom = new_idom</span><br><span class="line">            changed = <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// order is the postorder numbers</span></span><br><span class="line">function intersect(a, b) <span class="keyword">return</span> dom_tree_node&#123;</span><br><span class="line">    f1 = a;</span><br><span class="line">    f2 = b;</span><br><span class="line">    <span class="keyword">while</span>(f1 != f2)&#123;</span><br><span class="line">        <span class="keyword">while</span> (f1-&gt;order &lt; f2-&gt;order ) &#123;</span><br><span class="line">            f1 = f1-&gt;idom;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">while</span> (f2-&gt;order &lt; f1-&gt;order) &#123;</span><br><span class="line">            f2 = f2-&gt;idom;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> f1;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>Remember that nodes higher in the dominator tree have higher postorder numbers, which is why intersect moves the finger whose value is less than the other finger’s.</p>
+</blockquote>
+<blockquote>
+<p>其实原论文中用的是数组，但我们用树实现。<br>原因是对于部分IR来说，basicblock*指针的值就可以被看为一个id。用指针+hashmap的组合更通用。</p>
+</blockquote>
+<h1 id="4-Lengauer-Tarjan-algorithm"><a href="#4-Lengauer-Tarjan-algorithm" class="headerlink" title="4. Lengauer-Tarjan algorithm"></a>4. Lengauer-Tarjan algorithm</h1><p>LT算法基于</p>
+<ol>
+<li>DFS </li>
+<li>spanning-tree</li>
+</ol>
+<p>基于DFS遍历顺序，LT算法提出了<strong>semidominator</strong>概念，简写为<code>sdom</code>(注意和strict dominator区分)。</p>
+<p>sdom(w) &#x3D; semidom(w) &#x3D; min {v | there is a path v &#x3D; v0, v1 ,…, vk&#x3D;w such that vi &gt; w for 1 ≤ i ≤ k-1 }<br>注：vi&gt;w指的是DFS的order</p>
+<p>对于大部分节点来说sdom和idom相同。<br>故我们需要</p>
+<ol>
+<li>计算sdom</li>
+<li>sdom -&gt; idom</li>
+</ol>
+<p>计算sdom：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// step 1</span></span><br><span class="line">Create a DFS tree T</span><br><span class="line"><span class="keyword">for</span> v in V</span><br><span class="line">    <span class="title function_">semi</span><span class="params">(v)</span> = v</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> v in <span class="title function_">reverse_preorder</span><span class="params">(V-&#123;entry&#125;)</span></span><br><span class="line">    <span class="keyword">for</span> q in <span class="title function_">pred</span><span class="params">(v)</span></span><br><span class="line">        z = eval(v, q)</span><br><span class="line">        <span class="keyword">if</span> <span class="title function_">semi</span><span class="params">(z)</span> &lt; <span class="title function_">semi</span><span class="params">(v)</span></span><br><span class="line">            <span class="title function_">semi</span><span class="params">(v)</span> = semi(z)</span><br><span class="line"></span><br><span class="line">function <span class="title function_">eval</span><span class="params">(v, q)</span>&#123;</span><br><span class="line">    <span class="keyword">if</span> v==entry <span class="keyword">return</span> v;</span><br><span class="line">    <span class="keyword">while</span> (v &lt; q) &#123;</span><br><span class="line">        q = semi(q)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> q;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>剩下的sdom-&gt; idom太复杂了，没看懂。。。。</p>
+<h1 id="5-semi-nca"><a href="#5-semi-nca" class="headerlink" title="5. semi-nca"></a>5. semi-nca</h1><ol>
+<li>计算semi dominator</li>
+<li>利用NCA算法计算idom</li>
+</ol>
+<p>idom(v) &#x3D; NCA_D( parent_T(v), sdom(v))<br>D是dom tree， T是spanning tree<br>算法如下：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">1. T = create a DFS tree</span><br><span class="line">2. Calculate semidominator for all vertex</span><br><span class="line">3. D = create_dom_tree().set_root(entry)</span><br><span class="line">4.</span><br><span class="line">for v in preorder_T(V-&#123;r&#125;)&#123;</span><br><span class="line">    Ascend the all the path r -&gt; parent_T(v) in D and find the deepest vertex with which number is smaller than or equal to sdom(v). set this vertext as the parent of v in D.</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>图例：<a target="_blank" rel="noopener" href="https://blog.csdn.net/dashuniuniu/article/details/103462147?spm=1001.2014.3001.5501">参考</a></p>
+<p><img src="/static/images/domtree/dt_cfg.png" alt="CFG"></p>
+<h3 id="step-1-Spanning-tree"><a href="#step-1-Spanning-tree" class="headerlink" title="step 1. Spanning tree"></a>step 1. Spanning tree</h3><blockquote>
+<p>初始CFG: <img src="/static/images/domtree/dt_cfg_dfs.png" alt="alt text"><br>Spanning Tree：<img src="/static/images/domtree/dt_dfs.png" alt="spanning tree"></p>
+</blockquote>
+<h3 id="step-2-计算sdom"><a href="#step-2-计算sdom" class="headerlink" title="step 2. 计算sdom"></a>step 2. 计算sdom</h3><p><img src="/static/images/domtree/dt_sdom.png" alt="alt text"></p>
+<h3 id="step-3-计算domtree"><a href="#step-3-计算domtree" class="headerlink" title="step 3. 计算domtree"></a>step 3. 计算domtree</h3><p><img src="/static/images/domtree/dt_domtree.png" alt="alt text"></p>
+<blockquote>
+<p><img src="/static/images/domtree/dt_all.png" alt="alt text"></p>
+</blockquote>
+<h1 id="6-Dominance-Frontiers"><a href="#6-Dominance-Frontiers" class="headerlink" title="6. Dominance Frontiers"></a>6. Dominance Frontiers</h1><p>SSA-construction中插入phi节点时候会用到。</p>
+<p><em>define the Dominance Frontiers of a node b as: for a node y, that b dominates a predessor of y but does not strictly dominate y.</em></p>
+<p>例子：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">digraph example3 &#123;</span><br><span class="line">    rankdir=TB;</span><br><span class="line">    node [shape=box];</span><br><span class="line">    </span><br><span class="line">    // 节点</span><br><span class="line">    entry [label=&quot;entry&quot;];</span><br><span class="line">    b [label=&quot;b&quot;];</span><br><span class="line">    x [label=&quot;x&quot;];</span><br><span class="line">    y [label=&quot;y&quot;];</span><br><span class="line">    </span><br><span class="line">    entry-&gt;b;</span><br><span class="line">    b-&gt;x;</span><br><span class="line">    x-&gt;y;</span><br><span class="line">    entry-&gt;y;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>DF(b) &#x3D; {y}</p>
+</blockquote>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">for b in nodes&#123;</span><br><span class="line">    if b.preds().len &gt;= 2 &#123;</span><br><span class="line">        for p in b.preds()&#123;</span><br><span class="line">            runner = mapping[p]</span><br><span class="line">            while runner != mapping[b]-&gt;idom &#123;</span><br><span class="line">                add b to runner&#x27;s dominance frontier set</span><br><span class="line">                runner = runner-&gt;idom</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h1 id="reference"><a href="#reference" class="headerlink" title="reference"></a>reference</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/dashuniuniu/article/details/103462147">https://blog.csdn.net/dashuniuniu/article/details/103462147</a><br>(为数不多的CSDN能用上的时候)</li>
+</ul>
+</div></div></div></div></div><div class="post-archive"><div class="post-archive__content"><div class="post-archive__month">Apr</div><div class="post-archive__body"><a class="post-archive__title" href="/2026/04/02/inline/" title="inline">inline</a><div class="post-archive__excerpt"><div class="post-archive__excerpt-content" title="内联,重要性不必多说。
+基本思路不是很难，
+
+module层面构建call graph
+根据call graph根据SCC（强连通分量
+遍历SCC尝试内联（注意递归函数） 在同一个SCC里面就是一个递归链
+决定内联时候：
+clone被内联函数，用valuemap[old] &amp;#x3D; new记录映射情况。
+被clone内容加入caller中
+更新下ssa的def use chain。
+
+
+
+主要是各种cost和gain的评估，各种启发式。
+"><p>内联,重要性不必多说。</p>
+<p>基本思路不是很难，</p>
+<ol>
+<li>module层面构建call graph</li>
+<li>根据call graph根据SCC（强连通分量</li>
+<li>遍历SCC尝试内联（注意递归函数） 在同一个SCC里面就是一个递归链</li>
+<li>决定内联时候：<ol>
+<li>clone被内联函数，用valuemap[old] &#x3D; new记录映射情况。</li>
+<li>被clone内容加入caller中</li>
+<li>更新下ssa的def use chain。</li>
+</ol>
+</li>
+</ol>
+<p>主要是各种cost和gain的评估，各种启发式。</p>
+</div></div></div></div></div><div class="post-archive"><div class="post-archive__content"><div class="post-archive__month">Apr</div><div class="post-archive__body"><a class="post-archive__title" href="/2026/04/02/diary/2026-3-12/" title="2026-3-12记">2026-3-12记</a><div class="post-archive__excerpt"><div class="post-archive__excerpt-content" title="记录下这一年半编译器开发的经验。
+
+编译通过，但是运行结果错误。
+
+如何检查？
+
+先减小问题规模，整出一个最小可复现用例
+检查pipeline，parser结果，ir pass结果，isel结果，reg alloc，stack frame等。
+verify的重要性，每个不同格式的中间表示转换处需要有verify，保证其流入和流出结果的合法性。
+重复上述步骤，直到问题解决。
+
+既然是pipeline模型，那么衔接需要处理好。需重点注意。
+
+编译器挂掉了，没其他信息。一般是各种空指针解引用导致的，linux里面很好处理。
+ISA里面还是需要cmp a,b; cset; jmpcc这样的指令。block数量可以少一些，虽然有隐式状态吧。
+phi-node-elimination，简单解法很有效。
+将合法化和优化分隔开。写在一起很难调试。比如说上面的phi消除，用phi-node-elimination + register-coalescer处理合法性和优化问题。
+阶段性测试，必不可少，花费时间写测试很有必要，也是约束项目复杂度的关键措施。想想一命通关的难度。
+ir层级表示，4到5层是极限了，每层其实都是一个小解释器。llvm有ast，llvm-ir，mir+MC。算上预处理器就4层了，MC是tablegen送的. 每层都要测试，有自己的结构，层之间的转换。
+小即是多，启动目标要尽可能小，而不是摊大饼。多一个环节，复杂度就会上升一级。
+关于ai，因为经济问题，只能用免费版本的。效果其实不错。如果还是传统的需求分析，设计，编码，测试流程，ai挺有用的。编码还需要盯着具体实现，最好是划定一个小范围，每步都有git commit。git真是ai code的大爹。
+
+"><p>记录下这一年半编译器开发的经验。</p>
+<ol>
+<li>编译通过，但是运行结果错误。</li>
+</ol>
+<p>如何检查？</p>
+<ul>
+<li>先减小问题规模，整出一个最小可复现用例</li>
+<li>检查pipeline，parser结果，ir pass结果，isel结果，reg alloc，stack frame等。</li>
+<li>verify的重要性，每个不同格式的中间表示转换处需要有verify，保证其流入和流出结果的合法性。</li>
+<li>重复上述步骤，直到问题解决。</li>
+</ul>
+<p>既然是pipeline模型，那么衔接需要处理好。需重点注意。</p>
+<ol start="2">
+<li>编译器挂掉了，没其他信息。一般是各种空指针解引用导致的，linux里面很好处理。</li>
+<li>ISA里面还是需要cmp a,b; cset; jmpcc这样的指令。block数量可以少一些，虽然有隐式状态吧。</li>
+<li>phi-node-elimination，简单解法很有效。</li>
+<li>将合法化和优化分隔开。写在一起很难调试。比如说上面的phi消除，用phi-node-elimination + register-coalescer处理合法性和优化问题。</li>
+<li>阶段性测试，必不可少，花费时间写测试很有必要，也是约束项目复杂度的关键措施。想想一命通关的难度。</li>
+<li>ir层级表示，4到5层是极限了，每层其实都是一个小解释器。llvm有ast，llvm-ir，mir+MC。算上预处理器就4层了，MC是tablegen送的. 每层都要测试，有自己的结构，层之间的转换。</li>
+<li>小即是多，启动目标要尽可能小，而不是摊大饼。多一个环节，复杂度就会上升一级。</li>
+<li>关于ai，因为经济问题，只能用免费版本的。效果其实不错。如果还是传统的需求分析，设计，编码，测试流程，ai挺有用的。编码还需要盯着具体实现，最好是划定一个小范围，每步都有git commit。git真是ai code的大爹。</li>
+</ol>
+</div></div></div></div></div></div></div><div id="backToTop"><div class="back-arrow back-arrow-left"></div><div class="back-arrow back-arrow-right"></div></div><footer class="container"><div class="rights"><span>Powered by </span><a href="http://hexo.io" target="_blank">Hexo</a><span>, Theme </span><a href="https://github.com/gary-Shen/hexo-theme-bear" target="_blank">Bear</a><span>.</span></div></footer>
+<script src="/script/jquery.min.js"></script>
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+<script src="/script/index.js"></script>
+<script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-61220413-1', 'auto');
+ga('send', 'pageview');</script></body></html>

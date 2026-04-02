@@ -1,0 +1,90 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta http-equiv="X-UA-Compatible" content="IE=edge"><title>llvm Value Use User内存布局 | by</title><link rel="shortcut icon" href="/images/avatar.png" type="image/x-icon">
+<link rel="stylesheet" href="/styles/site.css">
+<meta name="generator" content="Hexo 8.1.1"><link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+</head><body><header class="container" id="header"><div class="header"><div class="header-left"><div class="avatar"><img src="/images/avatar.png"></div><div class="author"><div class="author-name"><a href="/">by</a></div><div class="about-me"></div></div></div><div class="header-right"><ul class="navigation"><li><a href="/archives">Archives</a></li></ul></div><div class="about-me-mask"><div class="about-me-wrap"><div class="about-me__header"><div class="avatar"><img src="/images/avatar.png"></div></div><ul class="socials"><li class="social-item"><span class="label"><img src="/images/socials/github.svg" alt="https://github.com/wangbyby"></span><a href="https://github.com/wangbyby" target="_blank" rel="noopener" title="https://github.com/wangbyby">https://github.com/wangbyby</a></li></ul></div></div></div></header><div class="container post"><section class="article"><div class="title">llvm Value Use User内存布局</div><div class="date">Posted on 2026-04-02</div><div class="content"><blockquote>
+<ul>
+<li>起源：工作里用c搓了个ir库，ssa形式，但在实现方面遇到了问题（replaceAllUsesWith) 。所以看看工业级的llvm怎么处理的</li>
+<li>参考llvm18版本源码</li>
+</ul>
+</blockquote>
+<p>我的设计：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">enum</span> <span class="title">ClassID</span>&#123;</span></span><br><span class="line">   BasicBlock,</span><br><span class="line">   Instruction,</span><br><span class="line">   ...</span><br><span class="line">&#125;;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Value</span>&#123;</span></span><br><span class="line">    <span class="type">char</span>* name;</span><br><span class="line">    ClassID id;</span><br><span class="line">    Type* ty;</span><br><span class="line">    Use* use_list;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Use</span>&#123;</span></span><br><span class="line">   Value* user;</span><br><span class="line">   Use* next;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Instruction</span>&#123;</span></span><br><span class="line">    Value base;</span><br><span class="line">    Value* arr[];</span><br><span class="line">&#125;;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>Instruction即User，只储存了<code>Value*</code>数组<br>以下面的IR为例：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">%add = add %a, %b  </span><br><span class="line">%mul = mul %add, %b</span><br></pre></td></tr></table></figure>
+
+
+<blockquote>
+<p>![[&#x2F;static&#x2F;images&#x2F;use_graph.png]]</p>
+</blockquote>
+<p>看起来很简单，那实现replaceAllUsesWith是怎么实现呢？</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// replace all Use of self to other</span></span><br><span class="line"><span class="comment">// example: </span></span><br><span class="line"><span class="comment">//   %add = add %a, %b</span></span><br><span class="line"><span class="comment">//   %mul = mul %add, %b</span></span><br><span class="line"><span class="comment">// =&gt; after replaceAllUsesWith(%add, %a)</span></span><br><span class="line"><span class="comment">//   %mul = mul %a, %b</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">replaceAllUsesWith</span><span class="params">(Value* self, Value* other)</span> &#123;</span><br><span class="line">	<span class="keyword">while</span>(<span class="literal">NULL</span> != self.use_list)&#123;</span><br><span class="line">		Use* iter = self.use_list.pop();</span><br><span class="line">		Value *user = iter.val;</span><br><span class="line">		<span class="keyword">for</span>(<span class="type">int</span> i =<span class="number">0</span>; i &lt; user.get_operands_num();i++)&#123;</span><br><span class="line">			Value* op = user.operand[i];</span><br><span class="line">			<span class="keyword">if</span>(op == self)&#123;</span><br><span class="line">				other.add_use(user);</span><br><span class="line">				user.operand[i] = other;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>这里发现几个问题</p>
+<ol>
+<li>replace 需要扫描operands</li>
+<li>需要注意Use节点内存释放</li>
+<li>遇到<code>%add = add %a, %a</code> 容易出现double free</li>
+</ol>
+<hr>
+<p>那llvm如何处理呢？</p>
+<p>先看看llvm ir的继承体系:</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://llvm.org/doxygen/classllvm_1_1Value.html">https://llvm.org/doxygen/classllvm_1_1Value.html</a><br>Value是基类，User继承自Value。</p>
+</blockquote>
+<p>然后查看源码，看看User实现方式：</p>
+<blockquote>
+<p>内联User分配，以2为例<br>![[static&#x2F;images&#x2F;3e1c4416af8a2d18537664396f222e86b1d756d4_2_690x386.jpeg]]</p>
+</blockquote>
+<blockquote>
+<p>外挂Usee分配<br>![[static&#x2F;images&#x2F;b60afe1c4150d5e7b1b71c3ebbf3a428305a103d_2_690x290.png]]</p>
+</blockquote>
+<p>仍以这段代码为例子：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">%add = add %a, %b  </span><br><span class="line">%mul = mul %add, %b</span><br></pre></td></tr></table></figure>
+
+<p>对应图：</p>
+<blockquote>
+<p>![[&#x2F;static&#x2F;images&#x2F;llvm-ir-use.jpeg]]</p>
+</blockquote>
+<p>对应实现：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 双链表，头插法插入</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">User::setOperand</span><span class="params">(<span class="type">unsigned</span> i, Value *Val)</span> </span>&#123;</span><br><span class="line">  <span class="built_in">assert</span>(i &lt; NumUserOperands &amp;&amp; <span class="string">&quot;setOperand() out of range!&quot;</span>);</span><br><span class="line">  <span class="built_in">assert</span>((!<span class="built_in">isa</span>&lt;Constant&gt;((<span class="type">const</span> Value*)<span class="keyword">this</span>) ||</span><br><span class="line">        <span class="built_in">isa</span>&lt;GlobalValue&gt;((<span class="type">const</span> Value*)<span class="keyword">this</span>)) &amp;&amp;</span><br><span class="line">        <span class="string">&quot;Cannot mutate a constant with setOperand!&quot;</span>);</span><br><span class="line">  <span class="built_in">getOperandList</span>()[i] = Val; <span class="comment">// 调用Use::operator=(Value *RHS)</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Value *Use::<span class="keyword">operator</span>=(Value *RHS) &#123;</span><br><span class="line">  <span class="built_in">set</span>(RHS);  <span class="comment">// 调用Use::set(Value *V)</span></span><br><span class="line">  <span class="keyword">return</span> RHS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Use::set</span><span class="params">(Value *V)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (Val) <span class="built_in">removeFromList</span>();</span><br><span class="line">  Val = V;</span><br><span class="line">  <span class="keyword">if</span> (V) V-&gt;<span class="built_in">addUse</span>(*<span class="keyword">this</span>); <span class="comment">// 调用Value::addUse(Use &amp;U)</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Use::removeFromList</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  *Prev = Next;</span><br><span class="line">  <span class="keyword">if</span> (Next)</span><br><span class="line">    Next-&gt;Prev = Prev;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Value::addUse</span><span class="params">(Use &amp;U)</span> </span>&#123; U.<span class="built_in">addToList</span>(&amp;UseList); &#125; <span class="comment">// 调用Use::addToList(Use **List)</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Use::addToList</span><span class="params">(Use **List)</span> </span>&#123;</span><br><span class="line">  Next = *List;</span><br><span class="line">  <span class="keyword">if</span> (Next)</span><br><span class="line">    Next-&gt;Prev = &amp;Next;</span><br><span class="line">  Prev = List;</span><br><span class="line">  *Prev = <span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">Use *<span class="title">User::getOperandList</span><span class="params">()</span> </span>&#123;...&#125;</span><br></pre></td></tr></table></figure>
+
+<p>那replaceAllUsesWith实现就比较简单了：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (UseList) &#123;</span><br><span class="line">  Use &amp;U = *UseList;</span><br><span class="line">  U.<span class="built_in">set</span>(New);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<hr>
+<h3 id="一些特殊指令"><a href="#一些特殊指令" class="headerlink" title="一些特殊指令"></a>一些特殊指令</h3><ul>
+<li><p>branch指令:</p>
+<blockquote>
+<p>这里还需要提到BasicBlock如何获取前驱和后缀</p>
+<ul>
+<li>前驱：<br>变量UseList可以得到Inst，然后搜集inst.parent即可</li>
+<li>后继：<br>遍历最后一条指令的Use，搜集类型是BasicBlock的变量即可<br>注：这里的前驱和后缀都是CFG里面的概念<br>然后我们还看到，Function中有遍历Block的方法，其实遍历的是Block的存储结构。<br>即BasicBlock有两种遍历方式</li>
+</ul>
+<ol>
+<li>CFG遍历，通过前驱&#x2F;后缀。包括了RPO，DFS等遍历方式。</li>
+<li>存储结构遍历，通过ilist的next&#x2F;prev</li>
+</ol>
+</blockquote>
+</li>
+<li><p>phi指令：<br>basicblock是额外存储的，所以很容易出现basicblock未更新导致错误。新版本的llvm好像更新了。 </p>
+</li>
+<li><p>switch指令。会把cond，default，case都作为Use内联进来。</p>
+</li>
+</ul>
+<hr>
+<p>绘图：exlicdraw<br>![[static&#x2F;images&#x2F;llvm_value_use_layout.excalidraw]]</p>
+</div><div class="tags"></div></section></div><div class="container"><ul class="nav"><li><span>Previous: </span> <a href="/2026/04/02/llvm/llvm_SDNode_draw.excalidraw/">Untitled</a></li><li><span>Next: </span> <a href="/2026/04/02/llvm/regalloc_llvm0/">llvm寄存器分配0</a></li></ul></div><div id="backToTop"><div class="back-arrow back-arrow-left"></div><div class="back-arrow back-arrow-right"></div></div><footer class="container"><div class="rights"><span>Powered by </span><a href="http://hexo.io" target="_blank">Hexo</a><span>, Theme </span><a href="https://github.com/gary-Shen/hexo-theme-bear" target="_blank">Bear</a><span>.</span></div></footer>
+<script src="/script/jquery.min.js"></script>
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+<script src="/script/index.js"></script>
+<script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-61220413-1', 'auto');
+ga('send', 'pageview');</script>
+<script src="/script/post.js"></script>
+</body></html>

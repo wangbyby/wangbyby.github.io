@@ -1,9 +1,10 @@
-name: Deploy Zola site to GitHub Pages
+name: Deploy Hexo site to GitHub Pages
 
 on:
   push:
     branches:
-      - master  # 触发部署的分支
+      - master
+  workflow_dispatch:  # 支持手动触发
 
 jobs:
   deploy:
@@ -12,20 +13,35 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          submodules: true  # 拉取子模块
+          submodules: true
 
-      - name: Install Zola
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Cache Hexo
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            .cache
+          key: ${{ runner.os }}-hexo-${{ hashFiles('package-lock.json') }}
+          restore-keys: ${{ runner.os }}-hexo-
+
+      - name: Install dependencies
+        run: npm ci  # 使用 ci 代替 install，更快更可靠
+
+      - name: Build Hexo
         run: |
-          wget https://github.com/getzola/zola/releases/download/v0.19.2/zola-v0.19.2-x86_64-unknown-linux-gnu.tar.gz
-          tar -xzf zola-v0.19.2-x86_64-unknown-linux-gnu.tar.gz
-          sudo mv zola /usr/local/bin
+          npx hexo clean
+          npx hexo generate
 
-      - name: Build site
-        run: |
-          zola build
-
-      - name: Deploy to GitHub Pages
-        uses: shalzz/zola-deploy-action@master
-        env:
-            PAGES_BRANCH: gh-pages
-            TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          publish_branch: gh-pages
+          force_orphan: true  # 保持 gh-pages 分支干净

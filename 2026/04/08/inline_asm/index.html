@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+  <title>
+    
+    inline asm 丨
+    
+
+    typo
+  </title>
+
+  
+  <link rel="shortcut icon" href="/icon.svg">
+  
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  
+  <link id="theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.css">
+  <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
+  
+
+  <!-- 字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/root.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<link rel="stylesheet" href="/css/post.css">
+
+<meta name="generator" content="Hexo 8.1.1"><link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+</head>
+
+<body>
+  <header class="header">
+  <section class="header-container">
+    <a class="logo" href="/">Hexo</a>
+    <ul class="nav">
+      
+      <li><a href="/archives">archives</a></li>
+      
+      <li><a href="/about">about</a></li>
+      
+    </ul>
+  </section>
+</header>
+  <main class="main">
+    <article class="post">
+  
+  <div class="post-title">inline asm</div>
+  <div class="post-meta">
+    <div class="date">2026 April 8th</div>
+    <div class="tags">
+      
+    </div>
+  </div>
+  
+
+  <main class="post-content"><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">asm</span> <span class="title function_">volatile</span> <span class="params">(</span></span><br><span class="line"><span class="params">    <span class="string">&quot;asm template&quot;</span></span></span><br><span class="line"><span class="params">    : output_operands        <span class="comment">// ← 第一个冒号后</span></span></span><br><span class="line"><span class="params">    : input_operands         <span class="comment">// ← 第二个冒号后</span></span></span><br><span class="line"><span class="params">    : clobbers               <span class="comment">// ← 第三个冒号后</span></span></span><br><span class="line"><span class="params">)</span>;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p>example:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdint.h&gt;</span></span></span><br><span class="line"></span><br><span class="line">__attribute__((noinline))</span><br><span class="line"><span class="type">int</span> <span class="title function_">mul_add</span><span class="params">(</span></span><br><span class="line"><span class="params">    <span class="type">int</span> a, <span class="type">int</span> b, <span class="type">int</span> c,</span></span><br><span class="line"><span class="params">    <span class="type">int</span> *sum,</span></span><br><span class="line"><span class="params">    <span class="type">int</span> *acc)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">asm</span> <span class="title function_">volatile</span> <span class="params">(</span></span><br><span class="line"><span class="params">        <span class="string">&quot;imull  %[b], %[a]\n\t&quot;</span></span></span><br><span class="line"><span class="params">        <span class="string">&quot;leal   (%[a], %[c]), %[s]\n\t&quot;</span></span></span><br><span class="line"><span class="params">        <span class="string">&quot;addl   %[a], %[acc]\n\t&quot;</span></span></span><br><span class="line"><span class="params">        : [a]   <span class="string">&quot;+r&quot;</span>(a),        <span class="comment">// read-write</span></span></span><br><span class="line"><span class="params">          [s]   <span class="string">&quot;=r&quot;</span>(*sum),     <span class="comment">// write-only</span></span></span><br><span class="line"><span class="params">          [acc] <span class="string">&quot;+r&quot;</span>(*acc)      <span class="comment">// read-write</span></span></span><br><span class="line"><span class="params">        : [b]   <span class="string">&quot;r&quot;</span>(b),</span></span><br><span class="line"><span class="params">          [c]   <span class="string">&quot;r&quot;</span>(c)</span></span><br><span class="line"><span class="params">        : <span class="string">&quot;cc&quot;</span>, <span class="string">&quot;memory&quot;</span></span></span><br><span class="line"><span class="params">    )</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> a;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><code>%[b]</code> 是命名参数, 与后面的<code>[a]</code>对应。</p>
+<p><code>&quot;+r&quot;</code> read-write<br><code>&quot;=r&quot;</code> write only, 新定义一次，不读旧值<br><code>&quot;r&quot;</code>  read only，只读</p>
+</main>
+
+</article>
+
+
+<script src="/js/highlight.js"></script>
+
+  </main>
+  <footer class="footer">
+  
+  <span>Copyright © 2024 typo</span>
+  
+</footer>
+  
+<script src="/js/theme.js"></script>
+
+</body>
+
+</html>

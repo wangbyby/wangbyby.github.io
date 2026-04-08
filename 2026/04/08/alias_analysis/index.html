@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+  <title>
+    
+    alias analysis简介 丨
+    
+
+    typo
+  </title>
+
+  
+  <link rel="shortcut icon" href="/icon.svg">
+  
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  
+  <link id="theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.css">
+  <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
+  
+
+  <!-- 字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/root.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<link rel="stylesheet" href="/css/post.css">
+
+<meta name="generator" content="Hexo 8.1.1"><link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+</head>
+
+<body>
+  <header class="header">
+  <section class="header-container">
+    <a class="logo" href="/">Hexo</a>
+    <ul class="nav">
+      
+      <li><a href="/archives">archives</a></li>
+      
+      <li><a href="/about">about</a></li>
+      
+    </ul>
+  </section>
+</header>
+  <main class="main">
+    <article class="post">
+  
+  <div class="post-title">alias analysis简介</div>
+  <div class="post-meta">
+    <div class="date">2026 April 8th</div>
+    <div class="tags">
+      
+    </div>
+  </div>
+  
+
+  <main class="post-content"><h1 id="0-写这个文档的原因"><a href="#0-写这个文档的原因" class="headerlink" title="0. 写这个文档的原因"></a>0. 写这个文档的原因</h1><p>因为最近遇到几个问题</p>
+<ol>
+<li>在llvm ir上，如何分析一个global variable有没有在程序中变化？</li>
+<li>在llvm ir上，如何能分析出来指针的address space (stack, heap, global variable).？</li>
+</ol>
+<p>前提条件简点，假设我们在full lto模式下，不考虑类，但有函数指针。</p>
+<p>因为设计到指针+function call，所以我们需要一个全局分析。<br>如果我想构建一个call graph，就遇到几个问题</p>
+<ol>
+<li>递归函数的处理</li>
+<li>函数指针，特别是在参数中传递的函数指针。</li>
+<li>上下文敏感与否？ 特别是函数调用栈</li>
+<li>控制流敏感与否？</li>
+</ol>
+<p>3决定了call graph的数据结构如何。</p>
+<p>问题1就是AA分析（point to），store指令，memset call等会写入内存的操作的dst与 global variable是否会指向同一个地址。<br>问题2是分析指针的address space而不是point to集合，简单一些但也需要Whole program分析。</p>
+<h1 id="alias-analysis-简介"><a href="#alias-analysis-简介" class="headerlink" title="alias analysis 简介"></a>alias analysis 简介</h1><p>可以看这篇综述。</p>
+<ul>
+<li><p><a target="_blank" rel="noopener" href="https://www.cse.psu.edu/~gxt29/papers/ShengHsiuLin_thesis.pdf">https://www.cse.psu.edu/~gxt29/papers/ShengHsiuLin_thesis.pdf</a></p>
+</li>
+<li><p>alias analysis<br>The purpose of alias analysis is to determine all possible ways a program may access some given memory locations. A set of pointers are said to be in an alias group if they all point to the same memory locations.</p>
+</li>
+<li><p>points-to: a sub-problem of alias analysis. Points-to analysis<br>computes sets of memory locations that each pointer may point to</p>
+</li>
+</ul>
+<p>可以简单分下类</p>
+<ul>
+<li><p>field-sensitive : struct x {int a; int b;} x.a和x.b的空间不重叠，int arr[10]; a[0], a[1]等地址不重叠</p>
+</li>
+<li><p>Intra-procedural 函数内部  vs Inter-procedural 关注函数调用</p>
+</li>
+<li><p>Context-Sensitivity. Context-sensitivity governs how function calls are analyzed</p>
+</li>
+<li><p>Flow-Sensitivity. take care of the order of code or not</p>
+</li>
+</ul>
+<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><ol>
+<li><p>Anderson’s Points-to analysis. Inter-procedural, flow-insensitive, context-insensitive</p>
+</li>
+<li><p>Steensgaard’s Points-to, Inter-procedural, flow-insensitive, context-insensitive</p>
+</li>
+<li><p>Data Structure Analysis. flow-insensitive but context-sensitive and field-sensitiv</p>
+</li>
+</ol>
+<p> DSA is able to achieve a scalable and fast context-sensitive<br>and field-sensitive pointer analysis by giving up context-sensitivity within strongly connected<br>components of the call graph</p>
+<p>DSA can be performed in three phases:<br> (1) local analysis phase,<br> (2) bottom-up analysis phase<br> (3) top-bottom analysis phase.</p>
+<ul>
+<li>In the local analysis phase, a Local Data Structure Graph is computed for each function. It is a summary of the memory objects accessible within the function.</li>
+<li>The bottom-up analysis phase inlines the caller DS graph with the callee’s information.</li>
+<li>The top-bottom phase fills in incomplete argument information by merging caller DS graphs with callee DS graphs</li>
+</ul>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/svf-tools/SVF">https://github.com/svf-tools/SVF</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/svf-tools/SVF/wiki/Analyze-a-Simple-C-Program">https://github.com/svf-tools/SVF/wiki/Analyze-a-Simple-C-Program</a></li>
+<li><a target="_blank" rel="noopener" href="https://research.cs.wisc.edu/wpis/papers/tr1386.pdf">https://research.cs.wisc.edu/wpis/papers/tr1386.pdf</a></li>
+<li><a target="_blank" rel="noopener" href="https://tai-e.pascal-lab.net/lectures.html">https://tai-e.pascal-lab.net/lectures.html</a></li>
+<li><a target="_blank" rel="noopener" href="https://yuleisui.github.io/publications/fse16.pdf">https://yuleisui.github.io/publications/fse16.pdf</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cse.psu.edu/~gxt29/papers/ShengHsiuLin_thesis.pdf">https://www.cse.psu.edu/~gxt29/papers/ShengHsiuLin_thesis.pdf</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cs.utexas.edu/~lin/papers/cgo11.pdf">https://www.cs.utexas.edu/~lin/papers/cgo11.pdf</a></li>
+</ul>
+</main>
+
+</article>
+
+
+<script src="/js/highlight.js"></script>
+
+  </main>
+  <footer class="footer">
+  
+  <span>Copyright © 2024 typo</span>
+  
+</footer>
+  
+<script src="/js/theme.js"></script>
+
+</body>
+
+</html>

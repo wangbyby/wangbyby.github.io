@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+  <title>
+    
+    dom tree算法介绍 丨
+    
+
+    typo
+  </title>
+
+  
+  <link rel="shortcut icon" href="/icon.svg">
+  
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  
+  <link id="theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.css">
+  <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
+  
+
+  <!-- 字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/root.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<link rel="stylesheet" href="/css/post.css">
+
+<meta name="generator" content="Hexo 8.1.1"><link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+</head>
+
+<body>
+  <header class="header">
+  <section class="header-container">
+    <a class="logo" href="/">Hexo</a>
+    <ul class="nav">
+      
+      <li><a href="/archives">archives</a></li>
+      
+      <li><a href="/about">about</a></li>
+      
+    </ul>
+  </section>
+</header>
+  <main class="main">
+    <article class="post">
+  
+  <div class="post-title">dom tree算法介绍</div>
+  <div class="post-meta">
+    <div class="date">2026 April 8th</div>
+    <div class="tags">
+      
+    </div>
+  </div>
+  
+
+  <main class="post-content"><p>domtree构建算法</p>
+<h1 id="1-domtree概念介绍"><a href="#1-domtree概念介绍" class="headerlink" title="1. domtree概念介绍"></a>1. domtree概念介绍</h1><blockquote>
+<p>Dom(b): A node n in the CFG dominates b if n lies on every path from the entry node of the CFG to b.<br>即Dom(b)是一个集合，根据定义 b in Dom(b)</p>
+</blockquote>
+<blockquote>
+<p>immediate dominator: b’s immediate dominator is the node n in Dom(b) which is cloest to b.</p>
+</blockquote>
+<p>IDom(b): For a node b, the set IDom(b) contains exactly one node, the immediate dominator of b. If n is b’s immediate dominator, then every node in { Dom(b) - b } is also in Dom(n)<br>即集合IDom(b)只有一个元素。</p>
+<blockquote>
+<p>例子：</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">   +-------+</span><br><span class="line">   | entry |</span><br><span class="line">   +-------+</span><br><span class="line">      |</span><br><span class="line">      v</span><br><span class="line">   +-------+</span><br><span class="line">&gt;+--&gt;|   n   |</span><br><span class="line">&gt;|   +-------+</span><br><span class="line">&gt;|    |   \</span><br><span class="line">&gt;|    |    \</span><br><span class="line">&gt;|    v     v</span><br><span class="line">&gt;|   +---+  +---+</span><br><span class="line">&gt;+---| a |&lt;-| b |</span><br><span class="line">   +---+  +---+</span><br></pre></td></tr></table></figure>
+<p>Dom(b) &#x3D; {entry, n, b}<br>IDom(b) &#x3D; {n}</p>
+</blockquote>
+<h1 id="2-iteratve-way"><a href="#2-iteratve-way" class="headerlink" title="2. iteratve way"></a>2. iteratve way</h1><p>可以用前向数据流分析来计算domtree：<br>对于CFG G &#x3D; (N, E, n0), N是点集，E是边集，n0是entry</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> n in nodes</span><br><span class="line">    Dom[n] = &#123;<span class="number">1.</span>..N&#125;</span><br><span class="line"><span class="type">bool</span> changed = <span class="literal">true</span></span><br><span class="line"><span class="keyword">while</span> (changed)&#123;</span><br><span class="line">    changed = <span class="literal">false</span></span><br><span class="line">    <span class="keyword">for</span> n in reverse_post_order()&#123;</span><br><span class="line">        new_set = &#123;&#125;</span><br><span class="line">        <span class="keyword">for</span> p in preds(n)&#123;</span><br><span class="line">            new_set = new_set ∩ Dom(p)</span><br><span class="line">        &#125;</span><br><span class="line">        new_set = new_set ∪ &#123;n&#125;</span><br><span class="line">    </span><br><span class="line">        <span class="keyword">if</span>(new_set != Dom[n])&#123;</span><br><span class="line">            Dom[n] = new_set</span><br><span class="line">            changed = <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>这里用reverse post order可以保证n的所有前驱都被处理后，再处理n</p>
+<h1 id="3-A-Simple-Fast-Dominance-Algorithm"><a href="#3-A-Simple-Fast-Dominance-Algorithm" class="headerlink" title="3. A Simple, Fast Dominance Algorithm"></a>3. A Simple, Fast Dominance Algorithm</h1><p>前面介绍了迭代方式计算domtree算法，简单容易理解，但是效率没那么高(bitvector实现)。 bitvector每次拷贝所有节点信息。那对于稀疏的图来说，效率就难说了，所以<code>A Simple, Fast Dominance Algorithm</code>用一种sparse方式去计算domtree。</p>
+<p>除了entry节点， Dom(b) &#x3D; {b} ∪ IDom(b) ∪ IDom(IDom(b)) ∪ …. ∪ {entry}<br>根据这个特性，我们构建一个dom tree</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">dom_tree_node</span>&#123;</span></span><br><span class="line">    <span class="type">int</span> order;</span><br><span class="line">    cfg_node* ref;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">dom_tree_node</span> *<span class="title">idom</span>;</span></span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="class"><span class="keyword">struct</span> <span class="title">dom_tree_node</span>* &gt;</span> children;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">digraph cfg &#123;</span><br><span class="line">    rankdir=TB;</span><br><span class="line">    node [shape=box];</span><br><span class="line">    </span><br><span class="line">    // 节点</span><br><span class="line">    entry [label=&quot;entry&quot;];</span><br><span class="line">    n [label=&quot;n&quot;];</span><br><span class="line">    a [label=&quot;a&quot;];</span><br><span class="line">    b [label=&quot;b&quot;];</span><br><span class="line">    </span><br><span class="line">    // 支配关系（idom）</span><br><span class="line">    entry -&gt; n;</span><br><span class="line">    n -&gt; a;</span><br><span class="line">    n -&gt; b;</span><br><span class="line">    b -&gt; a;</span><br><span class="line">    a -&gt; n;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">digraph DominatorTree &#123;</span><br><span class="line">    rankdir=TB;</span><br><span class="line">    node [shape=box];</span><br><span class="line">    </span><br><span class="line">    // 节点</span><br><span class="line">    entry [label=&quot;entry&quot;];</span><br><span class="line">    n [label=&quot;n&quot;];</span><br><span class="line">    a [label=&quot;a&quot;];</span><br><span class="line">    b [label=&quot;b&quot;];</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    entry -&gt; n [label=&quot;children&quot;, color=red, fontcolor=red];</span><br><span class="line">    n -&gt; a [label=&quot;children&quot;, color=red, fontcolor=red];</span><br><span class="line">    n -&gt; b [label=&quot;children&quot;, color=red, fontcolor=red];</span><br><span class="line">    </span><br><span class="line">    // 添加子节点关系（children）</span><br><span class="line">    entry -&gt; n [label=&quot;idom&quot;, dir=back, color=blue, fontcolor=blue];</span><br><span class="line">    n -&gt; a [label=&quot;idom&quot;, dir=back, color=blue, fontcolor=blue];</span><br><span class="line">    n -&gt; b [label=&quot;idom&quot;, dir=back, color=blue, fontcolor=blue];</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p>算法实现：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">for</span> (number, node) in <span class="title function_">post_order</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="comment">// mapping CFG node to dom tree node</span></span><br><span class="line">    mapping[node] = create dom_tree_node(node, number) </span><br><span class="line">&#125;</span><br><span class="line">mapping[entry]-&gt;idom = mapping[entry];</span><br><span class="line">changed = <span class="literal">true</span></span><br><span class="line"><span class="keyword">while</span> (changed)&#123;</span><br><span class="line">    changed = <span class="literal">false</span></span><br><span class="line">    <span class="keyword">for</span> b in reverse_post_order(expect entry)&#123;</span><br><span class="line">        new_idom = first (processed) predecessor of b</span><br><span class="line">        <span class="keyword">for</span> p in other_processors(b) &#123;</span><br><span class="line">            <span class="keyword">if</span> mapping[p]-&gt;idom != <span class="literal">NULL</span> &#123;</span><br><span class="line">                new_idom = intersect(mapping[p], new_idom)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> mapping[b]-&gt;idom != new_idom &#123;</span><br><span class="line">            mapping[b]-&gt;idom = new_idom</span><br><span class="line">            changed = <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// order is the postorder numbers</span></span><br><span class="line">function intersect(a, b) <span class="keyword">return</span> dom_tree_node&#123;</span><br><span class="line">    f1 = a;</span><br><span class="line">    f2 = b;</span><br><span class="line">    <span class="keyword">while</span>(f1 != f2)&#123;</span><br><span class="line">        <span class="keyword">while</span> (f1-&gt;order &lt; f2-&gt;order ) &#123;</span><br><span class="line">            f1 = f1-&gt;idom;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">while</span> (f2-&gt;order &lt; f1-&gt;order) &#123;</span><br><span class="line">            f2 = f2-&gt;idom;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> f1;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>Remember that nodes higher in the dominator tree have higher postorder numbers, which is why intersect moves the finger whose value is less than the other finger’s.</p>
+</blockquote>
+<blockquote>
+<p>其实原论文中用的是数组，但我们用树实现。<br>原因是对于部分IR来说，basicblock*指针的值就可以被看为一个id。用指针+hashmap的组合更通用。</p>
+</blockquote>
+<h1 id="4-Lengauer-Tarjan-algorithm"><a href="#4-Lengauer-Tarjan-algorithm" class="headerlink" title="4. Lengauer-Tarjan algorithm"></a>4. Lengauer-Tarjan algorithm</h1><p>LT算法基于</p>
+<ol>
+<li>DFS </li>
+<li>spanning-tree</li>
+</ol>
+<p>基于DFS遍历顺序，LT算法提出了<strong>semidominator</strong>概念，简写为<code>sdom</code>(注意和strict dominator区分)。</p>
+<p>sdom(w) &#x3D; semidom(w) &#x3D; min {v | there is a path v &#x3D; v0, v1 ,…, vk&#x3D;w such that vi &gt; w for 1 ≤ i ≤ k-1 }<br>注：vi&gt;w指的是DFS的order</p>
+<p>对于大部分节点来说sdom和idom相同。<br>故我们需要</p>
+<ol>
+<li>计算sdom</li>
+<li>sdom -&gt; idom</li>
+</ol>
+<p>计算sdom：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// step 1</span></span><br><span class="line">Create a DFS tree T</span><br><span class="line"><span class="keyword">for</span> v in V</span><br><span class="line">    <span class="title function_">semi</span><span class="params">(v)</span> = v</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> v in <span class="title function_">reverse_preorder</span><span class="params">(V-&#123;entry&#125;)</span></span><br><span class="line">    <span class="keyword">for</span> q in <span class="title function_">pred</span><span class="params">(v)</span></span><br><span class="line">        z = eval(v, q)</span><br><span class="line">        <span class="keyword">if</span> <span class="title function_">semi</span><span class="params">(z)</span> &lt; <span class="title function_">semi</span><span class="params">(v)</span></span><br><span class="line">            <span class="title function_">semi</span><span class="params">(v)</span> = semi(z)</span><br><span class="line"></span><br><span class="line">function <span class="title function_">eval</span><span class="params">(v, q)</span>&#123;</span><br><span class="line">    <span class="keyword">if</span> v==entry <span class="keyword">return</span> v;</span><br><span class="line">    <span class="keyword">while</span> (v &lt; q) &#123;</span><br><span class="line">        q = semi(q)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> q;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>剩下的sdom-&gt; idom太复杂了，没看懂。。。。</p>
+<h1 id="5-semi-nca"><a href="#5-semi-nca" class="headerlink" title="5. semi-nca"></a>5. semi-nca</h1><ol>
+<li>计算semi dominator</li>
+<li>利用NCA算法计算idom</li>
+</ol>
+<p>idom(v) &#x3D; NCA_D( parent_T(v), sdom(v))<br>D是dom tree， T是spanning tree<br>算法如下：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">1. T = create a DFS tree</span><br><span class="line">2. Calculate semidominator for all vertex</span><br><span class="line">3. D = create_dom_tree().set_root(entry)</span><br><span class="line">4.</span><br><span class="line">for v in preorder_T(V-&#123;r&#125;)&#123;</span><br><span class="line">    Ascend the all the path r -&gt; parent_T(v) in D and find the deepest vertex with which number is smaller than or equal to sdom(v). set this vertext as the parent of v in D.</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>图例：<a target="_blank" rel="noopener" href="https://blog.csdn.net/dashuniuniu/article/details/103462147?spm=1001.2014.3001.5501">参考</a></p>
+<p><img src="/static/images/domtree/dt_cfg.png" alt="CFG"></p>
+<h3 id="step-1-Spanning-tree"><a href="#step-1-Spanning-tree" class="headerlink" title="step 1. Spanning tree"></a>step 1. Spanning tree</h3><blockquote>
+<p>初始CFG: <img src="/static/images/domtree/dt_cfg_dfs.png" alt="alt text"><br>Spanning Tree：<img src="/static/images/domtree/dt_dfs.png" alt="spanning tree"></p>
+</blockquote>
+<h3 id="step-2-计算sdom"><a href="#step-2-计算sdom" class="headerlink" title="step 2. 计算sdom"></a>step 2. 计算sdom</h3><p><img src="/static/images/domtree/dt_sdom.png" alt="alt text"></p>
+<h3 id="step-3-计算domtree"><a href="#step-3-计算domtree" class="headerlink" title="step 3. 计算domtree"></a>step 3. 计算domtree</h3><p><img src="/static/images/domtree/dt_domtree.png" alt="alt text"></p>
+<blockquote>
+<p><img src="/static/images/domtree/dt_all.png" alt="alt text"></p>
+</blockquote>
+<h1 id="6-Dominance-Frontiers"><a href="#6-Dominance-Frontiers" class="headerlink" title="6. Dominance Frontiers"></a>6. Dominance Frontiers</h1><p>SSA-construction中插入phi节点时候会用到。</p>
+<p><em>define the Dominance Frontiers of a node b as: for a node y, that b dominates a predessor of y but does not strictly dominate y.</em></p>
+<p>例子：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">digraph example3 &#123;</span><br><span class="line">    rankdir=TB;</span><br><span class="line">    node [shape=box];</span><br><span class="line">    </span><br><span class="line">    // 节点</span><br><span class="line">    entry [label=&quot;entry&quot;];</span><br><span class="line">    b [label=&quot;b&quot;];</span><br><span class="line">    x [label=&quot;x&quot;];</span><br><span class="line">    y [label=&quot;y&quot;];</span><br><span class="line">    </span><br><span class="line">    entry-&gt;b;</span><br><span class="line">    b-&gt;x;</span><br><span class="line">    x-&gt;y;</span><br><span class="line">    entry-&gt;y;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>DF(b) &#x3D; {y}</p>
+</blockquote>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">for b in nodes&#123;</span><br><span class="line">    if b.preds().len &gt;= 2 &#123;</span><br><span class="line">        for p in b.preds()&#123;</span><br><span class="line">            runner = mapping[p]</span><br><span class="line">            while runner != mapping[b]-&gt;idom &#123;</span><br><span class="line">                add b to runner&#x27;s dominance frontier set</span><br><span class="line">                runner = runner-&gt;idom</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h1 id="reference"><a href="#reference" class="headerlink" title="reference"></a>reference</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/dashuniuniu/article/details/103462147">https://blog.csdn.net/dashuniuniu/article/details/103462147</a><br>(为数不多的CSDN能用上的时候)</li>
+</ul>
+</main>
+
+</article>
+
+
+<script src="/js/highlight.js"></script>
+
+  </main>
+  <footer class="footer">
+  
+  <span>Copyright © 2024 typo</span>
+  
+</footer>
+  
+<script src="/js/theme.js"></script>
+
+</body>
+
+</html>

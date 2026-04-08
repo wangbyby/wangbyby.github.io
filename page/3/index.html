@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+  <title>
+    
+
+    typo
+  </title>
+
+  
+  <link rel="shortcut icon" href="/icon.svg">
+  
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  
+
+  <!-- 字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/root.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<link rel="stylesheet" href="/css/post.css">
+
+<meta name="generator" content="Hexo 8.1.1"><link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+</head>
+
+<body>
+  <header class="header">
+  <section class="header-container">
+    <a class="logo" href="/">Hexo</a>
+    <ul class="nav">
+      
+      <li><a href="/archives">archives</a></li>
+      
+      <li><a href="/about">about</a></li>
+      
+    </ul>
+  </section>
+</header>
+  <main class="main">
+    <div class="post-list">
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/04/08/clangd/">clang配置</a>
+    <div class="post-item-summary">
+      clangd+vscode在win11上经常崩溃，记录下可能的解决方案。
+
+配置文件冲突
+
+用户和工作区的clangd配置冲突了。用一个就行
+
+inlay hints
+
+可以尝试关掉( 不一定有用)
+
+clangd配置
+
+12345--log=verbose--background-index=0-j=1--clang-tidy--header-insertion=never
+
+
+
+设置--query-driver详见https://github.com/clangd/cla
+      <a class="read-more" href="/2026/04/08/clangd/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.04.08</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/04/08/allintext/">博客尽量用text格式</a>
+    <div class="post-item-summary">
+      感觉图片太多太麻烦了，想尽量在text格式下写。
+web图形处理上面有几种解决方案:
+
+用ascii绘制，有点太累了
+markdown提供的mermaid和graphviz。mermaid简单但是功能有限，graphviz功能强大。
+TikZ，更加专业，https://github.com/kisonecat/tikzjax https://github.com/jhuix-js/tikzjax
+base64嵌入，体积会比较大。
+
+关键是文本表示是在框架下已经生成为stati
+      <a class="read-more" href="/2026/04/08/allintext/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.04.08</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/04/08/compiler_books/">编译器相关书籍</a>
+    <div class="post-item-summary">
+      比较推荐的书
+高级编译器设计与实现 (鲸书)
+ssa based compiler design
+深入理解llvm代码生成  (彭成寒等著)
+LLVM Code Generation A deep dive into compiler backend development (Quentin Colombet)
+编译器设计 (Engineering a Compiler)
+https://gcc.godbolt.org/  https://alive2.llvm.org/ce
+      <a class="read-more" href="/2026/04/08/compiler_books/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.04.08</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/04/08/dce/">dead code elimination介绍</a>
+    <div class="post-item-summary">
+      死代码消除在ssa上比较好实现，根据use-def chain传播如果只是运算指令，且没有users，就是dead的指令。其实就是一个use-&gt;def的传播
+1234567891011121314151617181920212223worklist = &#123;&#125;for bb in func&#123;    for inst in bb &#123;        if (inst not in worklist)            worklist
+      <a class="read-more" href="/2026/04/08/dce/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.04.08</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/04/08/deploy/">使用zola设置github.io作为个人博客</a>
+    <div class="post-item-summary">
+      步骤如下：
+
+本地安装zola
+运行zola init &lt;your blog dir&gt;, like zola init myblog
+
+目录如下：
+1234567myblog/├── config.toml          # 配置文件├── content/             # 内容文件（Markdown）├── sass/                # Sass 样式文件（可选）├── static/              # 静态资源（图片
+      <a class="read-more" href="/2026/04/08/deploy/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.04.08</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/04/08/diary/2026-3-12/">2026-3-12记</a>
+    <div class="post-item-summary">
+      记录下这一年半编译器开发的经验。
+
+编译通过，但是运行结果错误。
+
+如何检查？
+
+先减小问题规模，整出一个最小可复现用例
+检查pipeline，parser结果，ir pass结果，isel结果，reg alloc，stack frame等。
+verify的重要性，每个不同格式的中间表示转换处需要有verify，保证其流入和流出结果的合法性。
+重复上述步骤，直到问题解决。
+
+既然是pipeline模型，那么衔接需要处理好。需重点注意。
+
+编译器挂掉了，没其他信息。一般是各种空
+      <a class="read-more" href="/2026/04/08/diary/2026-3-12/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.04.08</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+</div>
+
+
+<div class="paginator">
+  <a class="extend prev" rel="prev" href="/page/2/">&lt;</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span>
+</div>
+
+  </main>
+  <footer class="footer">
+  
+  <span>Copyright © 2024 typo</span>
+  
+</footer>
+  
+<script src="/js/theme.js"></script>
+
+</body>
+
+</html>

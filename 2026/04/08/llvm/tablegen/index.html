@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+  <title>
+    
+    tablegen 丨
+    
+
+    typo
+  </title>
+
+  
+  <link rel="shortcut icon" href="/icon.svg">
+  
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  
+  <link id="theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.css">
+  <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
+  
+
+  <!-- 字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/root.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<link rel="stylesheet" href="/css/post.css">
+
+<meta name="generator" content="Hexo 8.1.1"><link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+</head>
+
+<body>
+  <header class="header">
+  <section class="header-container">
+    <a class="logo" href="/">Hexo</a>
+    <ul class="nav">
+      
+      <li><a href="/archives">archives</a></li>
+      
+      <li><a href="/about">about</a></li>
+      
+    </ul>
+  </section>
+</header>
+  <main class="main">
+    <article class="post">
+  
+  <div class="post-title">tablegen</div>
+  <div class="post-meta">
+    <div class="date">2026 April 8th</div>
+    <div class="tags">
+      
+    </div>
+  </div>
+  
+
+  <main class="post-content"><ol>
+<li>构建llvm-tblgen， cmake configure后 <code>cd build &amp;&amp; ninja llvm-tblgen</code></li>
+<li>查看tblgen对某个td文件的实际命令：在build.ninja里面搜索。<br>比如说 X86GenAsmMatcher.inc是怎么编译出来的.</li>
+</ol>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"># Custom command for lib\Target\X86\X86GenAsmMatcher.inc</span><br><span class="line"></span><br><span class="line">build lib/Target/X86/X86GenAsmMatcher.inc | $&#123;cmake_ninja_workdir&#125;lib/Target/X86/X86GenAsmMatcher.inc: CUSTOM_COMMAND bin/llvm-tblgen.exe bin/llvm-tblgen.exe D$:/Code/llvm-project/llvm/lib/Target/X86/X86.td || bin/llvm-min-tblgen.exe bin/llvm-tblgen.exe include/llvm/CodeGen/vt_gen include/llvm/IR/intrinsics_gen lib/LLVMCodeGenTypes.lib lib/LLVMDemangle.lib lib/LLVMSupport.lib lib/LLVMTableGen.lib lib/Support/BLAKE3/LLVMSupportBlake3 utils/TableGen/Basic/obj.LLVMTableGenBasic utils/TableGen/Common/obj.LLVMTableGenCommon</span><br><span class="line">  COMMAND = C:\WINDOWS\system32\cmd.exe /C &quot;cd /D D:\Code\llvm-project\build\lib\Target\X86 &amp;&amp; D:\Code\llvm-project\build\bin\llvm-tblgen.exe -gen-asm-matcher -ID:/Code/llvm-project/llvm/lib/Target/X86 -ID:/Code/llvm-project/build/include -ID:/Code/llvm-project/llvm/include -I D:/Code/llvm-project/llvm/lib/Target D:/Code/llvm-project/llvm/lib/Target/X86/X86.td --write-if-changed -o X86GenAsmMatcher.inc -d X86GenAsmMatcher.inc.d &amp;&amp; &quot;D:\Program Files\bin\cmake.exe&quot; -E cmake_transform_depfile Ninja gccdepfile D:/Code/llvm-project/llvm D:/Code/llvm-project/llvm/lib/Target/X86 D:/Code/llvm-project/build D:/Code/llvm-project/build/lib/Target/X86 D:/Code/llvm-project/build/lib/Target/X86/X86GenAsmMatcher.inc.d D:/Code/llvm-project/build/CMakeFiles/d/c78dca343be67cfabd341efa9fb0fbe70dafdeceb081e5cb7ee12866c0dd9055.d&quot;</span><br><span class="line">  DESC = Building X86GenAsmMatcher.inc...</span><br><span class="line">  depfile = CMakeFiles\d\c78dca343be67cfabd341efa9fb0fbe70dafdeceb081e5cb7ee12866c0dd9055.d</span><br><span class="line">  deps = gcc</span><br><span class="line">  restat = 1</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>实际的命令就是<code>D:/Code/llvm-project/build/bin/llvm-tblgen.exe -gen-asm-matcher -ID:/Code/llvm-project/llvm/lib/Target/X86 -ID:/Code/llvm-project/build/include -ID:/Code/llvm-project/llvm/include -I D:/Code/l lvm-project/llvm/lib/Target D:/Code/llvm-project/llvm/lib/Target/X86/X86.td --write-if-changed -o X86GenAsmMatcher.inc</code>. -gen-asm-matcher就是生成具体代码实现。</p>
+<ol start="3">
+<li>生成record：删除掉<code>-gen-asm-matcher</code>就行。record文件巨大会卡。</li>
+</ol>
+</main>
+
+</article>
+
+
+<script src="/js/highlight.js"></script>
+
+  </main>
+  <footer class="footer">
+  
+  <span>Copyright © 2024 typo</span>
+  
+</footer>
+  
+<script src="/js/theme.js"></script>
+
+</body>
+
+</html>

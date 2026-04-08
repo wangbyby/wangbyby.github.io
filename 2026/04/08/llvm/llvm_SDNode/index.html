@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+  <title>
+    
+    llvm SDNode 介绍 丨
+    
+
+    typo
+  </title>
+
+  
+  <link rel="shortcut icon" href="/icon.svg">
+  
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  
+  <link id="theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.css">
+  <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
+  
+
+  <!-- 字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/root.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<link rel="stylesheet" href="/css/post.css">
+
+<meta name="generator" content="Hexo 8.1.1"><link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+</head>
+
+<body>
+  <header class="header">
+  <section class="header-container">
+    <a class="logo" href="/">Hexo</a>
+    <ul class="nav">
+      
+      <li><a href="/archives">archives</a></li>
+      
+      <li><a href="/about">about</a></li>
+      
+    </ul>
+  </section>
+</header>
+  <main class="main">
+    <article class="post">
+  
+  <div class="post-title">llvm SDNode 介绍</div>
+  <div class="post-meta">
+    <div class="date">2026 April 8th</div>
+    <div class="tags">
+      
+    </div>
+  </div>
+  
+
+  <main class="post-content"><blockquote>
+<p>指令选择</p>
+</blockquote>
+<h2 id="1-数据结构与内存布局"><a href="#1-数据结构与内存布局" class="headerlink" title="1. 数据结构与内存布局"></a>1. 数据结构与内存布局</h2><p>内存结构如下：</p>
+<p>问题是指针指向关系是前向还是后向？</p>
+<h2 id="2-SelectionDAG-结构介绍"><a href="#2-SelectionDAG-结构介绍" class="headerlink" title="2. SelectionDAG 结构介绍"></a>2. SelectionDAG 结构介绍</h2><blockquote>
+<p>作用域：block level</p>
+</blockquote>
+<p>以这段IR为例：(参考<a href="%5BMacLean-Fargnoli-ABeginnersGuide-to-SelectionDAG.pdf%5D(https://llvm.org/devmtg/2024-10/slides/tutorial/MacLean-Fargnoli-ABeginnersGuide-to-SelectionDAG.pdf)">^1</a>)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">then:</span><br><span class="line">	%y = add i32 %a, 5</span><br><span class="line">	%z = mul i32 %y, 3</span><br><span class="line">	br label %join</span><br></pre></td></tr></table></figure>
+
+
+<p>内存占用有点过于大了。。。<br>[[llvm_SDNode_draw.excalidraw]]</p>
+<blockquote>
+<p>SDUse和llvm::Use同理</p>
+</blockquote>
+<p>N：参考</p>
+</main>
+
+</article>
+
+
+<script src="/js/highlight.js"></script>
+
+  </main>
+  <footer class="footer">
+  
+  <span>Copyright © 2024 typo</span>
+  
+</footer>
+  
+<script src="/js/theme.js"></script>
+
+</body>
+
+</html>

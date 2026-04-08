@@ -35,7 +35,6 @@ jobs:
 
       - name: Build Hexo
         run: |
-          git clone https://github.com/rankangkang/hexo-theme-typo.git themes/typo --depth 1
           npx hexo clean
           npx hexo generate
 

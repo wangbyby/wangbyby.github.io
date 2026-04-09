@@ -1,5 +1,6 @@
 ---
 title: "GVN-PRE简介"
+date: 2026-04-08
 ---
 
 >参考 https://cs.wheaton.edu/~tvandrun/writings/cc04.pdf

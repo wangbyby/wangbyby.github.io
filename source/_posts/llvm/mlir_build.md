@@ -19,3 +19,17 @@ cmake -G Ninja \
 cd build && ninja
 
 ```
+
+- 把mlir当作lib使用
+1. 需要构建mlir
+2. cmake配置
+```sh
+
+set -x
+
+mkdir -p build
+cd build
+cmake .. -GNinja -DCMAKE_INSTALL_PREFIX=/<mlir_path>/install  -DCMAKE_PREFIX_PATH=../build
+ninja
+
+```

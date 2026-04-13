@@ -1,7 +1,7 @@
 
 ---
 title: "[WIP]mlir"
-date: 2026-04-09
+date: 2026-04-13
 ---
 
 >学习下mlir

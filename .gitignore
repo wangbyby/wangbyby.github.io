@@ -3,3 +3,5 @@ templates/**
 
 node_modules/**
 db.json
+*.o
+*.out

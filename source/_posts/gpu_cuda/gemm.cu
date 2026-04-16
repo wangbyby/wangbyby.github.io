@@ -12,6 +12,8 @@
 #include <cstdio>
 #include <cstdlib>
 
+#define TILE 32
+
 __global__ void gemm_naive(float *C, float *A, float *B, int M, int N, int K) {
   int col = blockIdx.x * blockDim.x + threadIdx.x;
   int row = blockIdx.y * blockDim.y + threadIdx.y;
@@ -24,6 +26,49 @@ __global__ void gemm_naive(float *C, float *A, float *B, int M, int N, int K) {
     C[N * row + col] = sum;
   }
 }
+
+// 3ms for float sB[TILE][TILE];
+
+template<const int TILING = TILE>
+__global__ void gemm_sharedmem(float *C, float *A, float *B, int M, int N,
+                               int K) {
+  int tx = threadIdx.x;
+  int ty = threadIdx.y;
+
+  int col = blockIdx.x * blockDim.x + tx;
+  int row = blockIdx.y * blockDim.y + ty;
+
+  __shared__ float sB[TILE][TILING];
+  __shared__ float sA[TILE][TILING];
+
+  float sum = 0.0f;
+  for(int t=0; t< (K+TILE-1)/TILE;t++ ){
+    if(row<M && (t*TILE + tx) < K ){
+      sA[ty][tx] = A[row*K+t*TILE+ tx];
+    }else{
+      sA[ty][tx] = 0.0f;
+    }
+
+    if(col <N && (t*TILE+ty) < K ){
+      sB[ty][tx] = B[ (t*TILE+ty)*N + col];
+    }else{
+      sB[ty][tx] = 0.0f;
+    }
+    __syncthreads();
+    for(int i=0;i<TILE;i++){
+      sum += sA[ty][i]* sB[i][tx];
+    }
+    __syncthreads();
+
+  }                         
+
+  if (row < M && col < N) {
+    C[row*N + col] = sum;
+  }
+
+}
+
+
 
 void cpu_gemm(float *C, float *A, float *B, int M, int N, int K) {
   for (int r = 0; r < M; r++) {
@@ -100,6 +145,40 @@ int main() {
   {
     auto start = std::chrono::high_resolution_clock::now();
     gemm_naive<<<grid, block>>>(GC, GA, GB, M, N, K);
+    cudaDeviceSynchronize();
+    auto end = std::chrono::high_resolution_clock::now();
+
+    double time_ms =
+        std::chrono::duration<double, std::milli>(end - start).count();
+    printf("gemm naive using time %fms\n", time_ms);
+
+    // 26ms
+
+    cudaMemcpy(GPU_RES, GC, sizeof(float) * M * N, cudaMemcpyDeviceToHost);
+    check(GPU_RES, CPU_RES, M * N);
+  }
+
+  {
+    cudaMemset(GC, 0, sizeof(float) * M * N);
+    auto start = std::chrono::high_resolution_clock::now();
+    gemm_sharedmem<<<grid, block>>>(GC, GA, GB, M, N, K);
+    cudaDeviceSynchronize();
+    auto end = std::chrono::high_resolution_clock::now();
+
+    double time_ms =
+        std::chrono::duration<double, std::milli>(end - start).count();
+    printf("gemm naive using time %fms\n", time_ms);
+
+    // 26ms
+
+    cudaMemcpy(GPU_RES, GC, sizeof(float) * M * N, cudaMemcpyDeviceToHost);
+    check(GPU_RES, CPU_RES, M * N);
+  }
+
+  {
+    cudaMemset(GC, 0, sizeof(float) * M * N);
+    auto start = std::chrono::high_resolution_clock::now();
+    gemm_sharedmem<TILE+1><<<grid, block>>>(GC, GA, GB, M, N, K);
     cudaDeviceSynchronize();
     auto end = std::chrono::high_resolution_clock::now();
 

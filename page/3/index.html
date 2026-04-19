@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+  <title>
+    
+
+    typo
+  </title>
+
+  
+  <link rel="shortcut icon" href="/icon.svg">
+  
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  
+
+  <!-- 字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/root.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<link rel="stylesheet" href="/css/post.css">
+
+<meta name="generator" content="Hexo 8.1.1"><link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+</head>
+
+<body>
+  <header class="header">
+  <section class="header-container">
+    <a class="logo" href="/">Hexo</a>
+    <ul class="nav">
+      
+      <li><a href="/archives">archives</a></li>
+      
+      <li><a href="/about">about</a></li>
+      
+    </ul>
+  </section>
+</header>
+  <main class="main">
+    <div class="post-list">
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/04/19/compiler_books/">编译器相关书籍</a>
+    <div class="post-item-summary">
+      比较推荐的书
+高级编译器设计与实现 (鲸书)
+ssa based compiler design
+深入理解llvm代码生成  (彭成寒等著)
+LLVM Code Generation A deep dive into compiler backend development (Quentin Colombet)
+编译器设计 (Engineering a Compiler)
+https://gcc.godbolt.org/  https://alive2.llvm.org/ce
+      <a class="read-more" href="/2026/04/19/compiler_books/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.04.19</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/04/19/dce/">dead code elimination介绍</a>
+    <div class="post-item-summary">
+      死代码消除在ssa上比较好实现，根据use-def chain传播如果只是运算指令，且没有users，就是dead的指令。其实就是一个use-&gt;def的传播
+1234567891011121314151617181920212223worklist = &#123;&#125;for bb in func&#123;    for inst in bb &#123;        if (inst not in worklist)            worklist
+      <a class="read-more" href="/2026/04/19/dce/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.04.19</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/04/19/deploy/">使用zola设置github.io作为个人博客</a>
+    <div class="post-item-summary">
+      步骤如下：
+
+本地安装zola
+运行zola init &lt;your blog dir&gt;, like zola init myblog
+
+目录如下：
+1234567myblog/├── config.toml          # 配置文件├── content/             # 内容文件（Markdown）├── sass/                # Sass 样式文件（可选）├── static/              # 静态资源（图片
+      <a class="read-more" href="/2026/04/19/deploy/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.04.19</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/04/13/gpu_cuda/cuda_basic/">[WIP]基础cuda</a>
+    <div class="post-item-summary">
+      
+线程组织 grid，block，thread。  一个kernel启动的所有线程称为grid。block是调度单元。&lt;&lt;&lt;网格大小，线程块大小&gt;&gt;&gt;
+实际硬件：GPU，SM （stream multiprocessor），SP。  SM： local register file + shared memory+L1 cache+ a number of functional units that perform computations 
+      <a class="read-more" href="/2026/04/13/gpu_cuda/cuda_basic/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.04.13</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/04/13/llvm/mlir/">[WIP]mlir</a>
+    <div class="post-item-summary">
+      
+学习下mlir
+
+1. 基本概念
+树形结构。Op，Region，Block，Op
+使用基本块参数代替phi
+Operand结构
+操作
+返回值：OpResult
+regions
+attrDict，属性字典
+参数：OpOperand, 经典的Use结构
+
+
+Value是ValueImpl*的包装，type+kind
+Type, TypeStorage* 实际上是AbstractType* &#x3D; {dialect, interface, typeid,name, subt
+      <a class="read-more" href="/2026/04/13/llvm/mlir/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.04.13</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/04/13/llvm/mlir_build/">mlir构建</a>
+    <div class="post-item-summary">
+      以mac air构建为例，耗时26min。
+123456789101112cmake -G Ninja \    -DCMAKE_EXPORT_COMPILE_COMMANDS=ON  \    -S ./llvm -B build \    -DCMAKE_BUILD_TYPE=RELWITHDEBINFO \    -DLLVM_BUILD_EXAMPLES=ON \    -DLLVM_ENABLE_PROJECTS=&quot;mlir&quot; \    -DLL
+      <a class="read-more" href="/2026/04/13/llvm/mlir_build/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.04.13</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/04/09/diary/2026-4-9-ai/">2026-4-9 cuda面经</a>
+    <div class="post-item-summary">
+      0. https://zhuanlan.zhihu.com/p/678602674 ai&amp;cuda1. https://zhuanlan.zhihu.com/p/1904550020918801886
+      <a class="read-more" href="/2026/04/09/diary/2026-4-9-ai/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.04.09</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/04/09/diary/2026-4-9-cpp/">2026-4-9面经-cpp</a>
+    <div class="post-item-summary">
+      
+crtp
+
+注意空基类优化 template &lt;typename T&gt; struct Base {};
+
+
+cpp左值，右值
+
+
+value categories (值类别)    glvalue – lvalue                       xvalue          &#x2F;    rvalue  – prvalue
+
+右值引用T&amp;&amp;是类型.
+编译器将已命名的右值引用视为左值，而将未命名的右值引用视为右值。
+int &
+      <a class="read-more" href="/2026/04/09/diary/2026-4-9-cpp/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.04.09</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/04/09/diary/2026-4-9/">2026-4-9面经</a>
+    <div class="post-item-summary">
+      0. https://zhuanlan.zhihu.com/p/678602674 ai&amp;cuda1. https://www.nowcoder.com/discuss/720701422198632448说说项目里面内存管理优化的实现
+4.有没有看过一些开源项目的内存管理的实现。
+答：没有，只会暴力实现。
+5.说说你所实现的算子融合和冗余算子消除。
+6.说说mlir里面的Op，region，block
+答：不会，瞎蒙了一下，类比于llvm里面相关的概念，说了一下它们
+      <a class="read-more" href="/2026/04/09/diary/2026-4-9/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.04.09</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/04/08/gvn-pre/">GVN-PRE简介</a>
+    <div class="post-item-summary">
+      
+参考 https://cs.wheaton.edu/~tvandrun/writings/cc04.pdf只考虑表达式，基于SSA
+
+GVN是将Global value numbering，而PRE是Partial redundancy elimination。一个是值编号，一个是部分冗余消除。
+GVN的思路简单，按照domtree进行深度优先遍历，记录每个block中表达式的编号，如果重复就删除重复的。对如下ir
+12345678910111213141516define
+      <a class="read-more" href="/2026/04/08/gvn-pre/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.04.08</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+</div>
+
+
+<div class="paginator">
+  <a class="extend prev" rel="prev" href="/page/2/">&lt;</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/4/">&gt;</a>
+</div>
+
+  </main>
+  <footer class="footer">
+  
+  <span>Copyright © 2024 typo</span>
+  
+</footer>
+  
+<script src="/js/theme.js"></script>
+
+</body>
+
+</html>

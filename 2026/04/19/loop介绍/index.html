@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+  <title>
+    
+    loop 介绍 丨
+    
+
+    typo
+  </title>
+
+  
+  <link rel="shortcut icon" href="/icon.svg">
+  
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  
+  <link id="theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.css">
+  <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
+  
+
+  <!-- 字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/root.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<link rel="stylesheet" href="/css/post.css">
+
+<meta name="generator" content="Hexo 8.1.1"><link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+</head>
+
+<body>
+  <header class="header">
+  <section class="header-container">
+    <a class="logo" href="/">Hexo</a>
+    <ul class="nav">
+      
+      <li><a href="/archives">archives</a></li>
+      
+      <li><a href="/about">about</a></li>
+      
+    </ul>
+  </section>
+</header>
+  <main class="main">
+    <article class="post">
+  
+  <div class="post-title">loop 介绍</div>
+  <div class="post-meta">
+    <div class="date">2026 April 19th</div>
+    <div class="tags">
+      
+    </div>
+  </div>
+  
+
+  <main class="post-content"><p>循环，重要性不必多说。</p>
+<p>llvm与循环相关的优化有很多：</p>
+<blockquote>
+<ul>
+<li>loop unroll and jam : 循环展开+ 合并</li>
+<li>loop unroll</li>
+<li>SCEV</li>
+<li>loop invariant code motion</li>
+<li>loop interchange</li>
+<li>loop rotation</li>
+<li>loop splitting</li>
+<li>loop fusion</li>
+<li>loop unswitching</li>
+<li>loop vectorization<br>….</li>
+</ul>
+</blockquote>
+<ul>
+<li>从非结构化的CFG中识别loop：</li>
+<li>识别循环迭代变量</li>
+</ul>
+<ol>
+<li>Loop 定义</li>
+</ol>
+<p>A loop in a control flow graph is a set of nodes S including a header node h, with the following properties:</p>
+<ul>
+<li>From any node in S there is a path leading to h </li>
+<li>There is a path from h to any node in S</li>
+<li>There is no edge from any node outside S to any node in S other than h</li>
+</ul>
+<ol>
+<li><p>back edge<br>A control flow graph edge from a node n to a node h that dominates n is called a back edge.</p>
+</li>
+<li><p>natural loop<br>The natural loop of a backedge (n,h), where h dominates n, is<br> • the set of nodes x such that h dominates x and<br> • there is a path from x to n not containing h.<br> The header of this loop will be h<br> Each back-edge has a corresponding natural loop</p>
+</li>
+<li><p>nested loop<br>Suppose:<br> – A and B are loops with headers a and b, such that a !&#x3D; b, and b is in A<br>Then<br> – The nodes of B must be a proper subset of the nodes of A<br> – We say that loop B is nested within A<br> – B is the inner loop</p>
+</li>
+</ol>
+<hr>
+<h1 id="loop识别"><a href="#loop识别" class="headerlink" title="loop识别"></a>loop识别</h1><p>假设已经有domtree。<br>根据loop的定义，从遍历domtree开始构建loop。</p>
+<p>用后序方式遍历domtree，即先识别内层loop，然后识别外层loop。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">initLoopInfo</span><span class="params">()</span></span>&#123;</span><br><span class="line">	stack = [root];</span><br><span class="line">	<span class="keyword">while</span>(stack.<span class="built_in">size</span>())&#123;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">auto</span>*top = stack.<span class="built_in">back</span>();</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span>( !<span class="built_in">all_children_visited</span>(top) )&#123;</span><br><span class="line">			<span class="keyword">for</span> c in top.<span class="built_in">children</span>()&#123;</span><br><span class="line">				stack.<span class="built_in">push</span>(c)</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">			stack.<span class="built_in">pop</span>();</span><br><span class="line">			</span><br><span class="line">			<span class="comment">// 1. find back edge</span></span><br><span class="line">			backedgs = []</span><br><span class="line">			<span class="keyword">for</span> pred in top.<span class="built_in">getBlock</span>().<span class="built_in">pred</span>()&#123;</span><br><span class="line">				<span class="keyword">if</span>( top.<span class="built_in">doms</span>( pred ) )&#123;</span><br><span class="line">					backedgs.<span class="built_in">push</span>(pred)</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">if</span> (pred.<span class="built_in">size</span>())&#123;</span><br><span class="line">				loop = <span class="built_in">createLoop</span>()</span><br><span class="line">				<span class="built_in">discoverLoop</span>(loop, backedgs)</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 有回边，loop header可以查找循环体了。</span></span><br><span class="line"><span class="comment">// 寻找backedges的前驱即可。</span></span><br><span class="line"><span class="type">void</span> <span class="built_in">discoverLoop</span>(loop, backedgs)&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">while</span>(backedgs.<span class="built_in">size</span>())&#123;</span><br><span class="line">		<span class="keyword">auto</span>* n = backedgs.<span class="built_in">back</span>();</span><br><span class="line">		backedgs.<span class="built_in">pop_back</span>();</span><br><span class="line"></span><br><span class="line">		sub_loop = info.<span class="built_in">get</span>(n)</span><br><span class="line">		<span class="keyword">if</span>(sub_loop == <span class="literal">nullptr</span>)&#123;</span><br><span class="line">			<span class="keyword">if</span>(!loop.<span class="built_in">getHeader</span>().<span class="built_in">dom</span>(n))&#123;</span><br><span class="line">				<span class="keyword">continue</span></span><br><span class="line">			&#125;</span><br><span class="line">			loop.<span class="built_in">add</span>(n)</span><br><span class="line">			<span class="keyword">for</span> p in n.<span class="built_in">pred</span>()&#123;</span><br><span class="line">				backedgs.<span class="built_in">push</span>(p)</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">			<span class="comment">// 有内层循环了</span></span><br><span class="line">			sub = sub_loop-&gt;<span class="built_in">getOuterMostLoop</span>()</span><br><span class="line">			loop.<span class="built_in">add_sub</span>(sub)</span><br><span class="line"></span><br><span class="line">			n = sub.<span class="built_in">getHeader</span>()</span><br><span class="line">			<span class="comment">// 不处理sub对应的所有block</span></span><br><span class="line">			<span class="keyword">for</span> p in n.<span class="built_in">preds</span>()&#123;</span><br><span class="line">				<span class="keyword">if</span>( <span class="built_in">getLoop</span>(p) != sub )&#123;</span><br><span class="line">					backedgs.<span class="built_in">push</span>(p)</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<hr>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.doc.ic.ac.uk/~phjk/Compilers/Lectures/pdfs/Ch7-part2-DominatorsAndNaturalLoops.pdf">Compilers I Chapter 1: Introduction</a></li>
+<li><a target="_blank" rel="noopener" href="https://dl.acm.org/doi/pdf/10.1145/570886.570887">On loops, dominators, and dominance frontiers (acm.org)</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cs.utexas.edu/~pingali/CS375/2010Sp/lectures/LoopOptimizations.pdf">Microsoft PowerPoint - loopOptimization [Compatibility Mode] (utexas.edu)</a></li>
+</ul>
+</main>
+
+</article>
+
+
+<script src="/js/highlight.js"></script>
+
+  </main>
+  <footer class="footer">
+  
+  <span>Copyright © 2024 typo</span>
+  
+</footer>
+  
+<script src="/js/theme.js"></script>
+
+</body>
+
+</html>

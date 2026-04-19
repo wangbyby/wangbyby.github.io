@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+  <title>
+    
+    寄存器分配简介 丨
+    
+
+    typo
+  </title>
+
+  
+  <link rel="shortcut icon" href="/icon.svg">
+  
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  
+  <link id="theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.css">
+  <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
+  
+
+  <!-- 字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/root.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<link rel="stylesheet" href="/css/post.css">
+
+<meta name="generator" content="Hexo 8.1.1"><link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+</head>
+
+<body>
+  <header class="header">
+  <section class="header-container">
+    <a class="logo" href="/">Hexo</a>
+    <ul class="nav">
+      
+      <li><a href="/archives">archives</a></li>
+      
+      <li><a href="/about">about</a></li>
+      
+    </ul>
+  </section>
+</header>
+  <main class="main">
+    <article class="post">
+  
+  <div class="post-title">寄存器分配简介</div>
+  <div class="post-meta">
+    <div class="date">2026 April 19th</div>
+    <div class="tags">
+      
+    </div>
+  </div>
+  
+
+  <main class="post-content"><blockquote>
+<p>寄存器分配简介</p>
+</blockquote>
+<h1 id="前置技术-Liveness-Analysis，-Live-Interval-reaching-define"><a href="#前置技术-Liveness-Analysis，-Live-Interval-reaching-define" class="headerlink" title="前置技术 Liveness Analysis， Live Interval, reaching define"></a>前置技术 Liveness Analysis， Live Interval, reaching define</h1><h2 id="Liveness-Analysis"><a href="#Liveness-Analysis" class="headerlink" title="Liveness Analysis"></a>Liveness Analysis</h2><p>经典的数据流分析, 后向(倒序)分析.</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">live_out[b] = ⋃ (live_in[s] for s ∈ succ(b))</span><br><span class="line">live_in[b]  = use[b] ∪ (live_out[b] − def[b])</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="live-interval"><a href="#live-interval" class="headerlink" title="live interval"></a>live interval</h2><p>llvm依赖这个，就是 def-use 分段.</p>
+<h2 id="reaching-define-到达定值"><a href="#reaching-define-到达定值" class="headerlink" title="reaching define 到达定值"></a>reaching define 到达定值</h2><p>就是某个定义点可以到达什么地方，前向分析。<br>实现上可以用bitset或者set.</p>
+<p>图着色会用到。每次define就生成一个新的ID。</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">b0:</span><br><span class="line">  v1 = ...</span><br><span class="line">  br b2</span><br><span class="line"></span><br><span class="line">b1:</span><br><span class="line">  v1 = ... </span><br><span class="line">  br b2</span><br><span class="line"></span><br><span class="line">b2:</span><br><span class="line">  print(v1)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>对其进行def标号后就是</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">b0:</span><br><span class="line">  v1 = ... ; &#123;d1:v1, &#125; bitset= &lt;10&gt;</span><br><span class="line">  br b2</span><br><span class="line"></span><br><span class="line">b1:</span><br><span class="line">  v1 = ... ; &#123;d2:v1, &#125; bitset= &lt;01&gt;</span><br><span class="line">  br b2</span><br><span class="line"></span><br><span class="line">b2:</span><br><span class="line">  print(v1)  ; &#123;d1:v1, d2:v1&#125; bitset= &lt;11&gt;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>首先, 下面介绍的寄存器分配针对的IR都是非SSA的.<br>基于SSA来实现的寄存器分配, emm, 没见过.<br>考虑以下问题: call中abi定义, two address inst, flag的隐式定义.</p>
+<h1 id="全局的图着色"><a href="#全局的图着色" class="headerlink" title="全局的图着色"></a>全局的图着色</h1><p>参考”高级编译器设计与实现” 16章.</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">fn alloc_reg()&#123;</span><br><span class="line">    bool success = false;</span><br><span class="line">    do&#123;</span><br><span class="line">        bool coalesce = false;</span><br><span class="line">        do&#123;</span><br><span class="line">            make_web()</span><br><span class="line">            build_adj_matrix()</span><br><span class="line">            coalesce = coalesce_regs()</span><br><span class="line">        &#125;while(!coalesce);</span><br><span class="line"></span><br><span class="line">        build_adj_list()</span><br><span class="line">        compute_spill_costs()</span><br><span class="line">        prune_graph()</span><br><span class="line">        success = assign_regs()</span><br><span class="line">        if(success)&#123;</span><br><span class="line">            modify_code()</span><br><span class="line">        &#125;else&#123;</span><br><span class="line">            gen_spill_code()</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;while(!success);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>迭代到不动点. </p>
+<h2 id="1-make-web"><a href="#1-make-web" class="headerlink" title="1. make web"></a>1. make web</h2><p>web构造有两种方式</p>
+<ol>
+<li>基于 reaching def的结果来构造. <ul>
+<li>先构造duchain</li>
+<li>基于duchain构造web</li>
+</ul>
+</li>
+<li>直接构造,每个虚拟寄存器就是一个web节点</li>
+</ol>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">b0:</span><br><span class="line">2:  v1 = ...</span><br><span class="line">4:  br b2</span><br><span class="line"></span><br><span class="line">b1:</span><br><span class="line">6:  v1 = ... </span><br><span class="line">8:  br b2</span><br><span class="line"></span><br><span class="line">b2:</span><br><span class="line">10:  print(v1)</span><br><span class="line">12:  v1 = ...</span><br><span class="line">14:  print(v1)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>第一种方式: (参杂了live range信息)<br>name, defs,  uses<br>web1, {2, 6}, {10}<br>web2, {12},   {14}</p>
+<p>第二种方式:<br>web1: {2,6,12}, {10, 14}</p>
+<h2 id="2-build-adj-matrix"><a href="#2-build-adj-matrix" class="headerlink" title="2. build_adj_matrix"></a>2. build_adj_matrix</h2><p>算法核心, 使用下三角邻接矩阵.<br>关键是如何判定两个web是否干涉.<br>如果用 Reaching def会有很多假阳性出现. 所以需要liveness来判定.</p>
+<h2 id="3-coalesce-regs"><a href="#3-coalesce-regs" class="headerlink" title="3. coalesce_regs"></a>3. coalesce_regs</h2><p>会尝试消除一些 <code>a = copy b</code>的指令</p>
+<h2 id="4-build-adj-list"><a href="#4-build-adj-list" class="headerlink" title="4. build_adj_list"></a>4. build_adj_list</h2><p>基于邻接表就行</p>
+<h2 id="5-compute-spill-costs"><a href="#5-compute-spill-costs" class="headerlink" title="5. compute_spill_costs"></a>5. compute_spill_costs</h2><p>启发式算法</p>
+<ol>
+<li>loop depth</li>
+<li>block frequency</li>
+<li>num of uses</li>
+</ol>
+<h2 id="6-prune-graph"><a href="#6-prune-graph" class="headerlink" title="6. prune_graph"></a>6. prune_graph</h2><p>算法的核心. 这一步是将web构成的冲突图排列到一个栈里面, 供<code>assign_regs</code>使用.<br>有<code>&lt;R</code>的乐观算法, 选择 <code>&lt;R</code>的节点开始染色. 或者用乐观的启发式算法,删除<code>度&gt;=R</code>的节点推广 <code>&lt;R</code>.</p>
+<h2 id="7-assign-regs"><a href="#7-assign-regs" class="headerlink" title="7. assign_regs"></a>7. assign_regs</h2><p>给web赋值颜色. 不是真正的修改指令.</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">success: bool = true</span><br><span class="line">while !stack.empty()</span><br><span class="line">    web = stack.pop()</span><br><span class="line">    c = min_color(web)</span><br><span class="line">    if c &gt; 0</span><br><span class="line">        adjList[web].color = c</span><br><span class="line">    else</span><br><span class="line">        adjList[web].spill = true</span><br><span class="line">        success = false</span><br><span class="line"></span><br><span class="line">return success</span><br></pre></td></tr></table></figure>
+
+<h2 id="8-modify-code"><a href="#8-modify-code" class="headerlink" title="8. modify code"></a>8. modify code</h2><p>就是很直接的重写</p>
+<h2 id="9-gen-spill-code"><a href="#9-gen-spill-code" class="headerlink" title="9. gen_spill_code"></a>9. gen_spill_code</h2><p>简单来说在def 后生成 store, 在use之前生成load.<br>注意, 图着色这里是针对所有已经标记为 spill的web进行溢出.</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>不难看出图着色还是比较耗时的. reaching define的计算, adj matrix的计算, 再加上迭代到不动点.<br>生成的代码质量上, 对live range建模不太完善, spill判定也比较简单.</p>
+<h1 id="linear-scan"><a href="#linear-scan" class="headerlink" title="linear scan"></a>linear scan</h1><p>从live range出发看待寄存器分配问题. 参考Linear scan register allocation.</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">reg_alloc()&#123;</span><br><span class="line">  do_instruction_order()</span><br><span class="line">  l =  do_live_intervals_calc()</span><br><span class="line">  l.sort_by_start_point()</span><br><span class="line">  linear_scan(l)</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">linear_scan(live_intervals l)&#123;</span><br><span class="line">  active = []</span><br><span class="line">  for live_interval i : l&#123;</span><br><span class="line">    expireOld(i)</span><br><span class="line">    if active.size() == R &#123;</span><br><span class="line">      spillAt(i)</span><br><span class="line">    &#125;else&#123;</span><br><span class="line">      register[i] = free_register.pop()</span><br><span class="line">      active.push(i)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">expireOld(i)&#123;</span><br><span class="line">  for live_interval j in ( active in order of increasing end point ) &#123;</span><br><span class="line">    if j.end &gt;= i.start &#123;</span><br><span class="line">      return </span><br><span class="line">    &#125;</span><br><span class="line">    remove j from active</span><br><span class="line">    free_register.push(add j.register)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">spillAt(i)&#123; // 启发式算法</span><br><span class="line">  spill = active.last()</span><br><span class="line">  if spill.end &gt; i.end &#123;</span><br><span class="line">    i.register = spill.register</span><br><span class="line">    spill.location = new stack location</span><br><span class="line"></span><br><span class="line">    active.remove(spill)</span><br><span class="line"></span><br><span class="line">    active.push(i)</span><br><span class="line">    active.sort_by_end()</span><br><span class="line">  &#125;else&#123;</span><br><span class="line">    i.location = new stack location</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>instruction order 不影响结果正确性,可能影响代码质量</li>
+<li>active最大长度是R</li>
+<li>spill的依据是启发式算法, 论文里面就是根据live range长度进行判定</li>
+</ol>
+<p>改进点:</p>
+<ol>
+<li>live intervals太宽泛,可以利用某些空洞</li>
+<li>spill计算太简陋, 可以结合更多信息</li>
+<li>copy coalescing, 尝试删除<code>a = copy b</code>这样的复制指令</li>
+</ol>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ol>
+<li>高级编译器设计与实现</li>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/AANA/p/16315859.html">https://www.cnblogs.com/AANA/p/16315859.html</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/hsyluxiaoguo/p/18902335">https://www.cnblogs.com/hsyluxiaoguo/p/18902335</a></li>
+<li>Massimiliano Poletto and Vivek Sarkar. 1999. Linear scan register allocation. ACM Trans. Program. Lang. Syst. 21, 5 (Sept. 1999), 895–913. <a target="_blank" rel="noopener" href="https://doi.org/10.1145/330249.330250">https://doi.org/10.1145/330249.330250</a>, <a target="_blank" rel="noopener" href="https://web.cs.ucla.edu/~palsberg/course/cs132/linearscan.pdf">https://web.cs.ucla.edu/~palsberg/course/cs132/linearscan.pdf</a></li>
+</ol>
+</main>
+
+</article>
+
+
+<script src="/js/highlight.js"></script>
+
+  </main>
+  <footer class="footer">
+  
+  <span>Copyright © 2024 typo</span>
+  
+</footer>
+  
+<script src="/js/theme.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+  <title>
+    
+    2026-4-9面经 丨
+    
+
+    typo
+  </title>
+
+  
+  <link rel="shortcut icon" href="/icon.svg">
+  
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  
+  <link id="theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.css">
+  <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
+  
+
+  <!-- 字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/root.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<link rel="stylesheet" href="/css/post.css">
+
+<meta name="generator" content="Hexo 8.1.1"><link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+</head>
+
+<body>
+  <header class="header">
+  <section class="header-container">
+    <a class="logo" href="/">Hexo</a>
+    <ul class="nav">
+      
+      <li><a href="/archives">archives</a></li>
+      
+      <li><a href="/about">about</a></li>
+      
+    </ul>
+  </section>
+</header>
+  <main class="main">
+    <article class="post">
+  
+  <div class="post-title">2026-4-9面经</div>
+  <div class="post-meta">
+    <div class="date">2026 April 9th</div>
+    <div class="tags">
+      
+    </div>
+  </div>
+  
+
+  <main class="post-content"><h1 id="0-https-zhuanlan-zhihu-com-p-678602674-ai-cuda"><a href="#0-https-zhuanlan-zhihu-com-p-678602674-ai-cuda" class="headerlink" title="0. https://zhuanlan.zhihu.com/p/678602674 ai&amp;cuda"></a>0. <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/678602674">https://zhuanlan.zhihu.com/p/678602674</a> ai&amp;cuda</h1><h1 id="1-https-www-nowcoder-com-discuss-720701422198632448"><a href="#1-https-www-nowcoder-com-discuss-720701422198632448" class="headerlink" title="1. https://www.nowcoder.com/discuss/720701422198632448"></a>1. <a target="_blank" rel="noopener" href="https://www.nowcoder.com/discuss/720701422198632448">https://www.nowcoder.com/discuss/720701422198632448</a></h1><p>说说项目里面内存管理优化的实现</p>
+<p>4.有没有看过一些开源项目的内存管理的实现。</p>
+<p>答：没有，只会暴力实现。</p>
+<p>5.说说你所实现的算子融合和冗余算子消除。</p>
+<p>6.说说mlir里面的Op，region，block</p>
+<p>答：不会，瞎蒙了一下，类比于llvm里面相关的概念，说了一下它们表示的范围不同</p>
+<p>7.说说triton。</p>
+<p>答：简易地说了一下triton从python kernel到cubin可执行文件的lower过程。</p>
+<p>8.看你简历上写了熟悉编译原理，说说你了解的编译原理。</p>
+<p>9.说说你所了解的循环优化的策略。</p>
+<p>10.说说为啥要有ssa，它的好处。</p>
+<p>11.了解常见的大语言模型吗？</p>
+<p>答：只知道基本概念，没有深入了解过。</p>
+<p>12.mlir里面有很多CRTP，这个你了解吗？</p>
+<p>答：不了解</p>
+<p>13.知道左值和右值吗？说说它们的区别</p>
+<p>14.说说cpp里面的移动拷贝构造。</p>
+<p>手撕：无向图的深拷贝</p>
+<h1 id="2-https-www-nowcoder-com-feed-main-detail-653959a6f5ff4fe2b5620ac418652629-sourceSSR-search"><a href="#2-https-www-nowcoder-com-feed-main-detail-653959a6f5ff4fe2b5620ac418652629-sourceSSR-search" class="headerlink" title="2. https://www.nowcoder.com/feed/main/detail/653959a6f5ff4fe2b5620ac418652629?sourceSSR=search"></a>2. <a target="_blank" rel="noopener" href="https://www.nowcoder.com/feed/main/detail/653959a6f5ff4fe2b5620ac418652629?sourceSSR=search">https://www.nowcoder.com/feed/main/detail/653959a6f5ff4fe2b5620ac418652629?sourceSSR=search</a></h1><p>1.请详细描述你在简历中提到的AI相关项目中，负责的主要模块和核心技术贡献。<br>2.在设计一个高吞吐、低延迟的模型推理服务时，你会重点考虑哪些架构层面和工程层面的问题?<br>3.请解释C++程序内存中栈(stack)、堆(heap)和静态&#x2F;全局存储区的特点与主要区别。<br>4.在C++中，new&#x2F;delete<code>与&#39;malloc/free</code>的主要区别是什么?为什么在C++中通常推荐使用前者?<br>5.请解释深拷贝和浅拷贝的概念，并说明在什么情况下必须使用深拷贝。<br>6.请阐述C++中’std:unique_ptr、’std..shared_ptr和’std:weak_ptr的设计意图、使用场景及相互区别。<br>7.虚函数表(vtable)是如何实现运行时多态的?虚函数与纯虚函数(抽象类)在语义和用法上有何不同?<br>8.什么是内存对齐?编译器对结构体进行内存对齐的主要规则是什么?请计算一个给定结构体(包含不同类型成员)在特定平台下的sizeof大小。<br>9.请解释C++11中右值引用(&amp;&amp;)和移动语义(move semantics)的概念，并说明它们如何用于实现高效的数据转移(如std.:.vector的push_back)。1<br>0.简述CUDA的SlIMT(单指令多线程)编程模型，描述thread、block、grid的层次关系。<br>11.在CUDA内核中，一个线程的局部变量通常存储在何处?这与寄存器的分配有何关系?<br>12.在CUDA优化中，如何使用共享内存(Shared Memory)来减少对全局内存的重复访问?请举一个简单的例子(如矩阵乘法中的分块)。<br>13.什么是warp shuffle指令?它在warp内部的数据交换和规约操作中有什么优势?<br>14.解释在CUDA中使用float4或int4等向量化加载&#x2F;存储指令进行合并访存的原理和性能收益。<br>15.什么是共享内存的bankconflict?它是如何产生的?请举例说明。<br>16.如何通过数据填充(padding)或其他内存布局调整技术来避免或减轻共享内存访问中的bankconflict?<br>17.解释CPU缓存的工作原理，包括时间局部性、空间局部性的概念，以及常见的缓存替换策略<br>18.编程题:实现一个算法，在一个包含大量整数的数据流中，实时找出出现频率最高的前K个元素。请描述你的思路(哈希表+最小堆)并分析时间复杂度</p>
+<h1 id="3-https-www-nowcoder-com-feed-main-detail-c69c9d6a4ec54c2e997369b2de37e049-sourceSSR-search"><a href="#3-https-www-nowcoder-com-feed-main-detail-c69c9d6a4ec54c2e997369b2de37e049-sourceSSR-search" class="headerlink" title="3. https://www.nowcoder.com/feed/main/detail/c69c9d6a4ec54c2e997369b2de37e049?sourceSSR=search"></a>3. <a target="_blank" rel="noopener" href="https://www.nowcoder.com/feed/main/detail/c69c9d6a4ec54c2e997369b2de37e049?sourceSSR=search">https://www.nowcoder.com/feed/main/detail/c69c9d6a4ec54c2e997369b2de37e049?sourceSSR=search</a></h1><p>2年编译器社招面经—沐曦二面<br>沐曦二面</p>
+<ol>
+<li>介绍项目</li>
+<li>llvm pass的开发<br>回答：llvm有一些自有的pass，比如…但是自己没有开发过。</li>
+<li>反汇编时jump指令越界处理<br>语义分析，比如一些下标越界，空指针这种。还有就是一些特殊段比如 stack 之类的有固定的虚拟地址。不然只能运行时报错。（面试官微微一笑，我感觉我答的有点奇怪）</li>
+<li>寄存器分配方法<br>我直接以之前课设浅薄知识回答：待用活跃链表，和基本块栈式组成。其实，应该是use-def链，中科大华保健老师的课我都看完还做了笔记的，我居然忘了，哭辽。</li>
+<li>平时调试代码的方法<br>代码里会写assert输出错误，还有就是gdb –args，b打断点，bt看调用栈这些。（大家有什么好方法可以补充）</li>
+<li>手写算法题<br>k组链表的翻转。</li>
+</ol>
+<h1 id="4-https-www-nowcoder-com-feed-main-detail-eb180a1d39e44f3d943cc886eb466590-sourceSSR-search"><a href="#4-https-www-nowcoder-com-feed-main-detail-eb180a1d39e44f3d943cc886eb466590-sourceSSR-search" class="headerlink" title="4. https://www.nowcoder.com/feed/main/detail/eb180a1d39e44f3d943cc886eb466590?sourceSSR=search"></a>4. <a target="_blank" rel="noopener" href="https://www.nowcoder.com/feed/main/detail/eb180a1d39e44f3d943cc886eb466590?sourceSSR=search">https://www.nowcoder.com/feed/main/detail/eb180a1d39e44f3d943cc886eb466590?sourceSSR=search</a></h1><ol>
+<li>场景题：给你一幅图，提取出它的子图</li>
+<li>第二道题口头说一下思路就行：给定一个数组，找出一个分界点，使得左右两边的元素乘积符号是否相等（正负或者0）</li>
+<li>遍历图节点，根据条件合并节点</li>
+</ol>
+<h1 id="5-https-www-nowcoder-com-discuss-353159561660014592-sourceSSR-search"><a href="#5-https-www-nowcoder-com-discuss-353159561660014592-sourceSSR-search" class="headerlink" title="5. https://www.nowcoder.com/discuss/353159561660014592?sourceSSR=search"></a>5. <a target="_blank" rel="noopener" href="https://www.nowcoder.com/discuss/353159561660014592?sourceSSR=search">https://www.nowcoder.com/discuss/353159561660014592?sourceSSR=search</a></h1><ol>
+<li>右值引用，lambda表达式，for迭代遍历，智能指针，初始化列表等</li>
+<li>详细问了智能指针，share_ptr和week_ptr，share_ptr原理以及缺陷，以及week_ptr的作用，week_ptr如何转变成share_ptr。</li>
+<li>问项目，一个经典的模型细分算法，openmesh库解析模型，opengl绘制，qt界面。问了模型面片法线的处理。</li>
+<li>手撕代码，k个一组反转链表（leetcode hard）</li>
+</ol>
+<h1 id="6"><a href="#6" class="headerlink" title="6."></a>6.</h1><p>1）CUDA编程模型<br>host端 device端 找几个算子来写写熟悉流程，直接矩阵乘法或者转置（之前工作写过简单的算子，这块擦边过）<br>（2）代码优化<br>2.1 控制流图，数据流图要了解，又想到我的拓扑排序了（死代码删除常量处理会用到）一紧张开始抽风直接写了半个逆拓扑序…<br>2.2 寄存器分配算法（其实我以前搞过一个最简单的根据最长最久未使用待用链表来分配，一紧张直接忘了，我是个five我检讨）<br>2.3 指令调度：循环展开，软流水（一着急想了半天）<br>2.4 问到了一个SIMD和SIMT编译差异<br>当时直接答了寄存器分配和指令调度差别，现在想想应该还要加上table格式。<br>（3）xla流程<br>xla多层ir组织方式和llvm backend td intrinsic，有没有做一些指令级别的工作</p>
+<p>作者：hallucination833<br>链接：<a target="_blank" rel="noopener" href="https://www.nowcoder.com/feed/main/detail/4b06fed361044da9ba3d033953315f13?sourceSSR=search">https://www.nowcoder.com/feed/main/detail/4b06fed361044da9ba3d033953315f13?sourceSSR=search</a><br>来源：牛客网</p>
+<h1 id="7"><a href="#7" class="headerlink" title="7"></a>7</h1><ol>
+<li>自我介绍</li>
+<li>推理框架的设计，计算图，运行图，内存管理</li>
+<li>动态图，静态图，动态shape</li>
+<li>图优化</li>
+<li>warp之间通信</li>
+<li>cuda reduce</li>
+<li>cuda softmax，warp处理与block处理的区别</li>
+<li>block，grid的设置，调度，为什么会影响算子速度</li>
+<li>CUDA的计算模型<br>10.flash attention v1 v2</li>
+</ol>
+<p>作者：我是阿猩<br>链接：<a target="_blank" rel="noopener" href="https://www.nowcoder.com/feed/main/detail/f4a2742ed1c743c4b177756d7d76b2c5?sourceSSR=search">https://www.nowcoder.com/feed/main/detail/f4a2742ed1c743c4b177756d7d76b2c5?sourceSSR=search</a><br>来源：牛客网</p>
+<h1 id="8"><a href="#8" class="headerlink" title="8"></a>8</h1><p>快手 编译器研发-实习 一二面面经</p>
+<ol>
+<li>PGO优化相关</li>
+<li>TLB 全称和英文是什么 有什么用</li>
+<li>最长上升子序列（5分钟）</li>
+<li>struct在C和C++里的异同</li>
+<li>c语言里的struct定义，有办法不带struct关键字吗</li>
+<li>数组和指针区别</li>
+<li>写一个常量指针和指针常量例子</li>
+<li>将0x1234赋值给int型，如何char<em>指向刚刚的地址，分别输出 (int)<em>p，(int)</em>(p+1)，(int)</em>(p+2)。说一下代码输出内容，为什么？假设在64位小端机器上</li>
+<li>C++虚函数的作用和原理，写一个例子，另外说一下对纯虚函数的理解</li>
+<li>memcpy原理与实现</li>
+</ol>
+<p>作者：Xiaooo_jian<br>链接：<a target="_blank" rel="noopener" href="https://www.nowcoder.com/discuss/619525234290331648?sourceSSR=search">https://www.nowcoder.com/discuss/619525234290331648?sourceSSR=search</a><br>来源：牛客网</p>
+</main>
+
+</article>
+
+
+<script src="/js/highlight.js"></script>
+
+  </main>
+  <footer class="footer">
+  
+  <span>Copyright © 2024 typo</span>
+  
+</footer>
+  
+<script src="/js/theme.js"></script>
+
+</body>
+
+</html>

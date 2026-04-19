@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+  <title>
+    
+    SCCP 丨
+    
+
+    typo
+  </title>
+
+  
+  <link rel="shortcut icon" href="/icon.svg">
+  
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  
+  <link id="theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.css">
+  <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
+  
+
+  <!-- 字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/root.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<link rel="stylesheet" href="/css/post.css">
+
+<meta name="generator" content="Hexo 8.1.1"><link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+</head>
+
+<body>
+  <header class="header">
+  <section class="header-container">
+    <a class="logo" href="/">Hexo</a>
+    <ul class="nav">
+      
+      <li><a href="/archives">archives</a></li>
+      
+      <li><a href="/about">about</a></li>
+      
+    </ul>
+  </section>
+</header>
+  <main class="main">
+    <article class="post">
+  
+  <div class="post-title">SCCP</div>
+  <div class="post-meta">
+    <div class="date">2026 April 19th</div>
+    <div class="tags">
+      
+    </div>
+  </div>
+  
+
+  <main class="post-content"><p>稀疏条件常量传播</p>
+<p>核心是格，从def到use的传播。</p>
+<p>有Top，Const，Bottom三类，Const其实有无穷个状态。<br>状态转移就是从Top 到 Const&#x2F;Bottom</p>
+<p>然后定义状态转移函数meet:</p>
+<ul>
+<li>meet(any, Top) &#x3D; any</li>
+<li>meet(any, Bottom) &#x3D; Bottom</li>
+<li>meet(Ci, Cj) &#x3D; Ci if i&#x3D;&#x3D;j</li>
+<li>meet(Ci, Cj) &#x3D; Bottom if i!&#x3D;j</li>
+</ul>
+<p>定义evalExpr函数(不处理phi)<br>    - 如果操作数有Bottom， 结果是Bottom<br>    - 如果都是常数，计算<br>    - 返回Bottom</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">bool sccp(func)&#123;</span><br><span class="line">    edgeList: vector&lt;(BB, BB) &gt; = [] </span><br><span class="line">    instList: vector&lt;inst&gt; = []</span><br><span class="line">    lattice_map = &#123;&#125;</span><br><span class="line"></span><br><span class="line">    edge_visited : set&lt;(BB,BB)&gt; = &#123;&#125;</span><br><span class="line"></span><br><span class="line">    // init</span><br><span class="line"></span><br><span class="line">    edgeList.push( null, entry )</span><br><span class="line"></span><br><span class="line">    for arg in func.getArgs()&#123;</span><br><span class="line">        lattice_map[arg] = Bottom</span><br><span class="line">    &#125;</span><br><span class="line">    for bb in func&#123;</span><br><span class="line">        lattice_map[bb] = Top</span><br><span class="line">        for inst in bb&#123;</span><br><span class="line">            lattice_map[inst]  = Top</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    while(edgeList.size() || instList.size())&#123;</span><br><span class="line">        while(instList.size() )</span><br><span class="line">        &#123;</span><br><span class="line">            inst = instList.pop()</span><br><span class="line">            if( is_phi(inst) )&#123;</span><br><span class="line">                visit_phi(inst)</span><br><span class="line">                continue;</span><br><span class="line">            &#125;</span><br><span class="line">            visit_inst(inst)</span><br><span class="line">        &#125;</span><br><span class="line">        while(edgeList.size())&#123;</span><br><span class="line">            (from, to) =  edgeList.pop()</span><br><span class="line"></span><br><span class="line">            if edge_visited.contains(from, to)&#123;</span><br><span class="line">                continue;</span><br><span class="line">            &#125;</span><br><span class="line">            edge_visited.inset(from,to)</span><br><span class="line">            for inst in to &#123;</span><br><span class="line">                if(inst.isPhi())&#123;</span><br><span class="line">                    visit_phi(inst)</span><br><span class="line">                &#125;else&#123;</span><br><span class="line">                    visit_inst(inst)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    remove all the inst with Top lattice </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">void visit_phi(PhiNode* phi)&#123;</span><br><span class="line">    auto old = lattice_map.get(phi)</span><br><span class="line"></span><br><span class="line">    auto (v1, bb1) = phi.incomings().begin()</span><br><span class="line">    new_cell = Top    </span><br><span class="line">    if edge_visited.contains(bb1, phi-&gt;getParent()) &#123;</span><br><span class="line">        new_cell = lattice_map.get(v1)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    for (v, bb) in phi.incomings().else()&#123;</span><br><span class="line">        celli = Top</span><br><span class="line">        if(edge_visited.contains(bb, phi-&gt;getParent()) )&#123;</span><br><span class="line">            celli =  lattice_map.get(v)</span><br><span class="line">            new_cell = meet(new_cell, celli)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">     </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void visit_inst(inst)&#123;</span><br><span class="line">    old = lattice_map.get(inst)</span><br><span class="line">    switch inst.kind()&#123;</span><br><span class="line">        case BinOp:&#123;</span><br><span class="line">            a = lattice_map.get(inst.getLHS())</span><br><span class="line">            b = lattice_map.get(inst.getRHS())</span><br><span class="line">            new_cell = eval(a,b, inst)</span><br><span class="line">            if new_cell != old &#123;</span><br><span class="line">                lattice_map[inst] = new_cell</span><br><span class="line">                for u in inst.getUsers()&#123;</span><br><span class="line">                    instList.push(u)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            break;</span><br><span class="line">        &#125;</span><br><span class="line">        case UnaryOp:&#123;</span><br><span class="line">            a = lattice_map.get(inst.getOp())</span><br><span class="line">            res = evalExpr(a)</span><br><span class="line">            if( a != old )&#123;</span><br><span class="line">                lattice_map[inst] = a</span><br><span class="line">                for u in inst.getUsers()&#123;</span><br><span class="line">                    instList.push(u)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            break;</span><br><span class="line">        &#125;</span><br><span class="line">        case Branch &#123;</span><br><span class="line">            auto succ = inst.getSucc()</span><br><span class="line">            for i in succ&#123;</span><br><span class="line">                if edge_visited.contains(inst.getParent(), i)&#123;</span><br><span class="line">                    continue;</span><br><span class="line">                &#125;</span><br><span class="line">                edgeList.push(inst.getParent(), i)</span><br><span class="line">                </span><br><span class="line">                for phi in i.phis()&#123;</span><br><span class="line">                    visit_phi(phi)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p>考虑下<br>bb:<br>    a &#x3D; phi(0, b)<br>    b &#x3D; a + 1<br>    jmp bb</p>
+<p>最开始 a:T, b:T<br>然后a被标记为C(0), b也是C(1)<br>然后a &#x3D; meet(C(0), C(1)) &#x3D; Bottom, b: Bottom</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://dl.acm.org/doi/pdf/10.1145/103135.103136">https://dl.acm.org/doi/pdf/10.1145/103135.103136</a></li>
+<li><a target="_blank" rel="noopener" href="https://karkare.github.io/cs738/lecturenotes/11CondConstPropSlides.pdf">https://karkare.github.io/cs738/lecturenotes/11CondConstPropSlides.pdf</a></li>
+</ul>
+</main>
+
+</article>
+
+
+<script src="/js/highlight.js"></script>
+
+  </main>
+  <footer class="footer">
+  
+  <span>Copyright © 2024 typo</span>
+  
+</footer>
+  
+<script src="/js/theme.js"></script>
+
+</body>
+
+</html>

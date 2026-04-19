@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+  <title>
+    
+    2026-4-9面经-cpp 丨
+    
+
+    typo
+  </title>
+
+  
+  <link rel="shortcut icon" href="/icon.svg">
+  
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  
+  <link id="theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.css">
+  <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
+  
+
+  <!-- 字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/root.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<link rel="stylesheet" href="/css/post.css">
+
+<meta name="generator" content="Hexo 8.1.1"><link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+</head>
+
+<body>
+  <header class="header">
+  <section class="header-container">
+    <a class="logo" href="/">Hexo</a>
+    <ul class="nav">
+      
+      <li><a href="/archives">archives</a></li>
+      
+      <li><a href="/about">about</a></li>
+      
+    </ul>
+  </section>
+</header>
+  <main class="main">
+    <article class="post">
+  
+  <div class="post-title">2026-4-9面经-cpp</div>
+  <div class="post-meta">
+    <div class="date">2026 April 9th</div>
+    <div class="tags">
+      
+    </div>
+  </div>
+  
+
+  <main class="post-content"><ol start="2">
+<li><p>crtp</p>
+<ul>
+<li>注意空基类优化 <code>template &lt;typename T&gt; struct Base {};</code></li>
+</ul>
+</li>
+<li><p>cpp左值，右值</p>
+</li>
+</ol>
+<p>value categories (值类别)<br>    glvalue – lvalue<br>           <br>            xvalue<br>          &#x2F;<br>    rvalue  – prvalue</p>
+<ul>
+<li>右值引用T&amp;&amp;是类型.</li>
+<li>编译器将已命名的右值引用视为左值，而将未命名的右值引用视为右值。</li>
+<li>int &amp;&amp; r &#x3D; 10; r的类型是int&amp;&amp;，但如果表达式使用r，r类型是int，lvalue。<br>C++ 表达式的类型不会是引用类型，引用类型决定value categories</li>
+<li>int&amp;和int&amp;&amp;在ir中都是ptr。</li>
+<li>如果是模板T&amp;&amp; ！&#x3D; 右值引用，用来保存value categories信息。</li>
+</ul>
+<ol start="4">
+<li><p>cpp纯虚函数, 抽象类。有构造函数但不能被实例化</p>
+</li>
+<li><p>结构体对齐 align。 maxalign&#x3D;16</p>
+</li>
+<li><p>初始化列表&#x2F;cpp拷贝&#x2F;移动构造</p>
+<ul>
+<li>{} 初始化的匹配顺序是 initializer_list 构造函数 ＞ 普通构造函数 ＞ 聚合初始化</li>
+<li>aggregate initialization 聚合初始化（ C-style struct）</li>
+<li>A a{10} vs A a &#x3D; 10 的区别<ul>
+<li>A a{10} 是直接列表初始化</li>
+<li>A a &#x3D; 10 是拷贝初始化。就是 A a &#x3D; A(10), 所以不支持explicit</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>智能指针，unique_ptr, shared_ptr, weak_ptr</p>
+<ul>
+<li>shared_ptr{ T* data; count_* ctl_block; }</li>
+<li>count_{long;long; virtual deleter()}</li>
+</ul>
+</li>
+<li><p>完美转发。std::forward</p>
+</li>
+</ol>
+<ul>
+<li>恢复 T 推导时的“值类别”. T&amp;，T&amp;&amp;</li>
+<li>引用折叠</li>
+<li>remove_reference_t</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;type_traits&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span></span><br><span class="line"><span class="function"><span class="keyword">constexpr</span> T&amp;&amp; <span class="title">my_forward</span><span class="params">(std::<span class="type">remove_reference_t</span>&lt;T&gt;&amp; x)</span> <span class="keyword">noexcept</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">static_cast</span>&lt;T&amp;&amp;&gt;(x);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span></span><br><span class="line"><span class="function"><span class="keyword">constexpr</span> T&amp;&amp; <span class="title">my_forward</span><span class="params">(std::<span class="type">remove_reference_t</span>&lt;T&gt;&amp;&amp; x)</span> <span class="keyword">noexcept</span> </span>&#123;</span><br><span class="line">    <span class="built_in">static_assert</span>(!std::is_lvalue_reference&lt;T&gt;::value,</span><br><span class="line">                  <span class="string">&quot;bad forward&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">static_cast</span>&lt;T&amp;&amp;&gt;(x);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</main>
+
+</article>
+
+
+<script src="/js/highlight.js"></script>
+
+  </main>
+  <footer class="footer">
+  
+  <span>Copyright © 2024 typo</span>
+  
+</footer>
+  
+<script src="/js/theme.js"></script>
+
+</body>
+
+</html>

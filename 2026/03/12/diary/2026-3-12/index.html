@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+  <title>
+    
+    2026-3-12记 丨
+    
+
+    typo
+  </title>
+
+  
+  <link rel="shortcut icon" href="/icon.svg">
+  
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  
+  <link id="theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.css">
+  <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
+  
+
+  <!-- 字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/root.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<link rel="stylesheet" href="/css/post.css">
+
+<meta name="generator" content="Hexo 8.1.1"><link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+</head>
+
+<body>
+  <header class="header">
+  <section class="header-container">
+    <a class="logo" href="/">Hexo</a>
+    <ul class="nav">
+      
+      <li><a href="/archives">archives</a></li>
+      
+      <li><a href="/about">about</a></li>
+      
+    </ul>
+  </section>
+</header>
+  <main class="main">
+    <article class="post">
+  
+  <div class="post-title">2026-3-12记</div>
+  <div class="post-meta">
+    <div class="date">2026 March 12th</div>
+    <div class="tags">
+      
+    </div>
+  </div>
+  
+
+  <main class="post-content"><p>记录下这一年半编译器开发的经验。</p>
+<ol>
+<li>编译通过，但是运行结果错误。</li>
+</ol>
+<p>如何检查？</p>
+<ul>
+<li>先减小问题规模，整出一个最小可复现用例</li>
+<li>检查pipeline，parser结果，ir pass结果，isel结果，reg alloc，stack frame等。</li>
+<li>verify的重要性，每个不同格式的中间表示转换处需要有verify，保证其流入和流出结果的合法性。</li>
+<li>重复上述步骤，直到问题解决。</li>
+</ul>
+<p>既然是pipeline模型，那么衔接需要处理好。需重点注意。</p>
+<ol start="2">
+<li>编译器挂掉了，没其他信息。一般是各种空指针解引用导致的，linux里面很好处理。</li>
+<li>ISA里面还是需要cmp a,b; cset; jmpcc这样的指令。block数量可以少一些，虽然有隐式状态吧。</li>
+<li>phi-node-elimination，简单解法很有效。</li>
+<li>将合法化和优化分隔开。写在一起很难调试。比如说上面的phi消除，用phi-node-elimination + register-coalescer处理合法性和优化问题。</li>
+<li>阶段性测试，必不可少，花费时间写测试很有必要，也是约束项目复杂度的关键措施。想想一命通关的难度。</li>
+<li>ir层级表示，4到5层是极限了，每层其实都是一个小解释器。llvm有ast，llvm-ir，mir+MC。算上预处理器就4层了，MC是tablegen送的. 每层都要测试，有自己的结构，层之间的转换。</li>
+<li>小即是多，启动目标要尽可能小，而不是摊大饼。多一个环节，复杂度就会上升一级。</li>
+<li>关于ai，因为经济问题，只能用免费版本的。效果其实不错。如果还是传统的需求分析，设计，编码，测试流程，ai挺有用的。编码还需要盯着具体实现，最好是划定一个小范围，每步都有git commit。git真是ai code的大爹。</li>
+</ol>
+<hr>
+<p>还有编译器后端开发一些经验</p>
+<ol>
+<li><p>phi节点处理</p>
+<ul>
+<li>isel：需要谨慎选择block遍历顺序，RPO是个好选择</li>
+<li>legalize-type：更推荐增量式更新</li>
+<li>phi-elim：也是增量式，冗余copy之后让copy colaescing处理</li>
+</ul>
+</li>
+<li><p>legalize type需要在legalize opcode之前。因为机器支持的opcode+类型是确定的。<br>比如在32位机器上运行64位乘法，需要拆成mul-low，mul-high，然后再处理mul32的合法性。</p>
+</li>
+<li><p>stack frame layout中需要仔细检查下偏移量。多测试下</p>
+</li>
+<li><p>寄存器分配，看成一个二维图着色问题。一个是变量数目，一个是指令数量（index）</p>
+</li>
+</ol>
+<p>reg0: [10, 14]<br>reg1: [2, 12]</p>
+<p>考虑不同block块的频率不一样，视为频率热力图，greedy算法里面踢出某个块就更容易理解。</p>
+<p>图着色坏在不好调试（相对）。</p>
+<hr>
+</main>
+
+</article>
+
+
+<script src="/js/highlight.js"></script>
+
+  </main>
+  <footer class="footer">
+  
+  <span>Copyright © 2024 typo</span>
+  
+</footer>
+  
+<script src="/js/theme.js"></script>
+
+</body>
+
+</html>

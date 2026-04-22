@@ -1,8 +1,7 @@
 ---
 excalidraw-plugin: parsed
 tags: null
-draft: true
-hidden: true
+published: false
 ---
 
 

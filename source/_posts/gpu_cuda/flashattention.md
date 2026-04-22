@@ -1,7 +1,7 @@
 ---
 title: "flash attention"
 date: 2026-4-17
-draft: true
+published: false
 hidden: true
 ---
 

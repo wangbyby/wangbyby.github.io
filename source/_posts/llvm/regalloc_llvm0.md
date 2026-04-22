@@ -11,6 +11,114 @@ title: "llvm寄存器分配0"
 - block frequency
 
 
+## value number
+
+>VNInfo 能处理ssa和non-ssa格式的mir
+>
+
+
+一个例子：
+
+```llvm-ir
+; llc %s -march=aarch64 --stop-after=register-coalescer 
+
+declare void @print(i32);
+
+define i32 @foo(i32 %a, i1 %c) {
+
+bb0:
+    br i1 %c, label %bb1, label %bb2
+bb1:
+    call void @print(i32 %a)
+    br label %bb3
+
+bb2:
+    %a2 = add i32 %a, 1
+    br label %bb3
+bb3:
+    %a3 = phi i32 [%a, %bb1], [%a2, %bb2]
+    ret i32 %a3
+}
+```
+
+```mir
+; llc -march=aarch64 --start-after=register-coalescer -debug-only=regalloc -O1 %s
+bb.0.bb0:
+    successors: %bb.1(0x40000000), %bb.2(0x40000000)
+    liveins: $w0, $w1
+  
+    %3:gpr32 = COPY $w1
+    %5:gpr32common = COPY $w0
+    TBZW %3, 0, %bb.2
+    B %bb.1
+  
+  bb.2.bb2:
+    successors: %bb.3(0x80000000)
+  
+    %5:gpr32common = ADDWri %5, 1, 0
+    B %bb.3
+
+  bb.1.bb1:
+    successors: %bb.3(0x80000000)
+  
+    ADJCALLSTACKDOWN 0, 0, implicit-def dead $sp, implicit $sp
+    $w0 = COPY %5
+    BL @print, csr_darwin_aarch64_aapcs, implicit-def dead $lr, implicit $sp, implicit $w0, implicit-def $sp
+    ADJCALLSTACKUP 0, 0, implicit-def dead $sp, implicit $sp
+    B %bb.3
+
+  bb.3.bb3:
+    $w0 = COPY %5
+    RET_ReallyLR implicit $w0
+...
+```
+
+可以看到live intervals信息：
+```txt
+W0 [0B,32r:0)[160r,176r:2)[240r,256r:1) 0@0B-phi 1@240r 2@160r
+W1 [0B,16r:0) 0@0B-phi
+%3 [16r,48r:0) 0@16r  weight:0.000000e+00
+%5 [32r,96r:1)[96r,128B:0)[128B,224B:1)[224B,240r:2) 0@96r 1@32r 2@224B-phi  weight:0.000000e+00
+Function Live Ins: $w0 in %2, $w1 in %3
+
+0B	bb.0.bb0:
+	  successors: %bb.2(0x40000000), %bb.1(0x40000000); %bb.2(50.00%), %bb.1(50.00%)
+	  liveins: $w0, $w1
+16B	  %3:gpr32 = COPY $w1
+32B	  %5:gpr32common = COPY $w0
+48B	  TBZW %3:gpr32, 0, %bb.1
+64B	  B %bb.2
+
+80B	bb.1.bb2:
+	; predecessors: %bb.0
+	  successors: %bb.3(0x80000000); %bb.3(100.00%)
+
+96B	  %5:gpr32common = ADDWri %5:gpr32common, 1, 0
+112B	  B %bb.3
+
+128B	bb.2.bb1:
+	; predecessors: %bb.0
+	  successors: %bb.3(0x80000000); %bb.3(100.00%)
+
+144B	  ADJCALLSTACKDOWN 0, 0, implicit-def dead $sp, implicit $sp
+160B	  $w0 = COPY %5:gpr32common
+176B	  BL @print, <regmask $fp $lr $wzr $wzr_hi $xzr $b8 $b9 $b10 $b11 $b12 $b13 $b14 $b15 $d8 $d9 $d10 $d11 $d12 $d13 $d14 $d15 $h8 $h9 $h10 $h11 $h12 $h13 $h14 $h15 $s8 $s9 $s10 $s11 and 92 more...>, implicit-def dead $lr, implicit $sp, implicit $w0, implicit-def $sp
+192B	  ADJCALLSTACKUP 0, 0, implicit-def dead $sp, implicit $sp
+208B	  B %bb.3
+
+224B	bb.3.bb3:
+	; predecessors: %bb.1, %bb.2
+
+240B	  $w0 = COPY %5:gpr32common
+256B	  RET_ReallyLR implicit $w0
+
+```
+
+可以看到`%5 [32r,96r:1)[96r,128B:0)[128B,224B:1)[224B,240r:2) 0@96r 1@32r 2@224B-phi`，就是phi所占用的live range。
+由此，live intervals实现了精细的reaching define和liveness信息构建，这也是后续regalloc的基础。
+
+----
+
 
 例子:
 ```c
@@ -549,7 +657,7 @@ Compiler returned: 0
 
 ```
 
-可以看到Vninfo是以 ssa形式进行命名的. 每次def,每次live in 都是一个新的ID.
+可以看到Vninfo是以ssa形式进行命名的.
 
 ## liveness
 

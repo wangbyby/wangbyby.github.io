@@ -1,5 +1,6 @@
 ---
 title: "dead code elimination介绍"
+date: 2025-03-22
 
 ---
 

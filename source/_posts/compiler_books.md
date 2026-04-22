@@ -1,6 +1,6 @@
 ---
 title: 编译器相关书籍
-
+date: 2026-04-22
 ---
 
 
@@ -12,12 +12,11 @@ title: 编译器相关书籍
 4. LLVM Code Generation A deep dive into compiler backend development (Quentin Colombet)
 5. 编译器设计 (Engineering a Compiler)
 6. https://gcc.godbolt.org/  https://alive2.llvm.org/ce/
-
+7. 龙书：大而全，前端太多了，导致后端没耐心看了，其实后端优化写的挺好的
 
 ---------
 # 次一级的书
 
-龙书：大而全，但优化方面细节太少了
 虎书：之前买过一本，感觉越后面越糊
 llvm cookbook：入门书
 

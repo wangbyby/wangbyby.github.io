@@ -1,9 +1,8 @@
-
-
 ---
 title: "flash attention"
 date: 2026-4-17
 draft: true
+hidden: true
 ---
 
 https://zhuanlan.zhihu.com/p/668888063

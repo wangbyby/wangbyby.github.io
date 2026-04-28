@@ -287,7 +287,7 @@ llvm实现做了一些优化，domtree遍历优化，特殊情况处理等。
 
 ----
 
-# SSA destruction
+# 2. SSA destruction
 
 如何销毁SSA形式，删除phinode。
 

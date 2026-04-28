@@ -866,7 +866,7 @@ class LiveInterval : public LiveRange {
     class SubRange : public LiveRange {
     public:
       SubRange *Next = nullptr;
-      LaneBitmask LaneMask;
+      LaneBitmask LaneMask; // subreg
 
       /// Constructs a new SubRange object.
       SubRange(LaneBitmask LaneMask) : LaneMask(LaneMask) {}

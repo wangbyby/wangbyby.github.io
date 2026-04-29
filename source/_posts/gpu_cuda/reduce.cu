@@ -43,8 +43,7 @@ __global__ void reduce_naive(float *A, float *dst, int N) {
   for (int offset = ThreadDim / 2; offset > 0; offset >>= 1) {
     if (threadIdx.x < offset)
       s_data[threadIdx.x] += s_data[threadIdx.x + offset];
-      __syncthreads();
-
+    __syncthreads();
   }
 
   if (threadIdx.x == 0) {
@@ -52,32 +51,42 @@ __global__ void reduce_naive(float *A, float *dst, int N) {
   }
 }
 
-__inline__ 
-__device__ float wardpShuffle(float val){
-    for(int offset=16;offset > 0; offset>>=1){
-        val += __shfl_down_sync(0xffffffff, val, offset);
-    }
-    return val;
+__inline__ __device__ float wardpShuffle(float val) {
+  for (int offset = 16; offset > 0; offset >>= 1) {
+    val += __shfl_down_sync(0xffffffff, val, offset);
+  }
+  return val;
 }
 
-__global__ void reduce_warp(float *A, float* dst, int N){
+__global__ void reduce_warp(float *A, float *dst, int N) {
 
-    int tid = threadIdx.x;
-      int idx = blockDim.x * blockIdx.x + threadIdx.x;
+  int tid = threadIdx.x;
+  int idx = blockDim.x * blockIdx.x + threadIdx.x;
 
-    float sum = 0.0f;
-    if(tid < N){
-        sum += A[idx];
-    }
+  float sum = 0.0f;
+  if (idx < N) {
+    sum = A[idx];
+  }
+  sum = wardpShuffle(sum);
+
+  __shared__ float s_data[32];
+  int warp_id = tid / 32;
+  int lane = tid % 32;
+  if (lane == 0)
+    s_data[warp_id] = sum;
+  __syncthreads();
+
+  // first warp to reduce s_data
+  if (warp_id == 0) {
+    int warp_count = (blockDim.x + 31) / 32;  // block 中的 warp 数量
+
+    float sum =  (lane< warp_count)   ?s_data[lane]:0.0f;
     sum = wardpShuffle(sum);
 
-    int lane = tid / 32;
-    int widx = tid % 32;
-
-    if(widx == 0){
-        atomicAdd(&dst[blockIdx.x], sum);
+    if (lane == 0) {
+      dst[blockIdx.x] = sum;
     }
-
+  }
 }
 
 int main() {
@@ -98,17 +107,17 @@ int main() {
   cudaMalloc(&Res, sizeof(float) * BlockDim(N));
 
   cudaMemcpy(GA, A, sizeof(float) * N, cudaMemcpyHostToDevice);
-  cudaMemset(Res, 0, sizeof(float) * BlockDim(N));
 
   dim3 block(512);
   dim3 grid((N + 511) / 512);
 
+  cudaMemset(Res, 0, sizeof(float) * BlockDim(N));
   LAUNCH(reduce_naive, grid, block, GA, Res, N);
   cudaMemcpy(res, Res, sizeof(float) * BlockDim(N), cudaMemcpyDeviceToHost);
   check_nth(res, 10);
 
-
-    LAUNCH(reduce_warp, grid, block, GA, Res, N);
+  cudaMemset(Res, 0, sizeof(float) * BlockDim(N));
+  LAUNCH(reduce_warp, grid, block, GA, Res, N);
   cudaMemcpy(res, Res, sizeof(float) * BlockDim(N), cudaMemcpyDeviceToHost);
   check_nth(res, 10);
 

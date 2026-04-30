@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+  <title>
+    
+
+    typo
+  </title>
+
+  
+  <link rel="shortcut icon" href="/icon.svg">
+  
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  
+
+  <!-- 字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/root.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<link rel="stylesheet" href="/css/post.css">
+
+<meta name="generator" content="Hexo 8.1.1"><link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+</head>
+
+<body>
+  <header class="header">
+  <section class="header-container">
+    <a class="logo" href="/">Hexo</a>
+    <ul class="nav">
+      
+      <li><a href="/archives">archives</a></li>
+      
+      <li><a href="/about">about</a></li>
+      
+    </ul>
+  </section>
+</header>
+  <main class="main">
+    <div class="post-list">
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/03/22/llvm/regalloc_llvm2/">llvm寄存器分配2</a>
+    <div class="post-item-summary">
+      greedyTODO
+
+      <a class="read-more" href="/2026/03/22/llvm/regalloc_llvm2/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.03.22</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/03/22/llvm/regalloc_llvm1/">llvm寄存器分配1</a>
+    <div class="post-item-summary">
+      接上一篇。列举下RABasic需要的数据结构
+
+LiveRegMatrix， LiveIntervals， VirtRegMap， LiveIntervalUnion
+
+LiveIntervals
+
+
+核心的查询接口。
+
+VirtRegIntervals Map&lt;reg, LiveIntervals&gt; 
+RegMaskSlots 是用来储存哪些指令用了regmask（基本是call），在判断干涉时用到，按照slotindex排序
+RegMaskBits，查询的ca
+      <a class="read-more" href="/2026/03/22/llvm/regalloc_llvm1/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.03.22</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/03/22/llvm/regalloc_llvm0/">llvm寄存器分配0</a>
+    <div class="post-item-summary">
+      依赖的分析
+value number
+live range(liveness). 这块挺复杂的.
+machine dom tree&#x2F;machine loop
+block frequency
+
+value number
+VNInfo 能处理ssa和non-ssa格式的mir
+
+一个例子：
+12345678910111213141516171819; llc %s -march=aarch64 --stop-after=register-coalescer declar
+      <a class="read-more" href="/2026/03/22/llvm/regalloc_llvm0/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.03.22</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/03/18/allintext/">博客尽量用text格式</a>
+    <div class="post-item-summary">
+      感觉图片太多太麻烦了，想尽量在text格式下写。
+web图形处理上面有几种解决方案:
+
+用ascii绘制，有点太累了
+markdown提供的mermaid和graphviz。mermaid简单但是功能有限，graphviz功能强大。
+TikZ，更加专业，https://github.com/kisonecat/tikzjax https://github.com/jhuix-js/tikzjax
+base64嵌入，体积会比较大。
+
+关键是文本表示是在框架下已经生成为stati
+      <a class="read-more" href="/2026/03/18/allintext/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.03.18</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/03/15/llvm/llvm_build/">win构建llvm</a>
+    <div class="post-item-summary">
+      构建llvm
+以win11+git bash为例
+
+配置
+
+1234567891011set -xexport COMPILER_DIR=D:/LLVM/bin/ # 替换为一个已有compiler的pathexport CC=$COMPILER_DIR/clang.exeexport CXX=$COMPILER_DIR/clang++.exeexport RC_COMPILER=$LLVM_DIR/llvm-rc.exemkdir -p buildmkdir -p inst
+      <a class="read-more" href="/2026/03/15/llvm/llvm_build/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.03.15</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/03/12/diary/2026-3-12/">2026-3-12记</a>
+    <div class="post-item-summary">
+      记录下这一年半编译器开发的经验。
+
+编译通过，但是运行结果错误。
+
+如何检查？
+
+先减小问题规模，整出一个最小可复现用例
+检查pipeline，parser结果，ir pass结果，isel结果，reg alloc，stack frame等。
+verify的重要性，每个不同格式的中间表示转换处需要有verify，保证其流入和流出结果的合法性。
+重复上述步骤，直到问题解决。
+
+既然是pipeline模型，那么衔接需要处理好。需重点注意。
+
+编译器挂掉了，没其他信息。一般是各种空
+      <a class="read-more" href="/2026/03/12/diary/2026-3-12/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.03.12</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/03/10/llvm/llvm_schedule/">LLVM Inst Schedule</a>
+    <div class="post-item-summary">
+      LLVM 指令调度有作用在SelectionDAG和MachineInstr的指令调度。并将调度策略和调度框架分离。
+结构
+SDep代表一个依赖关系
+SUnit代表一个基本单元。
+ScheduleDAG，调度DAG的基类。https://llvm.org/doxygen/classllvm_1_1ScheduleDAG.html
+
+ScheduleDAGSDNodes作用在SelectionDAG上的。主要在SelectionDAGISel::CodeGenAndEmitDA
+      <a class="read-more" href="/2026/03/10/llvm/llvm_schedule/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.03.10</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/02/20/regalloc/">寄存器分配简介</a>
+    <div class="post-item-summary">
+      
+寄存器分配简介
+
+前置技术 Liveness Analysis， Live Interval, reaching defineLiveness Analysis经典的数据流分析, 后向(倒序)分析.
+1234live_out[b] = ⋃ (live_in[s] for s ∈ succ(b))live_in[b]  = use[b] ∪ (live_out[b] − def[b])
+
+live intervalllvm依赖这个，就是 def-use 分段.
+reachin
+      <a class="read-more" href="/2026/02/20/regalloc/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.02.20</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2025/10/10/loop%E4%BB%8B%E7%BB%8D/">loop 介绍</a>
+    <div class="post-item-summary">
+      循环，重要性不必多说。
+llvm与循环相关的优化有很多：
+
+
+loop unroll and jam : 循环展开+ 合并
+loop unroll
+SCEV
+loop invariant code motion
+loop interchange
+loop rotation
+loop splitting
+loop fusion
+loop unswitching
+loop vectorization….
+
+
+
+从非结构化的CFG中识别loop：
+识别循环迭代变量
+
+
+Loop 定
+      <a class="read-more" href="/2025/10/10/loop%E4%BB%8B%E7%BB%8D/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2025.10.10</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2025/09/20/SSA/">SSA构建和销毁</a>
+    <div class="post-item-summary">
+      
+phinode的创建和消除
+
+1. SSA构建算法
+依赖：
+
+dom tree
+DF
+llvm ir基础知识
+
+
+对以下c代码
+1234int foo(int a)&#123;	int b = a;	return b;&#125;
+clang会生成类似这种IR
+12345678define i32 @foo(i32 %a)&#123;	%pa = alloc i32	%pb = alloc i32	store %a, %pa	store %a, %pb	%b1 = load
+      <a class="read-more" href="/2025/09/20/SSA/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2025.09.20</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+</div>
+
+
+<div class="paginator">
+  <a class="extend prev" rel="prev" href="/">&lt;</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/">&gt;</a>
+</div>
+
+  </main>
+  <footer class="footer">
+  
+  <span>Copyright © 2024 typo</span>
+  
+</footer>
+  
+<script src="/js/theme.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+  <title>
+    
+    使用zola设置github.io作为个人博客 丨
+    
+
+    typo
+  </title>
+
+  
+  <link rel="shortcut icon" href="/icon.svg">
+  
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  
+  <link id="theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.css">
+  <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
+  
+
+  <!-- 字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/root.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<link rel="stylesheet" href="/css/post.css">
+
+<meta name="generator" content="Hexo 8.1.1"><link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+</head>
+
+<body>
+  <header class="header">
+  <section class="header-container">
+    <a class="logo" href="/">Hexo</a>
+    <ul class="nav">
+      
+      <li><a href="/archives">archives</a></li>
+      
+      <li><a href="/about">about</a></li>
+      
+    </ul>
+  </section>
+</header>
+  <main class="main">
+    <article class="post">
+  
+  <div class="post-title">使用zola设置github.io作为个人博客</div>
+  <div class="post-meta">
+    <div class="date">2026 April 30th</div>
+    <div class="tags">
+      
+    </div>
+  </div>
+  
+
+  <main class="post-content"><p>步骤如下：</p>
+<ol>
+<li>本地安装zola</li>
+<li>运行<code>zola init &lt;your blog dir&gt;</code>, like <code>zola init myblog</code></li>
+</ol>
+<p>目录如下：</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">myblog/</span><br><span class="line">├── config.toml          # 配置文件</span><br><span class="line">├── content/             # 内容文件（Markdown）</span><br><span class="line">├── sass/                # Sass 样式文件（可选）</span><br><span class="line">├── static/              # 静态资源（图片、CSS、JS 等）</span><br><span class="line">├── templates/           # 模板文件（HTML）</span><br><span class="line">└── themes/              # 主题文件（可选）</span><br></pre></td></tr></table></figure>
+<ul>
+<li>创建的博客就放在content下面。</li>
+<li>图片放在static&#x2F;images下面，在博客里用<code>![test](/images/&lt;xxx&gt;.png)</code>引用</li>
+<li>博客格式：<code>+++</code>一定要有</li>
+</ul>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">title = &quot;我的第一篇文章&quot;</span><br><span class="line">---</span><br><span class="line"></span><br><span class="line">## hello zola</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li><code>cd &lt;your blog dir&gt; &amp;&amp; git init</code>将这些目录加到版本控制进去。</li>
+<li>添加自定义模板<code>teplates/index.html</code>和<code>teplates/page.html</code></li>
+<li>创建github actions: <code>.github/workflows/deploy.yml</code><br>内容如下：</li>
+</ol>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">Deploy</span> <span class="string">Zola</span> <span class="string">site</span> <span class="string">to</span> <span class="string">GitHub</span> <span class="string">Pages</span></span><br><span class="line"></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">master</span>  <span class="comment"># 触发部署的分支</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">deploy:</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Checkout</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">actions/checkout@v3</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Install</span> <span class="string">Zola</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">|</span></span><br><span class="line"><span class="string">          wget https://github.com/getzola/zola/releases/download/v0.19.2/zola-v0.19.2-x86_64-unknown-linux-gnu.tar.gz</span></span><br><span class="line"><span class="string">          tar -xzf zola-v0.19.2-x86_64-unknown-linux-gnu.tar.gz</span></span><br><span class="line"><span class="string">          sudo mv zola /usr/local/bin</span></span><br><span class="line"><span class="string"></span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Build</span> <span class="string">site</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">zola</span> <span class="string">build</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Deploy</span> <span class="string">to</span> <span class="string">GitHub</span> <span class="string">Pages</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">shalzz/zola-deploy-action@master</span></span><br><span class="line">        <span class="attr">env:</span></span><br><span class="line">            <span class="attr">PAGES_BRANCH:</span> <span class="string">gh-pages</span></span><br><span class="line">            <span class="attr">TOKEN:</span> <span class="string">$&#123;&#123;</span> <span class="string">secrets.GITHUB_TOKEN</span> <span class="string">&#125;&#125;</span></span><br></pre></td></tr></table></figure>
+<p>这里注意分支。</p>
+<ul>
+<li>master分支是我们源文件的分支</li>
+<li>gh-pages分支是制品分支</li>
+</ul>
+<blockquote>
+<p>参考：<a target="_blank" rel="noopener" href="https://www.getzola.org/documentation/deployment/github-pages/#github-actions">zola github-actions</a></p>
+</blockquote>
+<ol start="6">
+<li><p>推送到 <code>git@github.com:&lt;username&gt;/&lt;username&gt;.github.io.git</code></p>
+</li>
+<li><p>设置github pages:<br><img src="/static/images/image-github-pages.png" alt="alt text"></p>
+</li>
+<li><p>如果上传图片，设置<code>config.toml</code>中<code>base_url = &quot;https://&lt;username&gt;.github.io/&quot;</code></p>
+</li>
+<li><p>等待github actions完成，就OK了</p>
+</li>
+</ol>
+<hr>
+<h1 id="部署静态网址到服务器"><a href="#部署静态网址到服务器" class="headerlink" title="部署静态网址到服务器"></a>部署静态网址到服务器</h1><p>需要</p>
+<ol>
+<li>一个云服务器，带ip地址&#x2F;域名的</li>
+</ol>
+<p>步骤如下</p>
+<ol>
+<li>在云服务器安装zola（pre-build比较好）</li>
+<li><strong>在服务器安装nginx</strong></li>
+<li>拉取博客代码到服务器：<code>git clone example_blog@git</code></li>
+<li>运行命令<code>cd example_blog &amp;&amp; zola build -u &quot;&quot;</code>. 构建好的文件在<code>example_blog/public</code>下</li>
+<li><code>cp public /var/www/static-site -r</code></li>
+<li>给nginx权限并确保自己有权限<code>sudo chown -R $USER:$USER /var/www/static-site &amp;&amp; sudo chown -R www-data:www-data /var/www/static-site &amp;&amp; sudo chmod -R 755 /var/www/static-site</code></li>
+<li>修改nginx的配置文件（ai生成的）<br>- 新建配置文件<code>/etc/nginx/sites-available/static-site.conf</code><br>- 添加内容</li>
+</ol>
+<pre><code><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">  listen 80;</span><br><span class="line">  server_name example.com;  # 替换为你的域名或服务器 IP（如 192.168.1.100）</span><br><span class="line"></span><br><span class="line">  root /var/www/static-site;  # 静态文件根目录</span><br><span class="line">  index index.html index.htm;  # 默认索引文件</span><br><span class="line"></span><br><span class="line">  location / &#123;</span><br><span class="line">      try_files $uri $uri/ =404;  # 按顺序查找文件或目录，否则返回 404</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  # 可选：启用 Gzip 压缩</span><br><span class="line">  gzip on;</span><br><span class="line">  gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+- 设置符号链接`sudo ln -s /etc/nginx/sites-available/static-site.conf /etc/nginx/sites-enabled/`
+</code></pre>
+<ol start="8">
+<li>重启nginx  <code>sudo nginx -t &amp;&amp; sudo systemctl reload nginx</code></li>
+</ol>
+<blockquote>
+<p>坑</p>
+<ol>
+<li>本来打算用nginx做为动态转发，服务器后台跑个zola serve，结果发现zola build出来的都有端口<code>ip:1111/xxx</code>. 此路不通</li>
+<li>然后就用静态网页。最开始有403，权限问题。然后发现博客的url链接是<code>ip/ip/xxx</code>, 用<code>zola build -u &quot;&quot;</code>可以处理掉。然后就OK啦</li>
+</ol>
+</blockquote>
+<hr>
+<p>之前用hexo，但图片上传太麻烦了:( zola图片上传也没有那么方便。<br>ai真好用，特别是这种琐碎的安装部署。</p>
+</main>
+
+</article>
+
+
+<script src="/js/highlight.js"></script>
+
+  </main>
+  <footer class="footer">
+  
+  <span>Copyright © 2024 typo</span>
+  
+</footer>
+  
+<script src="/js/theme.js"></script>
+
+</body>
+
+</html>

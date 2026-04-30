@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+  <title>
+    
+    GVN-PRE简介 丨
+    
+
+    typo
+  </title>
+
+  
+  <link rel="shortcut icon" href="/icon.svg">
+  
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  
+  <link id="theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.css">
+  <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
+  
+
+  <!-- 字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/root.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<link rel="stylesheet" href="/css/post.css">
+
+<meta name="generator" content="Hexo 8.1.1"><link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+</head>
+
+<body>
+  <header class="header">
+  <section class="header-container">
+    <a class="logo" href="/">Hexo</a>
+    <ul class="nav">
+      
+      <li><a href="/archives">archives</a></li>
+      
+      <li><a href="/about">about</a></li>
+      
+    </ul>
+  </section>
+</header>
+  <main class="main">
+    <article class="post">
+  
+  <div class="post-title">GVN-PRE简介</div>
+  <div class="post-meta">
+    <div class="date">2026 April 8th</div>
+    <div class="tags">
+      
+    </div>
+  </div>
+  
+
+  <main class="post-content"><blockquote>
+<p>参考 <a target="_blank" rel="noopener" href="https://cs.wheaton.edu/~tvandrun/writings/cc04.pdf">https://cs.wheaton.edu/~tvandrun/writings/cc04.pdf</a><br>只考虑表达式，基于SSA</p>
+</blockquote>
+<p>GVN是将Global value numbering，而PRE是Partial redundancy elimination。一个是值编号，一个是部分冗余消除。</p>
+<p>GVN的思路简单，按照domtree进行深度优先遍历，记录每个block中表达式的编号，如果重复就删除重复的。<br>对如下ir</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">define i32 @foo(i32 %a, i32 %cond)&#123;</span><br><span class="line">bb0:</span><br><span class="line">    %add = add i32 %a, %a</span><br><span class="line">    %c = icmp eq %cond, 0</span><br><span class="line">    br %c, %bb1, %bb2</span><br><span class="line">bb1:</span><br><span class="line">    %a2 = add i32 %a, %a</span><br><span class="line">    br %bb3</span><br><span class="line"></span><br><span class="line">bb2:</span><br><span class="line">    %a3 = add i32 %a, 1</span><br><span class="line">    br %bb3</span><br><span class="line">bb3:</span><br><span class="line">    %phia = phi(%a2, %a3)</span><br><span class="line">    ret i32 %phia</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>按照domtree进行遍历，bb0,bb1,bb2,bb3，有以下结果。<br>%a: v0<br>%cond: v1<br>%add: v2<br>%c:  v3<br>%a2: v2 (same as %add)<br>%a3: v4<br>%phia: v5</p>
+<p>所以说%a2是冗余的值，可以删除掉。</p>
+<hr>
+<p>PRE更加复杂一些。</p>
+<p>在这个例子2里面，%sa和%a2重复，但bb1不dom bb3. 单纯GVN没法处理。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">define i32 @bar(i32 %a, i32 %cond)&#123;</span><br><span class="line">bb0:</span><br><span class="line">    %c = icmp eq %cond, 0</span><br><span class="line">    br %c, %bb1, %bb2</span><br><span class="line">bb1:</span><br><span class="line">    %a2 = add i32 %a, %a</span><br><span class="line">    br %bb3</span><br><span class="line"></span><br><span class="line">bb2:</span><br><span class="line">    %a3 = add i32 %a, 3</span><br><span class="line">    br %bb3</span><br><span class="line">bb3:</span><br><span class="line">    %phia = phi(%a2, %a3)</span><br><span class="line">    %sa = add i32 %a, %a</span><br><span class="line">    ret i32 %phia</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>PRE的算法有些复杂，这里先不介绍了。</p>
+<h1 id="GVN-PRE"><a href="#GVN-PRE" class="headerlink" title="GVN-PRE"></a>GVN-PRE</h1><p>结合二者的优点，GVN简单，PRE能力强。<br>针对上面的例子2，如果用逆向数据流分析，将%sa从bb3放到bb0底部，那么也就能消除%a2了。</p>
+<p>不过首先需要确定可用集合。就是在每个block最后，有哪些表达式可用。<br>还是按照GVN的思路，根据domtree遍历。<br>所以数据流公式就是</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">AVAIL_IN[b] = AVAIL_OUT[dom(b)]</span><br><span class="line">AVAIL_OUT[b] = AVAIL_IN[b] U PHI_GEN[b] U TMP_EXP[b]</span><br><span class="line"></span><br><span class="line">PHI_GEN就是phinode，TMP_EXP是b中定义的非phi节点。</span><br></pre></td></tr></table></figure>
+
+<p>然后因为需要逆向数据流分析（回想下liveness），所以</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">ANTIC_OUT[b] = </span><br><span class="line">    - for i in succ(b) &#123; ∧ ANTIC_IN[i] &#125; if |succ(b)| &gt; 1</span><br><span class="line">    - phi_translate( ANTIC_IN[succ(b)] ) if |succ(b)| =1</span><br><span class="line"></span><br><span class="line">ANTIC_IN[b] = clean(ANTIC_OUT[b] U EXP_GEN[b] - TMP_GEN[b])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">EXP_GEN就是value和指令右侧表达式的集合。</span><br><span class="line">clean会删除掉依赖被killed的值</span><br></pre></td></tr></table></figure>
+<p>所以算法就是</p>
+<ol>
+<li>计算avail和antic集合</li>
+<li>处理hoist<br> for b in blocks{<br>     if preds(b) &lt; 2<br>         continue<br>     for e in ANTIC_IN[b]:<br>         if e is avaiable in at least one predcessor, then insert e into predecessors where not avaiable.<br> }<br> (还有sink和hoist相反，原理类似)</li>
+<li>删除冗余表达式</li>
+</ol>
+</main>
+
+</article>
+
+
+<script src="/js/highlight.js"></script>
+
+  </main>
+  <footer class="footer">
+  
+  <span>Copyright © 2024 typo</span>
+  
+</footer>
+  
+<script src="/js/theme.js"></script>
+
+</body>
+
+</html>

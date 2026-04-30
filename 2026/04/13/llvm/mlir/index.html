@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+  <title>
+    
+    [WIP]mlir 丨
+    
+
+    typo
+  </title>
+
+  
+  <link rel="shortcut icon" href="/icon.svg">
+  
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  
+  <link id="theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.css">
+  <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
+  
+
+  <!-- 字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/root.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<link rel="stylesheet" href="/css/post.css">
+
+<meta name="generator" content="Hexo 8.1.1"><link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+</head>
+
+<body>
+  <header class="header">
+  <section class="header-container">
+    <a class="logo" href="/">Hexo</a>
+    <ul class="nav">
+      
+      <li><a href="/archives">archives</a></li>
+      
+      <li><a href="/about">about</a></li>
+      
+    </ul>
+  </section>
+</header>
+  <main class="main">
+    <article class="post">
+  
+  <div class="post-title">[WIP]mlir</div>
+  <div class="post-meta">
+    <div class="date">2026 April 13th</div>
+    <div class="tags">
+      
+    </div>
+  </div>
+  
+
+  <main class="post-content"><blockquote>
+<p>学习下mlir</p>
+</blockquote>
+<h1 id="1-基本概念"><a href="#1-基本概念" class="headerlink" title="1. 基本概念"></a>1. 基本概念</h1><ul>
+<li>树形结构。Op，Region，Block，Op</li>
+<li>使用基本块参数代替phi</li>
+<li>Operand结构<ol>
+<li>操作</li>
+<li>返回值：OpResult</li>
+<li>regions</li>
+<li>attrDict，属性字典</li>
+<li>参数：OpOperand, 经典的Use结构</li>
+</ol>
+</li>
+<li>Value是ValueImpl*的包装，type+kind</li>
+<li>Type, TypeStorage* 实际上是AbstractType* &#x3D; {dialect, interface, typeid,name, subtypes}</li>
+<li>interface vs trait<ul>
+<li>interface想要语义描述和具体Op&#x2F;dialect解耦, 给pass提供api<br>  使用主要是   <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Dialect *dialect = ...;</span><br><span class="line"><span class="keyword">if</span> (DialectInlinerInterface *interface = <span class="built_in">dyn_cast</span>&lt;DialectInlinerInterface&gt;(dialect)) &#123;</span><br><span class="line"><span class="comment">// The dialect has provided an implementation of this interface.</span></span><br><span class="line">...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>trait 更加静态，为attrs&#x2F;ops&#x2F;types 提供公共信息，比如说side effects<br>  <code>Operation *op = ..; if (op-&gt;hasTrait&lt;MyTrait&gt;()) ...</code></li>
+</ul>
+</li>
+</ul>
+<h1 id="2-添加dialect"><a href="#2-添加dialect" class="headerlink" title="2. 添加dialect"></a>2. 添加dialect</h1><h1 id="3-添加pass"><a href="#3-添加pass" class="headerlink" title="3. 添加pass"></a>3. 添加pass</h1><h1 id="4-pattern-rewriter"><a href="#4-pattern-rewriter" class="headerlink" title="4. pattern rewriter"></a>4. pattern rewriter</h1><h1 id="5-converter"><a href="#5-converter" class="headerlink" title="5. converter"></a>5. converter</h1><h1 id="ref"><a href="#ref" class="headerlink" title="ref"></a>ref</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/KEKE046/mlir-tutorial">https://github.com/KEKE046/mlir-tutorial</a></li>
+</ul>
+</main>
+
+</article>
+
+
+<script src="/js/highlight.js"></script>
+
+  </main>
+  <footer class="footer">
+  
+  <span>Copyright © 2024 typo</span>
+  
+</footer>
+  
+<script src="/js/theme.js"></script>
+
+</body>
+
+</html>

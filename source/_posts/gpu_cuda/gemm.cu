@@ -1,488 +1,205 @@
 
-/*
-    C(m,n) = A(m,k) * B(k,n)
-
-    block(32, 32)
-    grid( (m+31)/32, (n+31)/32 )
-
-*/
 
 #include <chrono>
-#include <cmath>
+#include <cstddef>
 #include <cstdio>
-#include <mma.h>
-#include <cuda_fp16.h>
 #include <cstdlib>
+#include <limits>
+#include <sys/cdefs.h>
 
-using namespace nvcuda;
+#define LAUNCH(name, grid, block, ...)                                         \
+  do {                                                                         \
+    auto start = std::chrono::high_resolution_clock::now();                    \
+    {                                                                          \
+      name<<<grid, block>>>(__VA_ARGS__);                                      \
+      cudaDeviceSynchronize();                                                 \
+    }                                                                          \
+    auto end = std::chrono::high_resolution_clock::now();                      \
+    auto time_ms =                                                             \
+        std::chrono::duration<double, std::milli>(end - start).count();        \
+    printf(#name " using time %fms\n", time_ms);                               \
+  } while (0)
 
-#define TILE 32
+void check_nth(const float *A, size_t n) {
+  for (int i = 0; i < n; i++) {
+    printf("%f, ", A[i]);
+  }
+  printf("\n");
+}
 
-__global__ void gemm_naive(float *C, float *A, float *B, int M, int N, int K) {
+#define BLOCK_SIZE 32
+#define TILE_SIZE 16
+
+__global__ void gemm(float *out, float *A /*M*K*/, float *B /*K*N*/, int M,
+                     int N, int K) {
+
   int col = blockIdx.x * blockDim.x + threadIdx.x;
   int row = blockIdx.y * blockDim.y + threadIdx.y;
 
   if (row < M && col < N) {
     float sum = 0.0f;
     for (int i = 0; i < K; i++) {
-      sum += A[K * row + i] * B[N * i + col];
+      sum += A[row * K + i] * B[i * N + col];
     }
-    C[N * row + col] = sum;
+
+    out[row * N + col] = sum;
   }
 }
 
-// 3ms for float sB[TILE][TILE];
+__global__ void gemm_shared(float *out, float *A /*M*K*/, float *B /*K*N*/, int M,
+                          int N, int K) {
 
-template<const int TILING = TILE>
-__global__ void gemm_sharedmem(float *C, float *A, float *B, int M, int N,
-                               int K) {
+  __shared__ float s_a[TILE_SIZE][TILE_SIZE];
+  __shared__ float s_b[TILE_SIZE][TILE_SIZE];
+
   int tx = threadIdx.x;
   int ty = threadIdx.y;
-
-  int col = blockIdx.x * blockDim.x + tx;
-  int row = blockIdx.y * blockDim.y + ty;
-
-  __shared__ float sB[TILE][TILING];
-  __shared__ float sA[TILE][TILING];
+  int col = blockIdx.x * TILE_SIZE + threadIdx.x;
+  int row = blockIdx.y * TILE_SIZE + threadIdx.y;
 
   float sum = 0.0f;
-  for(int t=0; t< (K+TILE-1)/TILE;t++ ){
-    if(row<M && (t*TILE + tx) < K ){
-      sA[ty][tx] = A[row*K+t*TILE+ tx];
-    }else{
-      sA[ty][tx] = 0.0f;
+  for (int k = 0; k < K; k += TILE_SIZE) {
+    if (row < M && k + tx < K) {
+      s_a[ty][tx] = A[row * K + k + tx];
     }
-
-    if(col <N && (t*TILE+ty) < K ){
-      sB[ty][tx] = B[ (t*TILE+ty)*N + col];
-    }else{
-      sB[ty][tx] = 0.0f;
-    }
-    __syncthreads();
-    for(int i=0;i<TILE;i++){
-      sum += sA[ty][i]* sB[i][tx];
+    if (col < N && k + ty < K) {
+      s_b[ty][tx] = B[(k + ty) * N + col];
     }
     __syncthreads();
 
-  }                         
+    for (int i = 0; i < TILE_SIZE; i++) {
+      sum += s_a[ty][i] * s_b[i][tx];
+    }
+    __syncthreads();
+  }
 
   if (row < M && col < N) {
-    C[row*N + col] = sum;
-  }
-
-}
-
-
-
-__global__ void gemm_register(float *C, float *A, float *B,
-                              int M, int N, int K) {
-
-    int tx = threadIdx.x;
-    int ty = threadIdx.y;
-
-    // 每个线程负责 2×2
-    int row = blockIdx.y * TILE + ty * 2;
-    int col = blockIdx.x * TILE + tx * 2;
-
-    __shared__ float sA[TILE][TILE+1];
-    __shared__ float sB[TILE][TILE+1];
-
-    float sum00 = 0, sum01 = 0;
-    float sum10 = 0, sum11 = 0;
-
-    for (int t = 0; t < K; t += TILE) {
-
-        // load A（每线程加载2行）
-        if (row < M && t + tx < K)
-            sA[ty*2][tx] = A[row * K + (t + tx)];
-        else
-            sA[ty*2][tx] = 0;
-
-        if (row+1 < M && t + tx < K)
-            sA[ty*2+1][tx] = A[(row+1) * K + (t + tx)];
-        else
-            sA[ty*2+1][tx] = 0;
-
-        // load B（每线程加载2列）
-        if (col < N && t + ty < K)
-            sB[ty][tx*2] = B[(t + ty) * N + col];
-        else
-            sB[ty][tx*2] = 0;
-
-        if (col+1 < N && t + ty < K)
-            sB[ty][tx*2+1] = B[(t + ty) * N + col+1];
-        else
-            sB[ty][tx*2+1] = 0;
-
-        __syncthreads();
-
-        for (int i = 0; i < TILE; i++) {
-            float a0 = sA[ty*2][i];
-            float a1 = sA[ty*2+1][i];
-
-            float b0 = sB[i][tx*2];
-            float b1 = sB[i][tx*2+1];
-
-            sum00 += a0 * b0;
-            sum01 += a0 * b1;
-            sum10 += a1 * b0;
-            sum11 += a1 * b1;
-        }
-
-        __syncthreads();
-    }
-
-    // 写回
-    if (row < M && col < N)
-        C[row * N + col] = sum00;
-
-    if (row < M && col+1 < N)
-        C[row * N + col+1] = sum01;
-
-    if (row+1 < M && col < N)
-        C[(row+1) * N + col] = sum10;
-
-    if (row+1 < M && col+1 < N)
-        C[(row+1) * N + col+1] = sum11;
-}
-
-
-#define TILE 32
-#define WARP_SIZE 32
-
-__global__ void gemm_warp(float *C, const float *A, const float *B,
-                          int M, int N, int K) {
-
-    // 一个 block 256 threads → 8 warps
-    int warp_id = threadIdx.x / WARP_SIZE;
-    int lane = threadIdx.x % WARP_SIZE;
-
-    // block tile 起点
-    int block_row = blockIdx.y * TILE;
-    int block_col = blockIdx.x * TILE;
-
-    // 每个 warp 负责 16×16
-    int warp_row = warp_id / 2; // 0~3
-    int warp_col = warp_id % 2; // 0~1
-
-    int row = block_row + warp_row * 16;
-    int col = block_col + warp_col * 16;
-
-    // lane 映射到 4×4 子块
-    int lane_row = lane / 8;   // 0~3
-    int lane_col = lane % 8;   // 0~7
-
-    float regC[4][2] = {0}; // 每线程算 4×2
-
-    __shared__ float sA[TILE][TILE];
-    __shared__ float sB[TILE][TILE];
-
-    for (int t = 0; t < K; t += TILE) {
-
-        // load shared memory
-        int tx = threadIdx.x % TILE;
-        int ty = threadIdx.x / TILE;
-
-        if (block_row + ty < M && t + tx < K)
-            sA[ty][tx] = A[(block_row + ty) * K + (t + tx)];
-        else
-            sA[ty][tx] = 0;
-
-        if (t + ty < K && block_col + tx < N)
-            sB[ty][tx] = B[(t + ty) * N + (block_col + tx)];
-        else
-            sB[ty][tx] = 0;
-
-        __syncthreads();
-
-        // compute
-        for (int k = 0; k < TILE; k++) {
-
-            float a[4];
-            float b[2];
-
-            #pragma unroll
-            for (int i = 0; i < 4; i++)
-                a[i] = sA[warp_row * 16 + lane_row * 4 + i][k];
-
-            #pragma unroll
-            for (int j = 0; j < 2; j++)
-                b[j] = sB[k][warp_col * 16 + lane_col * 2 + j];
-
-            #pragma unroll
-            for (int i = 0; i < 4; i++)
-                for (int j = 0; j < 2; j++)
-                    regC[i][j] += a[i] * b[j];
-        }
-
-        __syncthreads();
-    }
-
-    // write back
-    #pragma unroll
-    for (int i = 0; i < 4; i++) {
-        int r = row + lane_row * 4 + i;
-
-        #pragma unroll
-        for (int j = 0; j < 2; j++) {
-            int c = col + lane_col * 2 + j;
-
-            if (r < M && c < N)
-                C[r * N + c] = regC[i][j];
-        }
-    }
-}
-
-
-void cpu_gemm(float *C, float *A, float *B, int M, int N, int K) {
-  for (int r = 0; r < M; r++) {
-    for (int col = 0; col < N; col++) {
-      float sum = 0.0f;
-      for (int k = 0; k < K; k++) {
-        sum += A[r * K + k] * B[N * k + col];
-      }
-      C[r * N + col] = sum;
-    }
+    out[row * N + col] = sum;
   }
 }
 
-#define COUNT_TIME(name, code)                                                 \
-  do {                                                                         \
-    auto start = std::chrono::high_resolution_clock::now();                    \
-    code;                                                                      \
-    auto end = std::chrono::high_resolution_clock::now();                      \
-    double time_ms =                                                           \
-        std::chrono::duration<double, std::milli>(end - start).count();        \
-    printf(#name " using time %fms\n", time_ms);                               \
-  } while (0)
+__global__ void gemm_shared_bank(float *out, float *A /*M*K*/, float *B /*K*N*/, int M,
+                          int N, int K) {
 
-bool nearly_equal(float a, float b) {
-  float abs_err = fabs(a - b);
-  float rel_err = abs_err / fmaxf(1.0f, fmaxf(fabs(a), fabs(b)));
-  return abs_err < 1e-5f || rel_err < 1e-5f;
-}
+  __shared__ float s_a[TILE_SIZE][TILE_SIZE];
+  __shared__ float s_b[TILE_SIZE][TILE_SIZE+1];
 
-bool check(const float *A, const float *B, const int len) {
-  for (int i = 0; i < len; i++) {
-    if (!nearly_equal(A[i], B[i])) {
-      printf("Found diff value at %d, %f vs %f ", i, A[i], B[i]);
-      return false;
+  int tx = threadIdx.x;
+  int ty = threadIdx.y;
+  int col = blockIdx.x * TILE_SIZE + threadIdx.x;
+  int row = blockIdx.y * TILE_SIZE + threadIdx.y;
+
+  float sum = 0.0f;
+  for (int k = 0; k < K; k += TILE_SIZE) {
+    if (row < M && k + tx < K) {
+      s_a[ty][tx] = A[row * K + k + tx];
     }
+    if (col < N && k + ty < K) {
+      s_b[ty][tx] = B[(k + ty) * N + col];
+    }
+    __syncthreads();
+
+    for (int i = 0; i < TILE_SIZE; i++) {
+      sum += s_a[ty][i] * s_b[i][tx];
+    }
+    __syncthreads();
   }
-  return true;
+
+  if (row < M && col < N) {
+    out[row * N + col] = sum;
+  }
 }
 
-__global__ void gemm_tensorcore(half *A, half *B, float *C,
-                               int M, int N, int K) {
-
-    // warp id
-    int warpId = (blockIdx.x * blockDim.x + threadIdx.x) / 32;
-    int laneId = threadIdx.x % 32;
-
-    // 每个 warp 负责 16×16 tile
-    int warpM = (blockIdx.y * blockDim.y + threadIdx.y);
-    int warpN = (blockIdx.x * blockDim.x + threadIdx.x) / 32;
-
-    int row = warpM * 16;
-    int col = warpN * 16;
-
-    // fragments
-    wmma::fragment<wmma::matrix_a, 16, 16, 16, half, wmma::row_major> a_frag;
-    wmma::fragment<wmma::matrix_b, 16, 16, 16, half, wmma::row_major> b_frag;
-    wmma::fragment<wmma::accumulator, 16, 16, 16, float> c_frag;
-
-    wmma::fill_fragment(c_frag, 0.0f);
-
-    for (int k = 0; k < K; k += 16) {
-
-        if (row < M && col < N) {
-            wmma::load_matrix_sync(a_frag, A + row * K + k, K);
-            wmma::load_matrix_sync(b_frag, B + k * N + col, N);
-
-            wmma::mma_sync(c_frag, a_frag, b_frag, c_frag);
+__global__ void gemm_double_buffer(float *out, float *A, float *B, int M, int N, int K) {
+    __shared__ float s_a[2][TILE_SIZE][TILE_SIZE];
+    __shared__ float s_b[2][TILE_SIZE][TILE_SIZE];
+    
+    int tx = threadIdx.x, ty = threadIdx.y;
+    int row = blockIdx.y * TILE_SIZE + ty;
+    int col = blockIdx.x * TILE_SIZE + tx;
+    
+    float sum = 0.0f;
+    
+    // 预加载第一块
+    int write_stage = 0;
+    if (row < M && tx < K) s_a[write_stage][ty][tx] = A[row * K + tx];
+    if (col < N && ty < K) s_b[write_stage][ty][tx] = B[ty * N + col];
+    __syncthreads();
+    
+    for (int k = TILE_SIZE; k <= K; k += TILE_SIZE) {
+        int read_stage = write_stage;
+        write_stage ^= 1;  // 切换到下一块
+        
+        // 异步加载下一块
+        if (row < M && k + tx < K) 
+            s_a[write_stage][ty][tx] = A[row * K + k + tx];
+        if (col < N && k + ty < K) 
+            s_b[write_stage][ty][tx] = B[(k + ty) * N + col];
+        
+        // 计算当前块
+        for (int i = 0; i < TILE_SIZE; i++) {
+            sum += s_a[read_stage][ty][i] * s_b[read_stage][i][tx];
         }
+        __syncthreads();  // 确保加载完成
     }
-
-    if (row < M && col < N) {
-        wmma::store_matrix_sync(C + row * N + col,
-                                c_frag, N, wmma::mem_row_major);
-    }
+    
+    // 处理最后一块（如果需要）
+    if (row < M && col < N) out[row * N + col] = sum;
 }
-
 
 int main() {
-  const int M = 1024;
-  const int N = M;
-  const int K = N;
+  int rows = 1024;
+  int cols = 1024;
+  const int input_size = rows * cols;
 
-  float *A = (float *)calloc(M * K, sizeof(float));
-  float *B = (float *)calloc(N * K, sizeof(float));
-  float *CPU_RES = (float *)calloc(M * N, sizeof(float));
+  float *A = (float *)calloc(input_size, sizeof(float));
+  float *B = (float *)calloc(input_size, sizeof(float));
+  float *res = (float *)calloc((input_size), sizeof(float));
 
-  // init these value.
-
-  for (int i = 0; i < M * K; i++) {
+  for (int i = 0; i < input_size; i++) {
     A[i] = i;
-  }
-  for (int i = 0; i < N * K; i++) {
     B[i] = i;
   }
 
-  // COUNT_TIME(cpu_gemm, { cpu_gemm(CPU_RES, A, B, M, N, K); });
+  float *gpuA;
+  float *gpuB;
+  float *gpu_out;
+  cudaMalloc(&gpuA, sizeof(float) * input_size);
+  cudaMalloc(&gpuB, sizeof(float) * input_size);
+  cudaMalloc(&gpu_out, sizeof(float) * input_size);
 
-  float *GA;
-  float *GB;
-  float *GC;
+  cudaMemcpy(gpuA, A, sizeof(float) * input_size, cudaMemcpyHostToDevice);
+  cudaMemcpy(gpuB, B, sizeof(float) * input_size, cudaMemcpyHostToDevice);
 
-  cudaMalloc(&GA, sizeof(float) * M * K);
-  cudaMalloc(&GB, sizeof(float) * N * K);
-  cudaMalloc(&GC, sizeof(float) * M * N);
+  dim3 block(BLOCK_SIZE, BLOCK_SIZE);
+  dim3 grid((rows + BLOCK_SIZE - 1) / BLOCK_SIZE,
+            (cols + BLOCK_SIZE - 1) / BLOCK_SIZE);
 
-  cudaMemcpy(GA, A, sizeof(float) * M * K, cudaMemcpyHostToDevice);
-  cudaMemcpy(GB, B, sizeof(float) * K * N, cudaMemcpyHostToDevice);
-  float *GPU_RES = (float *)malloc(sizeof(float) * M * N);
+  cudaMemset(gpu_out, 0, sizeof(float) * (input_size));
+  LAUNCH(gemm, grid, block, gpu_out, gpuA, gpuB, rows, cols, rows);
+  cudaMemcpy(res, gpu_out, sizeof(float) * (input_size),
+             cudaMemcpyDeviceToHost);
+  check_nth(res, 10);
 
-  dim3 block(32, 32);
-  dim3 grid((N + 31) / 32, (M + 31) / 32);
-  {
-    auto start = std::chrono::high_resolution_clock::now();
-    gemm_naive<<<grid, block>>>(GC, GA, GB, M, N, K);
-    cudaDeviceSynchronize();
-    auto end = std::chrono::high_resolution_clock::now();
+  dim3 block2(TILE_SIZE, TILE_SIZE);
+  dim3 grid2( (rows+TILE_SIZE-1)/TILE_SIZE, (cols+TILE_SIZE-1)/TILE_SIZE );
+  cudaMemset(gpu_out, 0, sizeof(float) * (input_size));
+  LAUNCH(gemm_shared, grid2, block2, gpu_out, gpuA, gpuB, rows, cols, rows);
+  cudaMemcpy(res, gpu_out, sizeof(float) * (input_size),
+             cudaMemcpyDeviceToHost);
+  check_nth(res, 10);
 
-    double time_ms =
-        std::chrono::duration<double, std::milli>(end - start).count();
-    printf("gemm naive using time %fms\n", time_ms);
+  cudaMemset(gpu_out, 0, sizeof(float) * (input_size));
+  LAUNCH(gemm_shared_bank, grid2, block2, gpu_out, gpuA, gpuB, rows, cols, rows);
+  cudaMemcpy(res, gpu_out, sizeof(float) * (input_size),
+             cudaMemcpyDeviceToHost);
+  check_nth(res, 10);
 
-    // 26ms
+  cudaMemset(gpu_out, 0, sizeof(float) * (input_size));
+  LAUNCH(gemm_double_buffer, grid2, block2, gpu_out, gpuA, gpuB, rows, cols, rows);
+  cudaMemcpy(res, gpu_out, sizeof(float) * (input_size),
+             cudaMemcpyDeviceToHost);
+  check_nth(res, 10);
 
-    cudaMemcpy(GPU_RES, GC, sizeof(float) * M * N, cudaMemcpyDeviceToHost);
-    check(GPU_RES, CPU_RES, M * N);
-  }
-
-  {
-    cudaMemset(GC, 0, sizeof(float) * M * N);
-    auto start = std::chrono::high_resolution_clock::now();
-    gemm_sharedmem<<<grid, block>>>(GC, GA, GB, M, N, K);
-    cudaDeviceSynchronize();
-    auto end = std::chrono::high_resolution_clock::now();
-
-    double time_ms =
-        std::chrono::duration<double, std::milli>(end - start).count();
-    printf("gemm naive using time %fms\n", time_ms);
-
-    // 26ms
-
-    cudaMemcpy(GPU_RES, GC, sizeof(float) * M * N, cudaMemcpyDeviceToHost);
-    check(GPU_RES, CPU_RES, M * N);
-  }
-
-  {
-    cudaMemset(GC, 0, sizeof(float) * M * N);
-    auto start = std::chrono::high_resolution_clock::now();
-    gemm_sharedmem<TILE+1><<<grid, block>>>(GC, GA, GB, M, N, K);
-    cudaDeviceSynchronize();
-    auto end = std::chrono::high_resolution_clock::now();
-
-    double time_ms =
-        std::chrono::duration<double, std::milli>(end - start).count();
-    printf("gemm naive using time %fms\n", time_ms);
-
-    // 26ms
-
-    cudaMemcpy(GPU_RES, GC, sizeof(float) * M * N, cudaMemcpyDeviceToHost);
-    check(GPU_RES, CPU_RES, M * N);
-  }
-
-
-  {
-    dim3 block(16, 16);
-    dim3 grid((N + 31) / 32, (M + 31) / 32);
-
-    cudaMemset(GC, 0, sizeof(float) * M * N);
-    auto start = std::chrono::high_resolution_clock::now();
-    gemm_register<<<grid, block>>>(GC, GA, GB, M, N, K);
-    cudaDeviceSynchronize();
-    auto end = std::chrono::high_resolution_clock::now();
-
-    double time_ms =
-        std::chrono::duration<double, std::milli>(end - start).count();
-    printf("gemm register using time %fms\n", time_ms);
-
-    // 26ms
-
-    cudaMemcpy(GPU_RES, GC, sizeof(float) * M * N, cudaMemcpyDeviceToHost);
-    check(GPU_RES, CPU_RES, M * N);
-  }
-
-  {
-   dim3 block(256); // 8 warps
-  dim3 grid((N+31)/32, (M+31)/32);
-
-
-    cudaMemset(GC, 0, sizeof(float) * M * N);
-    auto start = std::chrono::high_resolution_clock::now();
-    gemm_warp<<<grid, block>>>(GC, GA, GB, M, N, K);
-    cudaDeviceSynchronize();
-    auto end = std::chrono::high_resolution_clock::now();
-
-    double time_ms =
-        std::chrono::duration<double, std::milli>(end - start).count();
-    printf("gemm warp using time %fms\n", time_ms);
-
-    // 26ms
-
-    cudaMemcpy(GPU_RES, GC, sizeof(float) * M * N, cudaMemcpyDeviceToHost);
-    check(GPU_RES, CPU_RES, M * N);
-  }
-
-  {
-     {
-    half *hA, *hB;
-    cudaMalloc(&hA, sizeof(half) * M * K);
-    cudaMalloc(&hB, sizeof(half) * K * N);
-
-    int totalA = M * K;
-    int totalB = K * N;
-
-    float2half_kernel<<<(totalA+255)/256, 256>>>(hA, GA, totalA);
-    float2half_kernel<<<(totalB+255)/256, 256>>>(hB, GB, totalB);
-
-    dim3 block(32, 4);
-    dim3 grid(N / 16, M / 16);
-
-    cudaMemset(GC, 0, sizeof(float) * M * N);
-
-    auto start = std::chrono::high_resolution_clock::now();
-
-    gemm_tensorcore<<<grid, block>>>(hA, hB, GC, M, N, K);
-
-    cudaDeviceSynchronize();
-
-    auto end = std::chrono::high_resolution_clock::now();
-
-    double time_ms =
-        std::chrono::duration<double, std::milli>(end - start).count();
-
-    printf("gemm tensor core using time %fms\n", time_ms);
-
-    cudaMemcpy(GPU_RES, GC, sizeof(float) * M * N, cudaMemcpyDeviceToHost);
-
-    check(GPU_RES, CPU_RES, M * N);
-
-    cudaFree(hA);
-    cudaFree(hB);
-}
-
-
-  }
-
-  cudaFree(GA);
-  cudaFree(GB);
-  cudaFree(GC);
-
-  free(A);
-  free(B);
-  free(CPU_RES);
   return 0;
 }

@@ -8,9 +8,10 @@ date: 2025-05-10
 
 ## 1. 数据结构与内存布局
 
-内存结构如下：
 
 问题是指针指向关系是前向还是后向？
+后向，其实是双向。
+operands指向def。但是SDUse其实是个双向链表。
 
 
 ## 2. SelectionDAG 结构介绍
@@ -30,6 +31,11 @@ then:
 [[llvm_SDNode_draw.excalidraw]]
 >SDUse和llvm::Use同理
 
+- chain：用于规定执行顺序
+- glue：表示紧密耦合，不能被调度分开。比如ADC进位。
+- EntryToken 作为block开始
+- `-mllvm -debug-only=isel`打印文本形态的DAG
+- `-mllvm -view-isel-dags`打印dot格式的DAG，GraphRoot节点其实是Printer添加的。
 
 N：参考
 

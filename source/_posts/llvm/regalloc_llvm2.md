@@ -40,12 +40,14 @@ tryEvict
 
 - trySplit分为几部分，
 1. 寄存器仅在单个block中，使用tryLocalSplit+tryInstructionSplit处理
-2. 在Split2阶段前，用tryRegionSplit。        
-    - calculateRegionSplitCost
-        calculateRegionSplitCostAroundReg
-            addSplitConstraints构建hopfield网络
-            grow Region中进行迭代
-    - doRegionSplit
+2. 在Split2阶段前，用tryRegionSplit。
+    - calculateRegionSplitCost，calculateRegionSplitCostAroundReg
+        addSplitConstraints构建hopfield网络（`lib/CodeGen/SpillPlacement.cpp` ），
+        growRegion中进行迭代，在calcGlobalSplitCost中最终计算。
+        实际是计算E的最小值$E = -\sum_n V_n * ( B_n + \sum_{ (n, m) linked by b} V_m * F_b )$
+$V_{n}$是神经元状态+1/-1，$B_{n}$是神经元偏置，$F_{b}$是边b的强度。
+对应在llvm中E就是总代价，V是基本块决策，B是本地代价，F是边代价，最后得出BestCand。
+    - doRegionSplit。根据上一部的BestCand进行拆分。
 
 3. 最后用tryBlockSplit。将live range拆分为single block块。
 

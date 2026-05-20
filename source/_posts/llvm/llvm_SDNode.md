@@ -37,6 +37,17 @@ then:
 - `-mllvm -debug-only=isel`打印文本形态的DAG
 - `-mllvm -view-isel-dags`打印dot格式的DAG，GraphRoot节点其实是Printer添加的。
 
+## 3. 实现
+
+1. ir to dag
+2. legalize type
+3. legalize opcode
+4. dag isel。DoInstructionSelection,Select,X86DAGToDAGISel::Select,SelectCode(in inc file)，SelectCodeCommon
+指令选择的核心，match table就是一个字节码，SelectCodeCommon类似虚拟机解释器。
+
+5. schedule
+6. emit
+
 N：参考
 
 [^1]: [MacLean-Fargnoli-ABeginnersGuide-to-SelectionDAG.pdf](https://llvm.org/devmtg/2024-10/slides/tutorial/MacLean-Fargnoli-ABeginnersGuide-to-SelectionDAG.pdf)

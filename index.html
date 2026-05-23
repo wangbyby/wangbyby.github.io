@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+  <title>
+    
+
+    typo
+  </title>
+
+  
+  <link rel="shortcut icon" href="/icon.svg">
+  
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  
+
+  <!-- 字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/root.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<link rel="stylesheet" href="/css/post.css">
+
+<meta name="generator" content="Hexo 8.1.1"><link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+</head>
+
+<body>
+  <header class="header">
+  <section class="header-container">
+    <a class="logo" href="/">Hexo</a>
+    <ul class="nav">
+      
+      <li><a href="/archives">archives</a></li>
+      
+      <li><a href="/about">about</a></li>
+      
+    </ul>
+  </section>
+</header>
+  <main class="main">
+    <div class="post-list">
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/05/23/inline_asm/">inline asm</a>
+    <div class="post-item-summary">
+      1234567asm volatile (    &quot;asm template&quot;    : output_operands        // ← 第一个冒号后    : input_operands         // ← 第二个冒号后    : clobbers               // ← 第三个冒号后);
+
+
+example:
+1234567891011121314151617181920212223#include &lt;stdint.
+      <a class="read-more" href="/2026/05/23/inline_asm/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.05.23</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/05/23/inline/">inline</a>
+    <div class="post-item-summary">
+      内联,重要性不必多说。
+基本思路不是很难，
+
+module层面构建call graph
+根据call graph根据SCC（强连通分量
+遍历SCC尝试内联（注意递归函数） 在同一个SCC里面就是一个递归链
+决定内联时候：
+clone被内联函数，用valuemap[old] &#x3D; new记录映射情况。
+被clone内容加入caller中
+更新下ssa的def use chain。
+
+
+
+主要是各种cost和gain的评估，各种启发式。
+
+      <a class="read-more" href="/2026/05/23/inline/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.05.23</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/05/23/deploy/">使用zola设置github.io作为个人博客</a>
+    <div class="post-item-summary">
+      步骤如下：
+
+本地安装zola
+运行zola init &lt;your blog dir&gt;, like zola init myblog
+
+目录如下：
+1234567myblog/├── config.toml          # 配置文件├── content/             # 内容文件（Markdown）├── sass/                # Sass 样式文件（可选）├── static/              # 静态资源（图片
+      <a class="read-more" href="/2026/05/23/deploy/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.05.23</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/05/23/gpu_cuda/wsl/">wsl2 &amp; cuda</a>
+    <div class="post-item-summary">
+      wsl2 NCU 错误
+Failed to initialize the profiler
+
+1234==ERROR== An error was reported by the counter measurement library:==ERROR== Failed to initialize the profiler: LibraryNotLoaded. Check that a compatible driver library is loaded.==PROF== T
+      <a class="read-more" href="/2026/05/23/gpu_cuda/wsl/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.05.23</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/05/22/wsl/">wsl安装</a>
+    <div class="post-item-summary">
+      
+打开win10相关功能。控制面板 -》 程序 -〉启用或关闭windwos功能-》windwos虚拟机健康 
+安装wsl
+安装对应linux发行版。下载appx解压，解压x64，运行exe
+
+
+      <a class="read-more" href="/2026/05/22/wsl/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.05.22</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/05/20/diary/2026-3-12/">2026-3-12记</a>
+    <div class="post-item-summary">
+      记录下这一年半编译器开发的经验。
+
+编译通过，但是运行结果错误。
+
+如何检查？
+
+先减小问题规模，整出一个最小可复现用例
+检查pipeline，parser结果，ir pass结果，isel结果，reg alloc，stack frame等。
+verify的重要性，每个不同格式的中间表示转换处需要有verify，保证其流入和流出结果的合法性。
+重复上述步骤，直到问题解决。
+
+既然是pipeline模型，那么衔接需要处理好。需重点注意。
+
+编译器挂掉了，没其他信息。一般是各种空
+      <a class="read-more" href="/2026/05/20/diary/2026-3-12/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.05.20</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/05/15/pytorch/">pytorch学习</a>
+    <div class="post-item-summary">
+      参考：https://datawhalechina.github.io/thorough-pytorch/index.html
+第一章介绍下ai，ml(垃圾邮件拦截)，dl（猫狗识别）。现在则是llm。指标介绍：如何评估结果
+比如对一个二分类来说。            实际          阳性 阴性预测：阳性  TP  FP     阴性  FN  TN
+overall-accuracy &#x3D; (TP+TN)&#x2F;(TP+FP+FN+TN)average-
+      <a class="read-more" href="/2026/05/15/pytorch/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.05.15</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/05/14/books3/">人月神话读后感</a>
+    <div class="post-item-summary">
+      项目管理必看。
+
+没有银弹
+
+乐观主义vs悲观主义。计划需求比计划生产更简单
+
+流程图&#x2F;文档&#x2F;实现
+
+
+文档能和实际同步就不错了。
+
+
+      <a class="read-more" href="/2026/05/14/books3/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.05.14</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/05/09/agent/">agent</a>
+    <div class="post-item-summary">
+      最近在看一个开源的agent项目。有一个问题当输入”find files with ABCD name”时候，agent开始进行web search。由此，我不太确定agent是如何理解输入意图的。
+其实是把输入提示词发给llm，让llm决定使用不使用工具调用。然后agent执行工具调用，然后拼接结果再给llm发过去。
+
+终端打印颜色注意背景残留，先恢复默认背景再换行解决printf(&quot;%-*s&quot;, width, text); /*用空格填充整行*/   
+      <a class="read-more" href="/2026/05/09/agent/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.05.09</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+  <section class="post-item">
+    <a class="post-item-title" href="/2026/05/09/parser/">cpp template parser</a>
+    <div class="post-item-summary">
+      众所周知c&#x2F;cpp的parser是上下文相关，边语义边语法。cpp11之前经典parser笑话A&lt;A&lt;int&gt;&gt; a.
+123456template&lt;typename T&gt;struct Container &#123;&#125;;int main() &#123;    Container&lt;Container&lt;int&gt;&gt; obj;  // 错误!&#125;
+看下clang的输出clang++ test-
+      <a class="read-more" href="/2026/05/09/parser/"> ... </a>
+    </div>
+    <div class="post-item-extra">
+      <div class="date">2026.05.09</div>
+      <div class="tags">
+        
+      </div>
+    </div>
+  </section>
+  
+</div>
+
+
+<div class="paginator">
+  <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/">&gt;</a>
+</div>
+
+  </main>
+  <footer class="footer">
+  
+  <span>Copyright © 2024 typo</span>
+  
+</footer>
+  
+<script src="/js/theme.js"></script>
+
+</body>
+
+</html>

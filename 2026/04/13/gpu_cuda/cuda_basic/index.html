@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+  <title>
+    
+    [WIP]基础cuda 丨
+    
+
+    typo
+  </title>
+
+  
+  <link rel="shortcut icon" href="/icon.svg">
+  
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  
+  <link id="theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.css">
+  <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
+  
+
+  <!-- 字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/root.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<link rel="stylesheet" href="/css/post.css">
+
+<meta name="generator" content="Hexo 8.1.1"><link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+</head>
+
+<body>
+  <header class="header">
+  <section class="header-container">
+    <a class="logo" href="/">Hexo</a>
+    <ul class="nav">
+      
+      <li><a href="/archives">archives</a></li>
+      
+      <li><a href="/about">about</a></li>
+      
+    </ul>
+  </section>
+</header>
+  <main class="main">
+    <article class="post">
+  
+  <div class="post-title">[WIP]基础cuda</div>
+  <div class="post-meta">
+    <div class="date">2026 April 13th</div>
+    <div class="tags">
+      
+    </div>
+  </div>
+  
+
+  <main class="post-content"><ul>
+<li>线程组织 grid，block，thread。<br>  一个kernel启动的所有线程称为grid。block是调度单元。<code>&lt;&lt;&lt;网格大小，线程块大小&gt;&gt;&gt;</code></li>
+<li>实际硬件：GPU，SM （stream multiprocessor），SP。<br>  SM： local register file + shared memory+L1 cache+ a number of functional units that perform computations<br>  一个block的所有thread都在一个SM上执行。</li>
+</ul>
+<p>CUDA要求以任意顺序执行blocks，即一个thread block不应该依赖其他block（同grid）。</p>
+<ul>
+<li><p>warp<br>block内部，threads以32个为一warp组织起来。warp是以SIMT模型执行kernel。该warp的线程执行相同的kernel code，但可以有不同branch。<br>When different threads in a warp follow different code paths, this is sometimes called warp divergence。 </p>
+</li>
+<li><p>内存层次</p>
+<ul>
+<li>DRAM，global memory 可被所有块所有线程访问， HBM<br>  coalesced global memory access：<br>  global memory以32bytes为单位访问称为memory transaction。<br>  warp会将内部线程的内存访问映射为memory transactions。</li>
+<li>同一个block内的线程访问，on chip memory，每个SM独占的。<ul>
+<li><p>shared memory<br>  32banks x 32bits&#x2F;cycle<br>  bank confilct：multi threads in the same warp attempt to access different elements in the same bank.</p>
+</li>
+<li><p>L1 cache</p>
+</li>
+<li><p>register file<br>  如果某个thread block需要的寄存器大于寄存器个数，该kernel不可启动</p>
+</li>
+<li><p>常量内存</p>
+</li>
+</ul>
+</li>
+<li>local memory 每个thread独有的。实际上在global memory上面。<ul>
+<li>特别是register spilling</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>thread hierarchy</p>
+</li>
+</ul>
+<blockquote>
+<p>The threads of a block are linearized predictably: the first index x moves the fastest,<br>followed by y and then z. This means that in the linearization of a thread indices, consecutive values of threadIdx.x indicate consecutive threads, threadIdx.y has a stride of blockDim.x, and threadIdx.z has a stride of blockDim.x * blockDim.y. </p>
+</blockquote>
+<p><code>linear_id = threadIdx.x + threadIdx.y * blockDim.x + threadId.z * blockDim.x * blockDim.y</code></p>
+<p>从threadid到 memory address的方式是自己选择的。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">__global__ <span class="type">void</span> <span class="title">transpose_shared</span><span class="params">(<span class="type">float</span>* out, <span class="type">const</span> <span class="type">float</span>* in, <span class="type">int</span> w, <span class="type">int</span> h)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    __shared__ <span class="type">float</span> tile[TILE][TILE + <span class="number">1</span>];  <span class="comment">// +1 避免 bank conflict</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// ===== 1. 全局坐标 =====</span></span><br><span class="line">    <span class="type">int</span> x = blockIdx.x * TILE + threadIdx.x;</span><br><span class="line">    <span class="type">int</span> y = blockIdx.y * TILE + threadIdx.y;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ===== 2. global → shared（连续读）=====</span></span><br><span class="line">    <span class="keyword">if</span> (x &lt; w &amp;&amp; y &lt; h) &#123;</span><br><span class="line">        tile[threadIdx.y][threadIdx.x] = in[y * w + x];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    __syncthreads();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ===== 3. 交换 blockIdx（关键！！！）=====</span></span><br><span class="line">    <span class="type">int</span> new_x = blockIdx.y * TILE + threadIdx.x;</span><br><span class="line">    <span class="type">int</span> new_y = blockIdx.x * TILE + threadIdx.y;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ===== 4. shared → global（连续写）=====</span></span><br><span class="line">    <span class="keyword">if</span> (new_x &lt; h &amp;&amp; new_y &lt; w) &#123;</span><br><span class="line">        out[new_y * h + new_x] = tile[threadIdx.x][threadIdx.y];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</main>
+
+</article>
+
+
+<script src="/js/highlight.js"></script>
+
+  </main>
+  <footer class="footer">
+  
+  <span>Copyright © 2024 typo</span>
+  
+</footer>
+  
+<script src="/js/theme.js"></script>
+
+</body>
+
+</html>

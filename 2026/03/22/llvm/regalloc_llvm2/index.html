@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+  <title>
+    
+    llvm寄存器分配2 丨
+    
+
+    typo
+  </title>
+
+  
+  <link rel="shortcut icon" href="/icon.svg">
+  
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  
+  <link id="theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.css">
+  <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
+  
+
+  <!-- 字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/root.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<link rel="stylesheet" href="/css/post.css">
+
+<meta name="generator" content="Hexo 8.1.1"><link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+</head>
+
+<body>
+  <header class="header">
+  <section class="header-container">
+    <a class="logo" href="/">Hexo</a>
+    <ul class="nav">
+      
+      <li><a href="/archives">archives</a></li>
+      
+      <li><a href="/about">about</a></li>
+      
+    </ul>
+  </section>
+</header>
+  <main class="main">
+    <article class="post">
+  
+  <div class="post-title">llvm寄存器分配2</div>
+  <div class="post-meta">
+    <div class="date">2026 March 22nd</div>
+    <div class="tags">
+      
+    </div>
+  </div>
+  
+
+  <main class="post-content"><h1 id="greedy"><a href="#greedy" class="headerlink" title="greedy"></a>greedy</h1><p>greedy以RegallocBase为基础。<br>每个要被分配的虚拟寄存器有这几个阶段。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="title class_">LiveRangeStage</span> &#123;</span><br><span class="line">  RS_New,       <span class="comment">// 初始状态</span></span><br><span class="line">  RS_Assign,    <span class="comment">// 尝试分配一个物理寄存器</span></span><br><span class="line">  RS_Split,     <span class="comment">// 分配失败，拆分生命周期来尝试分配</span></span><br><span class="line">  RS_Split2,    <span class="comment">// Split分配失败，再次拆分尝试分配</span></span><br><span class="line">  RS_Spill,     <span class="comment">// 分配失败，溢出到memory</span></span><br><span class="line">  RS_Done       <span class="comment">// 结束</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>greedy核心就是细化live range分配，然后用高优先级抢占低优先级分配。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">selectOrSplitImpl</span><br><span class="line">    tryAssign</span><br><span class="line">    tryEvict</span><br><span class="line">    trySplit</span><br><span class="line">    tryLastChanceRecoloring</span><br><span class="line">    spill</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>tryEvict</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tryEvict</span><br><span class="line">    tryFindEvictionCandidate <span class="comment">// 尝试找到能被抢占的物理寄存器</span></span><br><span class="line">    evictInterference        <span class="comment">// 更新信息</span></span><br></pre></td></tr></table></figure>
+<p>实际由DefaultEvictionAdvisor实现在llvm&#x2F;lib&#x2F;CodeGen&#x2F;RegAllocEvictionAdvisor.cpp中。</p>
+<ul>
+<li>trySplit分为几部分，</li>
+</ul>
+<ol>
+<li>寄存器仅在单个block中，使用tryLocalSplit+tryInstructionSplit处理</li>
+<li>在Split2阶段前，用tryRegionSplit。<ul>
+<li>calculateRegionSplitCost，calculateRegionSplitCostAroundReg<br>  addSplitConstraints构建hopfield网络（<code>lib/CodeGen/SpillPlacement.cpp</code> ），<br>  growRegion中进行迭代，在calcGlobalSplitCost中最终计算。<br>  实际是计算E的最小值$E &#x3D; -\sum_n V_n * ( B_n + \sum_{ (n, m) linked by b} V_m * F_b )$</li>
+</ul>
+</li>
+</ol>
+<p>$V_{n}$是神经元状态+1&#x2F;-1，$B_{n}$是神经元偏置，$F_{b}$是边b的强度。<br>对应在llvm中E就是总代价，V是基本块决策，B是本地代价，F是边代价，最后得出BestCand。<br>    - doRegionSplit。根据上一部的BestCand进行拆分。</p>
+<ol start="3">
+<li>最后用tryBlockSplit。将live range拆分为single block块。</li>
+</ol>
+<ul>
+<li>tryLastChanceRecoloring</li>
+</ul>
+<p>todo</p>
+<ul>
+<li>spill。llvm&#x2F;lib&#x2F;CodeGen&#x2F;InlineSpiller.cpp:InlineSpiller<ol>
+<li>collectRegsToSpill</li>
+<li>reMaterializeAll 重物化，就是重新计算一遍该值。</li>
+<li>spillAll</li>
+</ol>
+</li>
+</ul>
+</main>
+
+</article>
+
+
+<script src="/js/highlight.js"></script>
+
+  </main>
+  <footer class="footer">
+  
+  <span>Copyright © 2024 typo</span>
+  
+</footer>
+  
+<script src="/js/theme.js"></script>
+
+</body>
+
+</html>

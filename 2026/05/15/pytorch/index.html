@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+  <title>
+    
+    pytorch学习 丨
+    
+
+    typo
+  </title>
+
+  
+  <link rel="shortcut icon" href="/icon.svg">
+  
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  
+  <link id="theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.css">
+  <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
+  
+
+  <!-- 字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/root.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<link rel="stylesheet" href="/css/post.css">
+
+<meta name="generator" content="Hexo 8.1.1"><link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+</head>
+
+<body>
+  <header class="header">
+  <section class="header-container">
+    <a class="logo" href="/">Hexo</a>
+    <ul class="nav">
+      
+      <li><a href="/archives">archives</a></li>
+      
+      <li><a href="/about">about</a></li>
+      
+    </ul>
+  </section>
+</header>
+  <main class="main">
+    <article class="post">
+  
+  <div class="post-title">pytorch学习</div>
+  <div class="post-meta">
+    <div class="date">2026 May 15th</div>
+    <div class="tags">
+      
+    </div>
+  </div>
+  
+
+  <main class="post-content"><p>参考：<a target="_blank" rel="noopener" href="https://datawhalechina.github.io/thorough-pytorch/index.html">https://datawhalechina.github.io/thorough-pytorch/index.html</a></p>
+<h1 id="第一章"><a href="#第一章" class="headerlink" title="第一章"></a>第一章</h1><p>介绍下ai，ml(垃圾邮件拦截)，dl（猫狗识别）。现在则是llm。<br>指标介绍：如何评估结果</p>
+<p>比如对一个二分类来说。<br>            实际<br>          阳性 阴性<br>预测：阳性  TP  FP<br>     阴性  FN  TN</p>
+<p>overall-accuracy &#x3D; (TP+TN)&#x2F;(TP+FP+FN+TN)<br>average-accuracy &#x3D; 每一类预测正确的样本&#x2F;该类总体数量<br>                 &#x3D; 1&#x2F;2* (TP&#x2F;(TP+FN) + TN&#x2F;(FP+TN))<br>kappa系数，一致性检验的指标<br>recall，召回率 &#x3D; 实际为正样本并且被正确识别为正样本&#x2F;实际正样本<br>              &#x3D; TP&#x2F;(TP+FN)<br>  即判断模型识别所有正样本的能力<br>precision，精准率 &#x3D; 预测正确的正样本&#x2F;全部预测为正样本 &#x3D; TP&#x2F;(TP+FP)</p>
+<p>F1 &#x3D; recall和precision的加权平均 &#x3D; 2* P*R &#x2F; (P+R)<br>PR曲线：对比模型性能。<br>    曲线一个点就是某个阈值下，模型将大于该阈值的结果判定为正样本。<br>置信度：大于置信度为正样本<br>IOU &#x3D; 交集&#x2F;并集</p>
+<p>AP（average precision）&#x3D; PR曲线的面积<br>mAP：所有类AP值的平均值。</p>
+<h1 id="第二章"><a href="#第二章" class="headerlink" title="第二章"></a>第二章</h1><p>推荐uv安装</p>
+<p>tensor（张量）就是向量矩阵的推广。</p>
+<ol>
+<li>创建: tensor, ones, zeros, arange,linespace, rand，rand</li>
+<li>操作：</li>
+</ol>
+<ul>
+<li>索引，返回与原数据共享内存</li>
+</ul>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line">x = torch.rand(<span class="number">4</span>,<span class="number">3</span>)</span><br><span class="line"><span class="comment"># 取第二列</span></span><br><span class="line"><span class="built_in">print</span>(x[:, <span class="number">1</span>]) </span><br><span class="line"><span class="built_in">print</span>(x[<span class="number">0</span>,:]) <span class="comment">#第一行</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>维度变化:<ul>
+<li>view, <code>x.view(-1,6)</code> -1就是auto的意思。但是只有一个维度可以是-1</li>
+<li>reshape: 可能会返回view，也可能是拷贝值，</li>
+</ul>
+</li>
+<li>广播机制</li>
+</ul>
+<p>当形状不同的tensor按元素运算时，可能会触发广播。先复制，再按元素运算</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">a = torch.arange(<span class="number">0</span>, <span class="number">3</span>).view(<span class="number">3</span>,<span class="number">1</span>)</span><br><span class="line">b = torch.arange(<span class="number">10</span>, <span class="number">12</span>).view(<span class="number">1</span>,<span class="number">2</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(a)</span><br><span class="line"><span class="built_in">print</span>(b)</span><br><span class="line"><span class="built_in">print</span>(a+b)</span><br><span class="line"></span><br><span class="line"><span class="comment"># tensor([[0],</span></span><br><span class="line"><span class="comment">#         [1],</span></span><br><span class="line"><span class="comment">#         [2]])</span></span><br><span class="line"><span class="comment"># tensor([[10, 11]])</span></span><br><span class="line"><span class="comment"># tensor([[10, 11],</span></span><br><span class="line"><span class="comment">#         [11, 12],</span></span><br><span class="line"><span class="comment">#         [12, 13]])</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>自动求导+反向传播 autograd</li>
+</ul>
+<ol>
+<li>y.backward()只是标量，对向量还需要传入向量。</li>
+<li>计算图是累加的</li>
+</ol>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">x = torch.rand(<span class="number">1</span>,<span class="number">2</span>, requires_grad=<span class="literal">True</span>)</span><br><span class="line">y = x ** <span class="number">2</span></span><br><span class="line"><span class="built_in">print</span>(x)</span><br><span class="line"><span class="built_in">print</span>(y)</span><br><span class="line"></span><br><span class="line">y.backward(x)</span><br><span class="line"><span class="built_in">print</span>(x.grad)</span><br></pre></td></tr></table></figure>
+<h1 id="第三章"><a href="#第三章" class="headerlink" title="第三章"></a>第三章</h1><ol>
+<li>数据预处理：1.数据格式统一 2.异常数据消除 3. 划分训练集，验证集，测试集 </li>
+<li>选择模型，损失函数和优化方法，对应超参数。</li>
+<li>训练，并计算模型表现</li>
+</ol>
+<h2 id="模型构造训练"><a href="#模型构造训练" class="headerlink" title="模型构造训练"></a>模型构造训练</h2><ul>
+<li><p>二维卷积层。模型参数：卷积核+标量偏差。选随机化卷积核再迭代卷积核+偏差。<br>滑动窗口</p>
+</li>
+<li><p>池化层。直接计算窗口内元素属性。</p>
+</li>
+<li><p>参数初始化<br>  torch.nn.init</p>
+</li>
+<li><p>损失函数</p>
+<ul>
+<li><p>BCE &#x3D; <code>-(y*log(p) + (1-y)*log(1-p))</code> e为底</p>
+</li>
+<li><p>CrossEntropy (x, class) &#x3D; -log( ( exp(x[class]) )&#x2F;( sum exp(x[j]) ) ) &#x3D; -x[class] + log(sum exp(x[j]))</p>
+</li>
+<li><p>L1 &#x3D; abs(y_pred - y_true)<br>  Smooth L1 &#x3D; (sum z_i)&#x2F;n<br>  z_i &#x3D;  0.5(xi-yi)^2 if abs(xi-yi)&lt;1<br> abs(xi-yi) - 0.5</p>
+</li>
+<li><p>MSE &#x3D; (y_pred - y_true)^2</p>
+</li>
+<li><p>PoissonNLL</p>
+</li>
+<li><p>余弦相似度  衡量方向一致性 loss(x,y) &#x3D; 1-cos(x1,x2)  if y&#x3D;&#x3D;1<br>                               max(0,cos(x1,x2)-margin ) if y&#x3D;&#x3D;-1</p>
+</li>
+</ul>
+</li>
+<li><p>激活函数</p>
+<ul>
+<li>Sigmoid &#x3D; 1&#x2F;(1+e^(-x))</li>
+<li>tanh </li>
+<li>ReLU(x) &#x3D; max(0, x)</li>
+<li>GELU &#x3D; x * Φ(x) </li>
+<li>输出层<ul>
+<li>softmax</li>
+<li>sigmoid</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>训练</p>
+</li>
+<li><p>优化器 torch.optim, 快速寻找参数</p>
+<ul>
+<li>SGD 随机梯度下降</li>
+<li>Momentum，累计历史梯度</li>
+<li>Adagrad</li>
+<li>RMSprop</li>
+<li>Adam， Momentum + RMSprop</li>
+<li>AdamW</li>
+</ul>
+</li>
+</ul>
+<h2 id="ResNet"><a href="#ResNet" class="headerlink" title="ResNet"></a>ResNet</h2><h1 id="第四章"><a href="#第四章" class="headerlink" title="第四章"></a>第四章</h1><p>Sequential：更简单串联各个层, 自动实现forward<br>ModuleList：类似list，需要实现forward函数<br>ModuleDict：类似ModuleList，需要实现forward函数</p>
+<h1 id="第五章"><a href="#第五章" class="headerlink" title="第五章"></a>第五章</h1><p>模型存储与加载。<br>没有多卡，GG</p>
+<h1 id="第六章"><a href="#第六章" class="headerlink" title="第六章"></a>第六章</h1><ol>
+<li><p>自定义损失函数：和定义一层差不多</p>
+</li>
+<li><p>动态调整学习率：<code>torch.optim.lr_scheduler</code>，自定义就是在每次迭代后修改</p>
+</li>
+<li><p>模型微调：</p>
+<ol>
+<li>在源数据集上预训练一个模型，源模型</li>
+<li>clone一个新的模型：目标模型</li>
+<li>为目标模型添加一个输出⼤小为⽬标数据集类别个数的输出层，并随机初始化该层的模型参数。</li>
+<li>在目标数据集上训练目标模型。从头训练输出层，其余层参数都基于源模型微调&#x2F;</li>
+</ol>
+</li>
+<li><p>数据增强。 例如imgaug</p>
+</li>
+</ol>
+</main>
+
+</article>
+
+
+<script src="/js/highlight.js"></script>
+
+  </main>
+  <footer class="footer">
+  
+  <span>Copyright © 2024 typo</span>
+  
+</footer>
+  
+<script src="/js/theme.js"></script>
+
+</body>
+
+</html>

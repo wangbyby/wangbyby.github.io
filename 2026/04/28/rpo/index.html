@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+  <title>
+    
+    rpo 丨
+    
+
+    typo
+  </title>
+
+  
+  <link rel="shortcut icon" href="/icon.svg">
+  
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  
+  <link id="theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.css">
+  <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
+  
+
+  <!-- 字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/root.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<link rel="stylesheet" href="/css/post.css">
+
+<meta name="generator" content="Hexo 8.1.1"><link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+</head>
+
+<body>
+  <header class="header">
+  <section class="header-container">
+    <a class="logo" href="/">Hexo</a>
+    <ul class="nav">
+      
+      <li><a href="/archives">archives</a></li>
+      
+      <li><a href="/about">about</a></li>
+      
+    </ul>
+  </section>
+</header>
+  <main class="main">
+    <article class="post">
+  
+  <div class="post-title">rpo</div>
+  <div class="post-meta">
+    <div class="date">2026 April 28th</div>
+    <div class="tags">
+      
+    </div>
+  </div>
+  
+
+  <main class="post-content"><p>这里首先需要区分下树和图的遍历，只考虑dfs方式</p>
+<h1 id="树"><a href="#树" class="headerlink" title="树"></a>树</h1><p>以二叉树为例子：<br>dfs有pre-order，in-order，post-order。</p>
+<h1 id="图"><a href="#图" class="headerlink" title="图"></a>图</h1><blockquote>
+<p>只考虑有向图，一个start节点</p>
+</blockquote>
+<h2 id="拓扑排序"><a href="#拓扑排序" class="headerlink" title="拓扑排序"></a>拓扑排序</h2><p>考虑到图可能存在环，问题会有些复杂。</p>
+<ol>
+<li>先考虑拓扑排序，有两种情况</li>
+</ol>
+<ul>
+<li>DAG情况（无环），不断删除入度为0的节点或者用 reverse post order方式。</li>
+</ul>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">图1:</span><br><span class="line">    Entry</span><br><span class="line">    /    \</span><br><span class="line">    A    B</span><br><span class="line">    \   /</span><br><span class="line">    Exit</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>pre-order: [Entry, A, Exit, B]<br>post-order: [Exit, A, B, Entry]<br>reverse-post-order（RPO）：[Entry, B, A, Exit]就是这个DAG的拓扑排序。</p>
+<blockquote>
+<p>RPO还是和pre-order不一样的。</p>
+</blockquote>
+<ul>
+<li>有环（loop）：其实就没拓扑排序的概念了，这个循环是绕不开的。</li>
+</ul>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">图2:</span><br><span class="line">        Entry</span><br><span class="line">          │</span><br><span class="line">          ▼</span><br><span class="line">          A ◄────┐</span><br><span class="line">        ↙   ↘    │</span><br><span class="line">       B     C   │</span><br><span class="line">       │     │   │</span><br><span class="line">       │     ▼   │</span><br><span class="line">       │     D   │</span><br><span class="line">       │     │   │</span><br><span class="line">       │     ▼   │</span><br><span class="line">       │     E   │</span><br><span class="line">        ↘   ↙    │</span><br><span class="line">          F ─────┘ (back edge F → A)</span><br><span class="line">          │</span><br><span class="line">          ▼</span><br><span class="line">         Exit</span><br></pre></td></tr></table></figure>
+
+<p>pre-order: [Entry, A, B, F, Exit, C, D, E]<br>post-order: [Exit, F, B, E, D, C, A, Entry]<br>reverser-post-order: [Entry, A, C, D, E, B, F, Exit]</p>
+<h1 id="数据流分析"><a href="#数据流分析" class="headerlink" title="数据流分析"></a>数据流分析</h1><p>有两种信息的流向</p>
+<ol>
+<li>前向，从entry到exit，例如图2从A-&gt;B, A-&gt;C</li>
+<li>后向，从exit到entry, 例如图2从B-&gt;A, C-&gt;A</li>
+</ol>
+<p>对于图1，一次RPO就能完成前向分析。对于图2，一次RPO不能迭代到不动点，所以还是需要多次迭代。<br>至于后向分析，有两种思路1.对原图进行post order；2.对源图求逆，然后进行rpo<a target="_blank" rel="noopener" href="https://eli.thegreenplace.net/2015/directed-graph-traversal-orderings-and-applications-to-data-flow-analysis/">1</a>。</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">图3:</span><br><span class="line"></span><br><span class="line">A  --&gt; B --&gt; D</span><br><span class="line">      | ^</span><br><span class="line">      v |</span><br><span class="line">       C</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">---------------------</span><br><span class="line"></span><br><span class="line">图4：</span><br><span class="line"></span><br><span class="line">A  &lt;-- B &lt;--- D</span><br><span class="line">      ^ |</span><br><span class="line">      | v</span><br><span class="line">       C</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>图4是图3的逆,<br>对图3进行post-order：D，C，B，A。<br>对图4进行RPO：D，B，C，A     </p>
+<h2 id="性能"><a href="#性能" class="headerlink" title="性能"></a>性能</h2><p>不管前向后向，顺序遍历肯定是可行方法。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">bool</span> changed = <span class="literal">false</span>;</span><br><span class="line"><span class="keyword">do</span>&#123;</span><br><span class="line">    chaneged = <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">auto</span> block: func) &#123;</span><br><span class="line">        changed |= ...</span><br><span class="line">    &#125;</span><br><span class="line">&#125;<span class="keyword">while</span>(changed)</span><br></pre></td></tr></table></figure>
+
+<p>对于前向分析，DAG情况下RPO肯定块，loop情况下我没实测过，但考虑到分支众多，RPO<code>应该</code>比顺序遍历要快吧。<br>逆向分析下，我也没测试过。。。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a target="_blank" rel="noopener" href="https://eli.thegreenplace.net/2015/directed-graph-traversal-orderings-and-applications-to-data-flow-analysis/">https://eli.thegreenplace.net/2015/directed-graph-traversal-orderings-and-applications-to-data-flow-analysis/</a></p>
+</main>
+
+</article>
+
+
+<script src="/js/highlight.js"></script>
+
+  </main>
+  <footer class="footer">
+  
+  <span>Copyright © 2024 typo</span>
+  
+</footer>
+  
+<script src="/js/theme.js"></script>
+
+</body>
+
+</html>

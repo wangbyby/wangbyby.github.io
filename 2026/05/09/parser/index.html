@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+  <title>
+    
+    cpp template parser 丨
+    
+
+    typo
+  </title>
+
+  
+  <link rel="shortcut icon" href="/icon.svg">
+  
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  
+  <link id="theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.css">
+  <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
+  
+
+  <!-- 字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/root.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<link rel="stylesheet" href="/css/post.css">
+
+<meta name="generator" content="Hexo 8.1.1"><link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+</head>
+
+<body>
+  <header class="header">
+  <section class="header-container">
+    <a class="logo" href="/">Hexo</a>
+    <ul class="nav">
+      
+      <li><a href="/archives">archives</a></li>
+      
+      <li><a href="/about">about</a></li>
+      
+    </ul>
+  </section>
+</header>
+  <main class="main">
+    <article class="post">
+  
+  <div class="post-title">cpp template parser</div>
+  <div class="post-meta">
+    <div class="date">2026 May 9th</div>
+    <div class="tags">
+      
+    </div>
+  </div>
+  
+
+  <main class="post-content"><p>众所周知c&#x2F;cpp的parser是上下文相关，边语义边语法。<br>cpp11之前经典parser笑话<code>A&lt;A&lt;int&gt;&gt; a</code>.</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Container</span> &#123;&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    Container&lt;Container&lt;<span class="type">int</span>&gt;&gt; obj;  <span class="comment">// 错误!</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>看下clang的输出<code>clang++ test-struct.cpp -Xclang -dump-tokens -v</code></p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">clang -cc1 version 17.0.0 (clang-1700.0.13.5) default target arm64-apple-darwin24.6.0</span><br><span class="line">template &#x27;template&#x27;      [StartOfLine]  Loc=&lt;test-struct.cpp:33:1&gt;</span><br><span class="line">less &#x27;&lt;&#x27;                Loc=&lt;test-struct.cpp:33:9&gt;</span><br><span class="line">typename &#x27;typename&#x27;             Loc=&lt;test-struct.cpp:33:10&gt;</span><br><span class="line">identifier &#x27;T&#x27;   [LeadingSpace] Loc=&lt;test-struct.cpp:33:19&gt;</span><br><span class="line">greater &#x27;&gt;&#x27;             Loc=&lt;test-struct.cpp:33:20&gt;</span><br><span class="line">struct &#x27;struct&#x27;  [StartOfLine]  Loc=&lt;test-struct.cpp:34:1&gt;</span><br><span class="line">identifier &#x27;Container&#x27;   [LeadingSpace] Loc=&lt;test-struct.cpp:34:8&gt;</span><br><span class="line">l_brace &#x27;&#123;&#x27;      [LeadingSpace] Loc=&lt;test-struct.cpp:34:18&gt;</span><br><span class="line">r_brace &#x27;&#125;&#x27;             Loc=&lt;test-struct.cpp:34:19&gt;</span><br><span class="line">semi &#x27;;&#x27;                Loc=&lt;test-struct.cpp:34:20&gt;</span><br><span class="line">int &#x27;int&#x27;        [StartOfLine]  Loc=&lt;test-struct.cpp:36:1&gt;</span><br><span class="line">identifier &#x27;main&#x27;        [LeadingSpace] Loc=&lt;test-struct.cpp:36:5&gt;</span><br><span class="line">l_paren &#x27;(&#x27;             Loc=&lt;test-struct.cpp:36:9&gt;</span><br><span class="line">r_paren &#x27;)&#x27;             Loc=&lt;test-struct.cpp:36:10&gt;</span><br><span class="line">l_brace &#x27;&#123;&#x27;      [LeadingSpace] Loc=&lt;test-struct.cpp:36:12&gt;</span><br><span class="line">identifier &#x27;Container&#x27;   [StartOfLine] [LeadingSpace]   Loc=&lt;test-struct.cpp:37:5&gt;</span><br><span class="line">less &#x27;&lt;&#x27;                Loc=&lt;test-struct.cpp:37:14&gt;</span><br><span class="line">identifier &#x27;Container&#x27;          Loc=&lt;test-struct.cpp:37:15&gt;</span><br><span class="line">less &#x27;&lt;&#x27;                Loc=&lt;test-struct.cpp:37:24&gt;</span><br><span class="line">int &#x27;int&#x27;               Loc=&lt;test-struct.cpp:37:25&gt;</span><br><span class="line">greatergreater &#x27;&gt;&gt;&#x27;             Loc=&lt;test-struct.cpp:37:28&gt;</span><br><span class="line">identifier &#x27;obj&#x27;         [LeadingSpace] Loc=&lt;test-struct.cpp:37:31&gt;</span><br><span class="line">semi &#x27;;&#x27;                Loc=&lt;test-struct.cpp:37:34&gt;</span><br><span class="line">r_brace &#x27;&#125;&#x27;      [StartOfLine]  Loc=&lt;test-struct.cpp:38:1&gt;</span><br><span class="line">eof &#x27;&#x27;          Loc=&lt;test-struct.cpp:38:2&gt;</span><br></pre></td></tr></table></figure>
+<p>哦<code>&gt;&gt;</code>是一个整体</p>
+<p>在叠加一下，如果是三个<code>&gt;&gt;&gt;</code>会是什么样子<br><code>Container&lt;Container&lt;Container&lt;int&gt;&gt;&gt; obj</code></p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">greatergreater &#x27;&gt;&gt;&#x27;		Loc=&lt;test-struct.cpp:37:38&gt;</span><br><span class="line">greater &#x27;&gt;&#x27;		Loc=&lt;test-struct.cpp:37:40&gt;</span><br></pre></td></tr></table></figure>
+<p>所以clang用了贪心策略。</p>
+<blockquote>
+<p>clang里面还会有greatergreatergreater，是cuda的’&gt;&gt;&gt;’</p>
+</blockquote>
+<p>但是明显’&gt;&gt;’在parser里面是不合适的.<br>clang是在<code>clang/lib/Parse/ParseTemplate.cpp:ParseGreaterThanInTemplateList</code>里处理，<br>将’&gt;&gt;’拆分为’&gt;’,’&gt;’然后塞回去一个。如果是’&gt;&gt;&gt;’就拆为’&gt;&gt;’,’&gt;’ 然后将’&gt;&gt;’入队列，’&gt;’是peeking。</p>
+</main>
+
+</article>
+
+
+<script src="/js/highlight.js"></script>
+
+  </main>
+  <footer class="footer">
+  
+  <span>Copyright © 2024 typo</span>
+  
+</footer>
+  
+<script src="/js/theme.js"></script>
+
+</body>
+
+</html>

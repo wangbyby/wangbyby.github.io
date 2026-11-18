@@ -1,0 +1,38 @@
+
+在wsl里面安装ros2的依赖
+ubuntu24.04
+
+0. source
+
+```sh
+export export COLCON_CURRENT_PREFIX=$HOME/ros2-linux
+source $HOME/ros2-linux/local_setup.sh
+```
+路径可以自己改
+
+1. apt install
+
+```sh
+sudo apt install  liblttng-ust1
+sudo apt install libspdlog1.12
+sudo apt install libconsole-bridge1.0
+```
+
+如果安装完, 运行ros2还是报错，可以看看是不是安装的版本不对，`apt search xxx`查找下版本
+
+2. python相关包
+建议用uv创建一个虚拟环境。`uv pip install xxx`即可
+
+3. ros2
+```sh
+#窗口1
+ros2 run demo_nodes_cpp talker
+
+#窗口2
+ros2 run demo_nodes_py listener
+```
+可以看到类似即可
+[INFO] [1795005462.628195364] [talker]: Publishing: 'Hello World: 45'
+[INFO] [1795005462.779402235] [talker]: Publishing: 'Hello World: 46'
+[INFO] [1795005462.629362179] [listener]: I heard: [Hello World: 45]
+[INFO] [1795005462.780290941] [listener]: I heard: [Hello World: 46]
